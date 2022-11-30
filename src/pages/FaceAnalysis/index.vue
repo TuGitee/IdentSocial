@@ -195,7 +195,6 @@ export default {
     font-size: 2rem;
     color: #fff;
     font-weight: 600;
-    text-shadow: 1px 1px 1px #000;
     height: 4rem;
     line-height: 4rem;
     left: 1.5rem;
