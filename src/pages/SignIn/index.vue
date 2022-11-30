@@ -17,7 +17,7 @@
                             placeholder="Enter your phone number" @keyup="regCheck" />
 
                         <el-tooltip class="sign-in-box-item" effect="dark" content="Phone number requires 13 digits."
-                            placement="top" hide-after="1000"><i class="el-icon-warning-outline" style="color:grey;"></i>
+                            placement="top" ><i class="el-icon-warning-outline" style="color:grey;"></i>
                         </el-tooltip>
                     </div>
 
@@ -27,7 +27,7 @@
                             @keyup="regCheck" placeholder="Enter your password" />
 
                         <el-tooltip class="sign-in-box-item" effect="dark" content="Password requires 6-20 characters."
-                            placement="bottom" hide-after="1000">
+                            placement="bottom">
                             <i class="el-icon-warning-outline"></i>
                         </el-tooltip>
                     </div>

@@ -4,7 +4,7 @@
       :style="imgSrc === '' ? 'background: linear-gradient(#A493FF 0%,#FFF 40%);' : `background: url(${imgSrc}) no-repeat center center; filter: blur(10px);`">
     </div>
 
-    <div class="face-analysis-picture" draggable="false" v-if="imgSrc"
+    <div class="face-analysis-picture" v-if="imgSrc"
       :style="`background: url(${imgSrc}) no-repeat center center ; height: ${imgHeight}px; width:${imgWidth}px; transform: translateY(-${delta}px); `"
       v-loading="isLoading" element-loading-text="Loading..." element-loading-spinner="el-icon-loading"
       element-loading-background="rgba(0,0,0,.5)">
@@ -21,7 +21,7 @@
         <h2 class="face-analysis-box-title">
           <span class="face-analysis-box-title-text">Please Click Upload to Upload a Photo!</span>
           <el-tooltip class="item" effect="dark" content="Swipe this to move if you have already upload a photo."
-            placement="top-start" :hide-after="1000">
+            placement="top-start">
             <i class="el-icon-info face-analysis-box-title-icon"></i>
           </el-tooltip>
         </h2>
