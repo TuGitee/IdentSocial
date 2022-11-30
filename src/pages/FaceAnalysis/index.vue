@@ -4,29 +4,32 @@
       :style="imgSrc === '' ? 'background: linear-gradient(#A493FF 0%,#FFF 40%);' : `background: url(${imgSrc}) no-repeat center center; filter: blur(10px);`">
     </div>
 
-    <div class="face-analysis-picture" v-if="imgSrc"
-      :style="`background: url(${imgSrc}) no-repeat center center ; height: ${imgHeight / (bounds + 1)}px; width:${imgWidth / (bounds + 1)}px; transform: translateY(-${delta}px); `"
+    <div class="face-analysis-picture" draggable="false" v-if="imgSrc"
+      :style="`background: url(${imgSrc}) no-repeat center center ; height: ${imgHeight}px; width:${imgWidth}px; transform: translateY(-${delta}px); `"
       v-loading="isLoading" element-loading-text="Loading..." element-loading-spinner="el-icon-loading"
       element-loading-background="rgba(0,0,0,.5)">
     </div>
 
-    <h2 class="face-analysis-title">
+    <h2 class="face-analysis-title" @touchstart="listenMoveDown">
       <span>FaceAnalysis</span>
       <i class="el-icon-more"></i>
     </h2>
 
-    <v-touch @swipeup="listenMoveUp" @swipedown="listenMoveDown" class="face-analysis-box"
-      :class="!isUnfold ? 'move-down' : 'move-up'" ref="box">
-      <h2 class="face-analysis-box-title">
-        <span class="face-analysis-box-title-text">Please Click Upload to Upload a Photo!</span>
-        <el-tooltip class="item" effect="dark" content="Please Upload Before Submit! " placement="top-start"
-          :hide-after="1000">
-          <i class="el-icon-info face-analysis-box-title-icon"></i>
-        </el-tooltip>
-      </h2>
+    <div class="face-analysis-box" :class="!isUnfold ? 'move-down' : 'move-up'" ref="box">
+      <v-touch @swipeup="listenMoveUp" @swipedown="listenMoveDown">
+        <p class="face-analysis-box-thumb" @touchstart="listenMoveUp"></p>
+        <h2 class="face-analysis-box-title">
+          <span class="face-analysis-box-title-text">Please Click Upload to Upload a Photo!</span>
+          <el-tooltip class="item" effect="dark" content="Swipe this to move if you have already upload a photo."
+            placement="top-start" :hide-after="1000">
+            <i class="el-icon-info face-analysis-box-title-icon"></i>
+          </el-tooltip>
+        </h2>
+      </v-touch>
+
       <div class="face-analysis-box-choice">
         <div class="face-analysis-box-choice-camera">
-          <input type="file" @change="changePicture" class="face-analysis-box-choice-camera-file" accept="/images/*"
+          <input type="file" @change="changePicture" class="face-analysis-box-choice-camera-file" accept="image/*"
             ref="file" />
           <button class="face-analysis-box-choice-camera-button">Upload</button>
         </div>
@@ -37,7 +40,7 @@
       <transition name="el-fade-in-linear" :duration="1000">
         <AnalysisResult v-show="isUnfold" :analysisList="userInfo.analysisList" />
       </transition>
-    </v-touch>
+    </div>
   </div>
 </template>
 
@@ -54,7 +57,6 @@ export default {
       imgSrc: '',
       imgHeight: 0,
       imgWidth: 0,
-      bounds: 1,
       isLoading: false,
       isUnfold: true,
     }
@@ -74,12 +76,20 @@ export default {
       let img = new Image();
       img.src = this.imgSrc;
       img.onload = () => {
-        this.imgHeight = img.height;
-        this.imgWidth = img.width;
-        this.bounds = img.width / window.screen.width;
+        let canvas = document.createElement('canvas');
+        let context = canvas.getContext('2d');
+        let bounds = img.width / window.screen.width;
+        let width = img.width / (bounds + 1);
+        let height = img.height / (bounds + 1);
+        let filter = 3;
+        canvas.width = width * filter;
+        canvas.height = height * filter;
+        context.drawImage(img, 0, 0, width * filter, height * filter);
+        this.imgSrc = canvas.toDataURL('image/jpeg', 0.5);
+        this.imgHeight = height;
+        this.imgWidth = width;
         this.isUnfold = false;
       }
-
     },
     submit() {
       this.isLoading = true;
@@ -98,7 +108,6 @@ export default {
       this.isLoading = false;
     },
     listenMoveUp() {
-      console.log(1)
       if (this.imgSrc) {
         this.isUnfold = true;
       }
@@ -117,7 +126,7 @@ export default {
       userInfo: state => state.user.userInfo
     }),
     delta() {
-      return (window.screen.height-this.imgHeight / (this.bounds + 1))/4;
+      return (window.screen.height - this.imgHeight) / 4;
     }
   },
 }
@@ -192,6 +201,7 @@ export default {
     left: 1.5rem;
     right: 1.5rem;
     z-index: 0;
+    touch-action: none;
 
     i {
       font-size: 1.5rem;
@@ -210,6 +220,7 @@ export default {
     overflow: hidden;
     padding-bottom: calc(constant(safe-area-inset-bottom) + 4rem);
     background-size: cover !important;
+    touch-action: none;
   }
 
   &-picture {
@@ -217,10 +228,10 @@ export default {
     box-sizing: border-box;
     background-size: contain !important;
     z-index: 0;
-    // position: fixed;
-    position: absolute;
     align-self: center;
     border-radius: @borderRadius;
+    touch-action: none;
+    position: fixed;
 
     /deep/ .el-loading-mask {
       border-radius: @borderRadius;
@@ -235,9 +246,15 @@ export default {
 
   }
 
+  .touch {
+    touch-action: pan-y !important;
+  }
 
   &-box {
-    position: relative;
+    // position: absolute;
+    position: sticky;
+    top: calc(1rem + constant(safe-area-inset-top));
+    top: calc(1rem + env(safe-area-inset-top));
     z-index: 9;
     padding: 0 2rem;
     // height: fit-content;
@@ -253,6 +270,15 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
+    touch-action: pan-y;
+
+    &-thumb {
+      height: .3rem;
+      width: 30%;
+      background-color: #ccc;
+      border-radius: 10px;
+      margin: .5rem auto 0;
+    }
 
     &-title {
       font-size: 1.5rem;
