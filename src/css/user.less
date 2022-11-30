@@ -1,0 +1,23 @@
+#root {
+    padding: 1.5rem;
+    box-sizing: border-box;
+    min-height: 100vh;
+    width: 100vw;
+    padding-top: constant(safe-area-inset-top);
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: constant(safe-area-inset-bottom);
+    padding-bottom: env(safe-area-inset-bottom);
+    position: relative;
+
+    &::after {
+        position: fixed;
+        top: 0;
+        left: 0;
+        content: "";
+        width: 100vw;
+        height: 100vh;
+        z-index: -999;
+        background: linear-gradient(180deg, #9a89ff 0, #FFFFFF calc(constant(safe-area-inset-bottom) + 2rem));
+        background: linear-gradient(180deg, #9a89ff 0, #FFFFFF calc(env(safe-area-inset-bottom) + 2rem));
+    }
+}
