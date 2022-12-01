@@ -46,7 +46,7 @@ export default {
   #app {
     height: 100vh;
     *{
-      // filter: grayscale(100%);
+       filter: grayscale(100%);
     }
   }
 
