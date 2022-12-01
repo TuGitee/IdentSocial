@@ -13,20 +13,20 @@ export default {
     ChangePage,
   },
   mounted() {
-    // let agent = navigator.userAgent.toLowerCase();
-    // let iLastTouchTime = null;
-    // if (agent.indexOf('iphone') >= 0 || agent.indexOf('ipad') >= 0) {
-    //   document.addEventListener('touchend', function (event) {
-    //     let iNowTime = new Date().getTime();
-    //     iLastTouchTime = iLastTouchTime || iNowTime + 1;
-    //     let delta = iNowTime - iLastTouchTime;
-    //     if (delta < 500 && delta > 0) {
-    //       event.preventDefault();
-    //       return false;
-    //     }
-    //     iLastTouchTime = iNowTime;
-    //   }, false);
-    // };
+    let agent = navigator.userAgent.toLowerCase();
+    let iLastTouchTime = null;
+    if (agent.indexOf('iphone') >= 0 || agent.indexOf('ipad') >= 0) {
+      document.addEventListener('touchend', function (event) {
+        let iNowTime = new Date().getTime();
+        iLastTouchTime = iLastTouchTime || iNowTime + 1;
+        let delta = iNowTime - iLastTouchTime;
+        if (delta < 500 && delta > 0) {
+          event.preventDefault();
+          return false;
+        }
+        iLastTouchTime = iNowTime;
+      }, false);
+    };
   }
 }
 </script>
@@ -45,8 +45,9 @@ export default {
 
   #app {
     height: 100vh;
-
-
+    *{
+      // filter: grayscale(100%);
+    }
   }
 
   a {
