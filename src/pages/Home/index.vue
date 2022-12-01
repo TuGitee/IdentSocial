@@ -14,8 +14,9 @@
     </div>
     <footer class="home-footer">
       <nav class="home-footer-nav">
-        <router-link class="home-footer-nav-item" v-for="(item,index) in homeRoutes" :key="index" :to="{name: item.name}">
-          {{item.name}}
+        <router-link replace class="home-footer-nav-item" v-for="(item, index) in homeRoutes" :key="index"
+          :to="{ name: item.name }">
+          {{ item.name }}
         </router-link>
       </nav>
       <router-view></router-view>
@@ -33,6 +34,23 @@ export default {
   mounted() {
     this.$store.dispatch('getUserInfo');
     this.$store.dispatch('getRecommendInfo');
+    const el = document.querySelector(".home-footer-nav");
+    console.log(el)
+    const observer = new IntersectionObserver(
+      ([e]) =>
+        e
+          .target
+          .classList
+          .toggle(
+            "is-pinned",
+            e.intersectionRatio < 1
+          ),
+      {
+        threshold: [1]
+      }
+    )
+    // 监听
+    observer.observe(el)
   },
   data() {
     return {
@@ -92,7 +110,7 @@ export default {
   }
 
   &-middle {
-    margin: 2rem 0;
+    margin: 2rem 0 0;
     width: 100%;
     height: fit-content;
     left: 0;
@@ -136,16 +154,29 @@ export default {
       flex-direction: row;
       justify-content: flex-start;
       align-items: center;
+      position: sticky;
+      padding: calc(1rem + constant(safe-area-inset-top)) 0 1rem;
+      padding: calc(1rem + env(safe-area-inset-top)) 0 1rem;
+      border-radius: 0 0 10px 10px;
+      transform: translateX(-1.5rem);
+      padding-left: 1.5rem;
+      width: calc(100vw - 1.5rem);
+      top: 0;
+      background-color: #fff;
+      border-bottom: 1px solid #A493FF22;
+      z-index: 99;
 
       &-item {
         margin-right: 1rem;
         font-size: 1.2rem;
         font-weight: 500;
       }
+
       .active {
         font-weight: 700;
         position: relative;
-        &::after{
+
+        &::after {
           content: '';
           display: block;
           position: absolute;

@@ -25,18 +25,19 @@
             <i class="el-icon-info face-analysis-box-title-icon"></i>
           </el-tooltip>
         </h2>
-      </v-touch>
 
-      <div class="face-analysis-box-choice">
-        <div class="face-analysis-box-choice-camera">
-          <input type="file" @change="changePicture" class="face-analysis-box-choice-camera-file" accept="image/*"
-            ref="file" />
-          <button class="face-analysis-box-choice-camera-button">Upload</button>
+
+        <div class="face-analysis-box-choice">
+          <div class="face-analysis-box-choice-camera">
+            <input type="file" @change="changePicture" class="face-analysis-box-choice-camera-file" accept="image/*"
+              ref="file" />
+            <button class="face-analysis-box-choice-camera-button">Upload</button>
+          </div>
+          <button class="face-analysis-box-choice-submit" :disabled="!imgSrc" @click="submit"
+            v-show="!isLoading">Submit</button>
+          <button class="face-analysis-box-choice-cancel" @click="cancel" v-show="isLoading">Cancel</button>
         </div>
-        <button class="face-analysis-box-choice-submit" :disabled="!imgSrc" @click="submit"
-          v-show="!isLoading">Submit</button>
-        <button class="face-analysis-box-choice-cancel" @click="cancel" v-show="isLoading">Cancel</button>
-      </div>
+      </v-touch>
       <transition name="el-fade-in-linear" :duration="1000">
         <AnalysisResult v-show="isUnfold" :analysisList="userInfo.analysisList" />
       </transition>
@@ -159,7 +160,6 @@ export default {
     }
   }
 
-
   .move-down {
     animation: MoveDown .6s forwards;
     position: fixed;
@@ -199,8 +199,7 @@ export default {
     line-height: 4rem;
     left: 1.5rem;
     right: 1.5rem;
-    z-index: 0;
-    touch-action: none;
+    z-index: -1;
 
     i {
       font-size: 1.5rem;
@@ -219,7 +218,6 @@ export default {
     overflow: hidden;
     padding-bottom: calc(constant(safe-area-inset-bottom) + 4rem);
     background-size: cover !important;
-    touch-action: none;
   }
 
   &-picture {
@@ -245,16 +243,12 @@ export default {
 
   }
 
-  .touch {
-    touch-action: pan-y !important;
-  }
-
   &-box {
-    // position: absolute;
-    position: sticky;
-    top: calc(1rem + constant(safe-area-inset-top));
-    top: calc(1rem + env(safe-area-inset-top));
-    z-index: 9;
+    position: fixed;
+    top: calc(constant(safe-area-inset-top) + 1rem);
+    top: calc(env(safe-area-inset-top) + 1rem);
+    bottom: 0;
+    z-index: 99;
     padding: 0 2rem;
     // height: fit-content;
     height: calc(100vh - constant(safe-area-inset-bottom) - constant(safe-area-inset-top) - 4rem);
@@ -269,7 +263,6 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
-    touch-action: pan-y;
 
     &-thumb {
       height: .3rem;

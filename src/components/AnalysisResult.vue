@@ -5,9 +5,9 @@
         </div>
         <div class="analysis-result-panel">
             <div class="analysis-result-panel-item" v-for="(item, index) in analysisList" :key="index">
-                <el-progress type="dashboard" :percentage="item.value" :color="colors" stroke-linecap="round"
-                    :stroke-width="8" :format="format" :text-color="colors" ></el-progress>
-                <span>{{ item.name }}</span>
+                <span class="analysis-result-panel-item-content">{{ item.name }}</span>
+                <el-progress class="analysis-result-panel-item-progress" :percentage="item.value" stroke-linecap="round" 
+                    :stroke-width="16" :format="format" :text-inside="true"></el-progress>
             </div>
         </div>
     </div>
@@ -19,18 +19,6 @@ export default {
     props: ['analysisList'],
     data() {
         return {
-            colors: [
-                { color: '#EDE8EDAA', percentage: 10 },
-                { color: '#EDCEF0AA', percentage: 20 },
-                { color: '#E682F3AA', percentage: 30 },
-                { color: '#C4BCF7AA', percentage: 40 },
-                { color: '#A48EE1AA', percentage: 50 },
-                { color: '#8E66CAAA', percentage: 60 },
-                { color: '#7E44B4AA', percentage: 70 },
-                { color: '#73289EAA', percentage: 80 },
-                { color: '#6B1187AA', percentage: 90 },
-                { color: '#640071AA', percentage: 100 }
-            ]
         }
     },
     methods: {
@@ -49,7 +37,6 @@ export default {
 <style lang="less" scoped>
 .analysis-result {
     width: 100%;
-    height: 100%;
     display: flex;
     margin-top: 1rem;
     justify-content: center;
@@ -59,7 +46,7 @@ export default {
     &-title {
         width: 100%;
         border-radius: 10px;
-        height: 3rem;
+        height: 8vh;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -100,40 +87,56 @@ export default {
         width: 100%;
         height: 100%;
         display: flex;
-        flex-wrap: wrap;
-        justify-content: space-around;
+        flex-direction: column;
+        justify-content: flex-start;
         align-items: center;
 
         &-item {
-            width: 45%;
-            height: fit-content;
+            height: 6vh;
+            width: 100%;
             box-sizing: border-box;
             display: flex;
-            flex-direction: column;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
             background-color: white;
             border-radius: 10px;
             margin-top: .5rem;
-            padding: 1rem;
+            padding: 0 1rem;
             box-shadow: 0px 5px 15px -5px rgb(166 150 255 / 30%);
 
-            &-title {
+            &-progress {
+                flex: 4;
+                width: 100%;
+                height: 100%;
                 display: flex;
+                justify-content: center;
                 align-items: center;
-                font-size: 1rem;
-                font-weight: bold;
 
-                i {
-                    margin-left: 1rem;
-                    font-size: 1.5rem;
-                    color: #A493FF;
+                /deep/ .el-progress-bar__inner {
+                    transform: translateX(-100%);
+                    animation: move .5s ease-in-out forwards .5s, color 1s linear forwards infinite;
+                    background: linear-gradient(90deg, #A493FF00 0%, #A493FF 100%);
+                }
+
+                @keyframes move {
+                    from {
+                       transform: translateX(-100%);
+                    }
+                    to {
+                        transform: translateX(0);
+                    }
+                }
+
+                /deep/ .el-progress-bar__innerText {
+                    color: white !important;
+                    font-size: .8rem;
+                    line-height: 1rem;
+                    font-weight: bold;
                 }
             }
 
             &-content {
-                display: flex;
-                align-items: center;
+                width: 5rem;
                 font-size: 1rem;
                 font-weight: bold;
                 color: #A493FF;
