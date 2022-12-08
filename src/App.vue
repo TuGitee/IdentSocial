@@ -45,9 +45,10 @@ export default {
 
   #app {
     height: 100vh;
-    *{
-       filter: grayscale(100%);
-    }
+    // 设置灰色滤色
+    // *{
+    //    filter: grayscale(100%);
+    // }
   }
 
   a {
