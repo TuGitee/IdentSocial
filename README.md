@@ -13,7 +13,7 @@
 
 ### 安装vue-cli脚手架
 ```
-在 windows 的命令行运行 cnpm install -g vue-cli
+在 windows 的命令行运行 cnpm install -g @vue-cli
 ```
 
 ### 为项目添加依赖
