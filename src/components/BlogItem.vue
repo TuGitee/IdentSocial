@@ -19,7 +19,7 @@
             </div>
             <ul class="blog-item-content-img">
                 <li class="blog-item-content-img-item" v-for="(image, index) in item.img" :key="index">
-                    <img :src="require('@/pages/Home/images/Blogs/' + image)" alt="" />
+                    <img :src="require('@/pages/Home/images/Blogs/' + image)" alt="" :preview="item.id+item.time" />
                 </li>
 
             </ul>
@@ -64,6 +64,7 @@ export default {
 </script>
 
 <style lang="less" scoped>
+@import "@/css/color.less";
 .blog-item {
 
     transition: all .5s;
@@ -163,7 +164,7 @@ export default {
         padding: 10px;
 
         .active {
-            color: #A493FF;
+            color: @purple;
         }
 
         &-item {

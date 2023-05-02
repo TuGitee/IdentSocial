@@ -5,6 +5,7 @@ export default [
         component: () => import('@/pages/Home/Recommend/index.vue'),
         meta: {
             footerShow: true,
+            name: '推荐',
         },
     },
     {
@@ -13,6 +14,7 @@ export default [
         component: () => import('@/pages/Home/Following/index.vue'),
         meta: {
             footerShow: true,
+            name: '关注',
         },
     },
     {
@@ -21,6 +23,7 @@ export default [
         component: () => import('@/pages/Home/Nearby/index.vue'),
         meta: {
             footerShow: true,
+            name: '附近',
         }
     },
 ]

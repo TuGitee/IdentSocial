@@ -1,11 +1,11 @@
 [
     {
         "id": "3",
-        "name": "Pink",
+        "name": "名名字名字名字字",
         "age": "20",
         "gender": "Male",
         "avatar": "avatar3.jpg",
-        "text": "Hello, I am Tina. Nice to meet you.",
+        "text": "简介简介简介简介简介简介简介简介简介简介简介简介简介",
         "time": "2017-01-01 12:00:00",
         "img": [
             "Blog2.png",
@@ -17,11 +17,11 @@
     },
     {
         "id": "4",
-        "name": "Toby",
+        "name": "兔兔兔兔图",
         "age": "20",
         "gender": "Male",
         "avatar": "avatar4.jpg",
-        "text": "Hello, I am Tina. Nice to meet you.",
+        "text": "大家好，我是兔兔兔兔图！",
         "time": "2017-01-01 12:00:00",
         "img": [
             "Blog4.png"
@@ -32,11 +32,11 @@
     },
     {
         "id": "5",
-        "name": "Sunny",
+        "name": "姓名姓名",
         "age": "16",
         "gender": "Female",
         "avatar": "avatar5.jpg",
-        "text": "Hello, I am Tina. Nice to meet you.",
+        "text": "大家好我是姓名姓名！",
         "time": "2017-01-01 12:00:00",
         "img": [],
         "like": "10",
@@ -45,11 +45,11 @@
     },
     {
         "id": "6",
-        "name": "Token",
+        "name": "家人们",
         "age": "13",
         "gender": "male",
         "avatar": "avatar6.jpg",
-        "text": "Hello, I am Tina. Nice to meet you.",
+        "text": "大家好我是家人们！",
         "time": "2017-01-01 12:00:00",
         "img": [
             "Blog5.png"
@@ -60,11 +60,11 @@
     },
     {
         "id": "7",
-        "name": "Weddy",
+        "name": "xxx",
         "age": "34",
         "gender": "Female",
         "avatar": "avatar7.jpg",
-        "text": "Hello, I am Tina. Nice to meet you.",
+        "text": "大家好我是xxx！",
         "time": "2017-01-01 12:00:00",
         "img": [
             "Blog3.png",

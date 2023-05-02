@@ -1,76 +1,68 @@
 <template>
   <div id="root" class="home">
     <header class="home-header">
-      <h2 class="home-header-hello">Hello, </h2>
+      <h2 class="home-header-hello">你好，</h2>
       <h1 class="home-header-name">{{ userInfo.name }}</h1>
       <i class="el-icon-plus home-header-plus"></i>
     </header>
     <div class="home-middle">
       <ul class="home-middle-list">
-        <li class="home-middle-list-item" v-for="item in recommendInfo.slice(0, 4)" :key="item.id">
+        <li
+          class="home-middle-list-item"
+          v-for="item in recommendInfo.slice(0, 4)"
+          :key="item.id"
+        >
           <img :src="require('./images/Avatars/' + item.avatar)" />
         </li>
       </ul>
     </div>
+    <nav class="home-nav" ref="nav">
+      <router-link
+        replace
+        class="home-nav-item"
+        v-for="(item, index) in homeRoutes"
+        :key="index"
+        :to="{ name: item.name }"
+      >
+        {{ item.meta.name }}
+      </router-link>
+    </nav>
     <footer class="home-footer">
-      <nav class="home-footer-nav">
-        <router-link replace class="home-footer-nav-item" v-for="(item, index) in homeRoutes" :key="index"
-          :to="{ name: item.name }">
-          {{ item.name }}
-        </router-link>
-      </nav>
       <router-view></router-view>
     </footer>
-
   </div>
 </template>
 
 <script>
-import '@/css/user.less';
-import { mapState } from 'vuex';
-import homeRoutes from '@/router/homeRoutes';
+import "@/css/user.less";
+import { mapState } from "vuex";
+import homeRoutes from "@/router/homeRoutes";
 export default {
   name: "Home",
   mounted() {
-    this.$store.dispatch('getUserInfo');
-    this.$store.dispatch('getRecommendInfo');
-    const el = document.querySelector(".home-footer-nav");
-    console.log(el)
-    const observer = new IntersectionObserver(
-      ([e]) =>
-        e
-          .target
-          .classList
-          .toggle(
-            "is-pinned",
-            e.intersectionRatio < 1
-          ),
-      {
-        threshold: [1]
-      }
-    )
-    // 监听
-    observer.observe(el)
+    this.$store.dispatch("getUserInfo");
+    this.$store.dispatch("getRecommendInfo");
   },
   data() {
     return {
       homeRoutes,
-    }
+    };
   },
   computed: {
     ...mapState({
-      userInfo: state => state.user.userInfo,
-      recommendInfo: state => state.home.recommendInfo,
-    })
+      userInfo: (state) => state.user.userInfo,
+      recommendInfo: (state) => state.home.recommendInfo,
+    }),
   },
-  methods: {
-  }
-}
+  mounted() {},
+};
 </script>
 
 <style lang="less" scoped>
+@import "@/css/color.less";
 .home {
   position: relative;
+  transition: all 0.5s;
 
   &::-webkit-scrollbar {
     display: none;
@@ -87,7 +79,7 @@ export default {
     }
 
     &-name {
-      margin: .5rem 0;
+      margin: 0.5rem 0;
       width: 18rem;
       text-overflow: ellipsis;
       overflow: hidden;
@@ -97,22 +89,24 @@ export default {
     }
 
     &-plus {
-      padding: .5rem;
+      padding: 0.5rem;
       position: absolute;
       right: 0;
       bottom: 0;
       border-radius: 50%;
       box-shadow: 0px 5px 10px 1px rgba(0, 0, 0, 0.1);
-      text-shadow: 1px 0px 0px #A493FF, 1px 1px 0px #A493FF, 0px 1px 0px #A493FF, -1px 1px 0px #A493FF, -1px 0px 0px #A493FF, -1px -1px 0px #A493FF, 0px -1px 0px #A493FF, 1px -1px 0px #A493FF;
+      text-shadow: 1px 0px 0px @purple, 1px 1px 0px @purple, 0px 1px 0px @purple,
+        -1px 1px 0px @purple, -1px 0px 0px @purple, -1px -1px 0px @purple,
+        0px -1px 0px @purple, 1px -1px 0px @purple;
       font-size: 1.5rem;
-      color: #A493FF;
+      color: @purple;
     }
   }
 
   &-middle {
     margin: 2rem 0 0;
     width: 100%;
-    height: fit-content;
+    height: 4rem;
     left: 0;
 
     &::-webkit-scrollbar {
@@ -131,8 +125,7 @@ export default {
         width: 3.5rem;
         height: 3.5rem;
         border-radius: 50%;
-        background-color: #fff;
-        border: 1px dashed #A493FF;
+        border: 1px dashed @purple;
 
         img {
           width: 90%;
@@ -144,50 +137,48 @@ export default {
         }
       }
     }
-
-
   }
+  &-nav {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    padding: calc(constant(safe-area-inset-top) + 1rem) 0 1rem;
+    padding: calc(env(safe-area-inset-top) + 1rem) 0 1rem;
+    border-radius: 0 0 10px 10px;
+    transform: translateX(-1.5rem);
+    padding-left: 1.5rem;
+    width: 100vw;
+    margin-left: -1px;
+    border-bottom: 1px solid @lightPurple;
+    z-index: 99;
+    position: sticky;
+    background: white;
+    top: 0;
 
-  &-footer {
-    &-nav {
-      display: flex;
-      flex-direction: row;
-      justify-content: flex-start;
-      align-items: center;
-      position: sticky;
-      padding: calc(1rem + constant(safe-area-inset-top)) 0 1rem;
-      padding: calc(1rem + env(safe-area-inset-top)) 0 1rem;
-      border-radius: 0 0 10px 10px;
-      transform: translateX(-1.5rem);
-      padding-left: 1.5rem;
-      width: calc(100vw - 1.5rem);
-      top: 0;
-      background-color: #fff;
-      border-bottom: 1px solid #A493FF22;
-      z-index: 99;
+    &-item {
+      margin-right: 1rem;
+      font-size: 1.2rem;
+      font-weight: 500;
+      letter-spacing: 1px;
+    }
 
-      &-item {
-        margin-right: 1rem;
-        font-size: 1.2rem;
-        font-weight: 500;
-      }
+    .active {
+      font-weight: 700;
+      position: relative;
 
-      .active {
-        font-weight: 700;
-        position: relative;
-
-        &::after {
-          content: '';
-          display: block;
-          position: absolute;
-          left: 50%;
-          transform: translateX(-50%);
-          bottom: -.5rem;
-          width: 3rem;
-          border-radius: 10px;
-          height: .3rem;
-          background-color: #A493FF;
-        }
+      &::after {
+        content: "";
+        display: block;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: -0.5rem;
+        width: 3rem;
+        border-radius: 10px;
+        height: 0.3rem;
+        background-color: @purple;
       }
     }
   }

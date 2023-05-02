@@ -1,7 +1,7 @@
 <template>
     <div class="analysis-result">
         <div class="analysis-result-title">
-            <span>Analysis Result</span>
+            <span>最近一次打分结果</span>
         </div>
         <div class="analysis-result-panel">
             <div class="analysis-result-panel-item" v-for="(item, index) in analysisList" :key="index">
@@ -23,7 +23,7 @@ export default {
     },
     methods: {
         format(value) {
-            return parseInt(value) + ' points';
+            return parseInt(value) + '%';
         }
     },
     beforeMount() {
@@ -35,6 +35,7 @@ export default {
 </script>
 
 <style lang="less" scoped>
+@import "@/css/color.less";
 .analysis-result {
     width: 100%;
     display: flex;
@@ -50,7 +51,7 @@ export default {
         display: flex;
         justify-content: center;
         align-items: center;
-        background-color: #A493FF;
+        background-color: @purple;
         color: white;
         font-size: 1rem;
         font-weight: bold;
@@ -65,7 +66,7 @@ export default {
             right: 0;
             height: 6rem;
             width: 6rem;
-            border: 1rem solid #ed93ff33;
+            border: 1rem solid @lightPink;
             transform: translateX(-25%) translateY(25%) rotate(45deg);
             border-radius: 1rem;
         }
@@ -77,7 +78,7 @@ export default {
             top: 0;
             height: 6rem;
             width: 6rem;
-            border: 1rem solid #ed93ff77;
+            border: 1rem solid @pink;
             transform: translateX(-25%) translateY(25%) rotate(45deg);
             border-radius: 1rem;
         }
@@ -98,7 +99,7 @@ export default {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: white;
+            background-color: @white;
             border-radius: 10px;
             margin-top: .5rem;
             padding: 0 1rem;
@@ -115,7 +116,7 @@ export default {
                 /deep/ .el-progress-bar__inner {
                     transform: translateX(-100%);
                     animation: move .5s ease-in-out forwards .5s, color 1s linear forwards infinite;
-                    background: linear-gradient(90deg, #A493FF00 0%, #A493FF 100%);
+                    background: linear-gradient(90deg, @lightPurple 0%, @purple 100%);
                 }
 
                 @keyframes move {
@@ -136,10 +137,10 @@ export default {
             }
 
             &-content {
-                width: 5rem;
                 font-size: 1rem;
+                padding-right: 1rem;
                 font-weight: bold;
-                color: #A493FF;
+                color: @purple;
             }
         }
     }

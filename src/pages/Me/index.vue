@@ -17,15 +17,15 @@
     <div class="me-drawers">
       <div class="me-drawers-header">
         <div class="me-drawers-header-item">
-          <span class="me-drawers-header-item-text">FaceAnalysis</span>
+          <span class="me-drawers-header-item-text">人脸分数</span>
           <span class="me-drawers-header-item-number">{{ userInfo.faceScore }}</span>
         </div>
         <div class="me-drawers-header-item">
-          <span class="me-drawers-header-item-text">Following</span>
+          <span class="me-drawers-header-item-text">关注</span>
           <span class="me-drawers-header-item-number">{{ following }}</span>
         </div>
         <div class="me-drawers-header-item">
-          <span class="me-drawers-header-item-text">Followers</span>
+          <span class="me-drawers-header-item-text">粉丝</span>
           <span class="me-drawers-header-item-number">{{ followers }}</span>
         </div>
       </div>
@@ -58,40 +58,40 @@ export default {
       list: [
         {
           icon: "el-icon-s-data",
-          text: "My Face Data"
+          text: "我的人脸数据"
         },
         {
           icon: "el-icon-star-on",
-          text: "Liked"
+          text: "喜欢过的"
         },
         {
           icon: "el-icon-share",
-          text: "Shared"
+          text: "分享过的"
         },
         {
           icon:"el-icon-message-solid",
-          text:"Messages"
+          text:"消息"
 
         },
         {
           icon: "el-icon-s-tools",
-          text: "Settings"
+          text: "设置"
         },
         {
           icon: "el-icon-s-help",
-          text: "Help"
+          text: "帮助中心"
         },
         {
           icon: "el-icon-s-release",
-          text: "Feedback"
+          text: "反馈"
         },
         {
           icon: "el-icon-s-opportunity",
-          text: "About"
+          text: "关于我们"
         },
         {
           icon: "el-icon-s-ticket",
-          text: "Tickets"
+          text: "优惠券"
         }
       ]
     };
@@ -122,21 +122,23 @@ export default {
 </script>
 
 <style lang="less" scoped>
+@import "@/css/color.less";
 .me {
-  overflow-x: hidden;
   box-sizing: border-box;
 
   &-header {
-    position: fixed;
-    height: 30vh;
-    width: 100vw;
-    background: linear-gradient(#F0E9FF, white);
+    box-sizing: border-box;
+    position: sticky;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: -99;
+    padding: 20px;
+    background: linear-gradient(@lightPurple, white);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin: constant(safe-area-inset-top) 0rem;
-    padding-bottom: 10rem;
 
     &-avatar {
       user-select: none;
@@ -159,13 +161,12 @@ export default {
         top: 50%;
         transform: translateY(-50%);
         font-size: 1.5rem;
-        color: #A493FF;
-        text-shadow: 1px 1px 0px #A493FF, 1px 0px 0px #A493FF, 0px 1px 0px #A493FF;
+        color: @purple;
+        text-shadow: 1px 1px 0px @purple, 1px 0px 0px @purple, 0px 1px 0px @purple;
       }
     }
 
     &-info {
-
       user-select: none;
       margin-top: 10px;
       display: flex;
@@ -201,9 +202,8 @@ export default {
       }
 
       &-intro {
-        margin-top: .5rem;
-        margin: 1rem 4rem 0;
         font-size: 1rem;
+        padding: 10px;
         color: #5C5C5C;
         text-align: center;
       }
@@ -211,14 +211,12 @@ export default {
   }
 
   &-drawers {
-    position: relative;
     z-index: 0;
     margin-bottom: calc(env(safe-area-inset-bottom) + 4rem);
-    background-color: #fff;
+    background-color: @white;
     border-radius: 20px 20px 0 0;
-    margin-top: calc(30vh - constant(safe-area-inset-top) + constant(safe-area-inset-bottom));
-    margin-top: calc(30vh - env(safe-area-inset-top) + env(safe-area-inset-bottom));
     padding: 0 2rem;
+    padding-bottom: 3rem;
     box-sizing: border-box;
 
     &-header {
@@ -267,7 +265,7 @@ export default {
 
           &-icon {
             font-size: 1.5rem;
-            color: #A493FF;
+            color: @purple;
           }
 
           &-text {

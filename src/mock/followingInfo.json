@@ -1,11 +1,11 @@
 [
     {
         "id": "1",
-        "name": "John",
+        "name": "张三",
         "age": "20",
         "gender": "Male",
         "avatar": "avatar1.png",
-        "text": "Hello, I am Tina. Nice to meet you.",
+        "text": "你好，我叫张三，他叫李四，谁叫王五？",
         "time": "2017-01-01 12:00:00",
         "img": [
             "Blog6.png",
@@ -19,11 +19,11 @@
     },
     {
         "id": "2",
-        "name": "Jenny",
+        "name": "李四",
         "age": "20",
         "gender": "Female",
         "avatar": "avatar2.jpg",
-        "text": "Hello, I am Tina. Nice to meet you.",
+        "text": "大家好好好好好好！",
         "time": "2017-01-01 12:00:00",
         "img": [
             "Blog5.png",
@@ -35,11 +35,11 @@
     },
     {
         "id": "5",
-        "name": "Sunny",
+        "name": "王五",
         "age": "16",
         "gender": "Female",
         "avatar": "avatar5.jpg",
-        "text": "Hello, I am Tina. Nice to meet you.",
+        "text": "大家好好啊啊啊啊啊啊啊啊！",
         "time": "2017-01-01 12:00:00",
         "img": [
             "Blog1.png"
@@ -50,11 +50,11 @@
     },
     {
         "id": "8",
-        "name": "Tina",
+        "name": "一只鱼",
         "age": "21",
         "gender": "Female",
         "avatar": "avatar8.jpg",
-        "text": "Hello, I am Tina. Nice to meet you.",
+        "text": "大家好好啊啊啊啊啊啊啊啊！",
         "time": "2017-01-01 12:00:00",
         "img": [
             "Blog2.png"

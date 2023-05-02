@@ -33,7 +33,7 @@ export default {
 #box {
   width: 100%;
   height: fit-content;
-  margin-top: 2rem;
+  margin-top: 1rem;
   padding-bottom: calc(constant(safe-area-inset-bottom) + 4rem);
   padding-bottom: calc(env(safe-area-inset-bottom) + 4rem);
 }

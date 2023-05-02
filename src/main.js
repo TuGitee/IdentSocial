@@ -16,6 +16,22 @@ Vue.config.productionTip = false
 
 import '@/mock/mockServe'
 
+let options = {
+  fullscreenEl: false, //关闭全屏按钮
+  shareEl: false, //关闭分享按钮
+  zoomEl: false, //关闭缩放按钮
+  counterEl: false, //关闭左下角数字
+  tapToClose: true, //点击关闭
+  clickToCloseNonZoomable: false, //点击关闭非缩放图片
+  closeEl: false, //关闭右上角关闭按钮
+  showAnimationDuration: 0, //显示动画时间
+  hideAnimationDuration: 500, //隐藏动画时间
+}
+import preview from 'vue-photo-preview'
+import 'vue-photo-preview/dist/skin.css'
+Vue.use(preview,options)
+
+
 new Vue({
   render: h => h(App),
   router,

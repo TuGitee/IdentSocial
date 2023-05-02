@@ -1,6 +1,6 @@
 {
     "id": "1024",
-    "name": "User Name 01",
+    "name": "用户名用户名",
     "age": "19",
     "gender": "Male",
     "email": "11377@qq.com",
@@ -13,22 +13,22 @@
     "faceScore": "78",
     "following": "123513",
     "followers": "368",
-    "intro": "I'm a web developer, I like to write code and make things work.",
+    "intro": "我是一个有趣的人，我喜欢旅行，我喜欢看书，我喜欢运动，我喜欢音乐，我喜欢电影，我喜欢美食，也很喜欢交朋友！",
     "analysisList": [
         {
-            "name": "Total",
+            "name": "总分",
             "value": 83
         },
         {
-            "name": "Features",
+            "name": "颜值",
             "value": 92
         },
         {
-            "name": "Skin",
+            "name": "皮肤",
             "value": 76
         },
         {
-            "name": "Hair",
+            "name": "五官",
             "value": 65
         }
     ]

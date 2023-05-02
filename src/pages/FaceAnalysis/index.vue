@@ -3,7 +3,6 @@
     <div class="face-analysis-background"
       :style="imgSrc === '' ? 'background: linear-gradient(#A493FF 0%,#FFF 40%);' : `background: url(${imgSrc}) no-repeat center center; filter: blur(10px);`">
     </div>
-
     <div class="face-analysis-picture" v-if="imgSrc"
       :style="`background: url(${imgSrc}) no-repeat center center ; height: ${imgHeight}px; width:${imgWidth}px; transform: translateY(-${delta}px); `"
       v-loading="isLoading" element-loading-text="Loading..." element-loading-spinner="el-icon-loading"
@@ -11,7 +10,7 @@
     </div>
 
     <h2 class="face-analysis-title" @touchstart="listenMoveDown">
-      <span>FaceAnalysis</span>
+      <span>人脸打分</span>
       <i class="el-icon-more"></i>
     </h2>
 
@@ -19,8 +18,8 @@
       <v-touch @swipeup="listenMoveUp" @swipedown="listenMoveDown">
         <p class="face-analysis-box-thumb" @touchstart="listenMoveUp"></p>
         <h2 class="face-analysis-box-title">
-          <span class="face-analysis-box-title-text">Please Click Upload to Upload a Photo!</span>
-          <el-tooltip class="item" effect="dark" content="Swipe this to move if you have already upload a photo."
+          <span class="face-analysis-box-title-text">点击<i>&nbsp;上传&nbsp;</i>上传一张图片</span>
+          <el-tooltip class="item" effect="dark" content="上传一张图片，进行人脸打分"
             placement="top-start">
             <i class="el-icon-info face-analysis-box-title-icon"></i>
           </el-tooltip>
@@ -31,11 +30,11 @@
           <div class="face-analysis-box-choice-camera">
             <input type="file" @change="changePicture" class="face-analysis-box-choice-camera-file" accept="image/*"
               ref="file" />
-            <button class="face-analysis-box-choice-camera-button">Upload</button>
+            <button class="face-analysis-box-choice-camera-button">上传</button>
           </div>
           <button class="face-analysis-box-choice-submit" :disabled="!imgSrc" @click="submit"
-            v-show="!isLoading">Submit</button>
-          <button class="face-analysis-box-choice-cancel" @click="cancel" v-show="isLoading">Cancel</button>
+            v-show="!isLoading">提交</button>
+          <button class="face-analysis-box-choice-cancel" @click="cancel" v-show="isLoading">取消</button>
         </div>
       </v-touch>
       <transition name="el-fade-in-linear" :duration="1000">
@@ -134,6 +133,7 @@ export default {
 </script>
 
 <style lang="less" scoped>
+@import "@/css/color.less";
 .face-analysis {
   touch-action: pan-y !important;
   display: flex;
@@ -277,7 +277,6 @@ export default {
       color: #000;
       font-weight: 600;
       text-align: center;
-      height: 6rem;
       box-sizing: border-box;
       line-height: 2rem;
       padding: 1rem;
@@ -286,7 +285,7 @@ export default {
         font-size: 1.5rem;
         margin-left: 1rem;
         margin-top: 1px;
-        color: #A493FF;
+        color: @purple;
         outline: none;
       }
 
@@ -323,9 +322,9 @@ export default {
 
         &-button {
           flex: 1;
-          border: 1px solid #A493FF;
+          border: 1px solid @purple;
           background-color: white;
-          box-shadow: 0px 0px 10px 0px #A493FF;
+          box-shadow: 0px 0px 10px 0px @purple;
           font-size: 1rem;
           color: black;
         }
@@ -336,7 +335,7 @@ export default {
         margin-left: .5rem;
         height: 3rem;
         border: none;
-        background-color: #A493FF;
+        background-color: @purple;
         box-shadow: 0px 10px 10px 0px #a393ff76;
         font-size: 1rem;
         color: white;

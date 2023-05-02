@@ -26,6 +26,7 @@ export default {
 </script>
 
 <style lang="less" scoped>
+@import "@/css/color.less";
 .change-page {
   background-color: white;
   position: fixed;
@@ -47,7 +48,7 @@ export default {
   padding-bottom: calc(env(safe-area-inset-bottom) + 1rem);
 
   .active {
-    color: #A493FF;
+    color: @purple;
   }
 
   &-item {
