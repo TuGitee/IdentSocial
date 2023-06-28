@@ -26,7 +26,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import "@/css/color.less";
 .change-page {
   background-color: white;
   position: fixed;
@@ -36,16 +35,17 @@ export default {
   box-shadow: 0px 20px 30px 0px #000;
   border-radius: 10px 10px 0px 0px;
   display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
   height: 3rem;
   height: calc(3rem + constant(safe-area-inset-bottom));
   height: calc(3rem + env(safe-area-inset-bottom));
   width: 100%;
   user-select: none;
   box-sizing: border-box;
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-  padding-bottom: calc(constant(safe-area-inset-bottom) + 1rem);
-  padding-bottom: calc(env(safe-area-inset-bottom) + 1rem);
+  padding-bottom: calc(constant(safe-area-inset-bottom));
+  padding-bottom: calc(env(safe-area-inset-bottom));
 
   .active {
     color: @purple;

@@ -71,7 +71,6 @@ export default {
         {
           icon:"el-icon-message-solid",
           text:"消息"
-
         },
         {
           icon: "el-icon-s-tools",
@@ -122,19 +121,31 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import "@/css/color.less";
 .me {
   box-sizing: border-box;
+  padding-top: constant(safe-area-inset-top);
+  padding-top: env(safe-area-inset-top);
+
+  &::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    z-index: -100;
+    background: linear-gradient(@lightPurple, white);
+  }
 
   &-header {
     box-sizing: border-box;
     position: sticky;
-    top: 0;
+    top: constant(safe-area-inset-top);
+    top: env(safe-area-inset-top);
     left: 0;
     width: 100%;
     z-index: -99;
     padding: 20px;
-    background: linear-gradient(@lightPurple, white);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -168,7 +179,7 @@ export default {
 
     &-info {
       user-select: none;
-      margin-top: 10px;
+      margin-top: 1rem;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -178,7 +189,6 @@ export default {
         user-select: none;
 
         &-input {
-
           max-width: 12rem;
           font-size: 1.5rem;
           font-weight: bold;
@@ -216,7 +226,7 @@ export default {
     background-color: @white;
     border-radius: 20px 20px 0 0;
     padding: 0 2rem;
-    padding-bottom: 3rem;
+    padding-bottom: 5.5rem;
     box-sizing: border-box;
 
     &-header {

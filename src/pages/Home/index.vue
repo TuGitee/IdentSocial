@@ -3,33 +3,29 @@
     <header class="home-header">
       <h2 class="home-header-hello">你好，</h2>
       <h1 class="home-header-name">{{ userInfo.name }}</h1>
-      <i class="el-icon-plus home-header-plus"></i>
+      <router-link to="/upload">
+        <i class="el-icon-plus home-header-plus"></i></router-link>
     </header>
     <div class="home-middle">
-      <ul class="home-middle-list">
-        <li
-          class="home-middle-list-item"
-          v-for="item in recommendInfo.slice(0, 4)"
-          :key="item.id"
-        >
-          <img :src="require('./images/Avatars/' + item.avatar)" />
-        </li>
-      </ul>
+      <div class="home-middle-scroll">
+        <ul class="home-middle-list">
+          <li class="home-middle-list-item" v-for="item in recommendInfo.slice(0, 6)" :key="item.id">
+            <img :src="require('./images/Avatars/' + item.avatar)" />
+          </li>
+        </ul>
+      </div>
     </div>
-    <nav class="home-nav" ref="nav">
-      <router-link
-        replace
-        class="home-nav-item"
-        v-for="(item, index) in homeRoutes"
-        :key="index"
-        :to="{ name: item.name }"
-      >
-        {{ item.meta.name }}
-      </router-link>
-    </nav>
-    <footer class="home-footer">
-      <router-view></router-view>
-    </footer>
+
+    <div class="home-titlemask" ref="mask"></div>
+
+    <el-tabs v-model="activeName" @tab-click="handleClick">
+      <el-tab-pane v-for="(item, index) in homeRoutes" :key="index" :label="item.meta.name" :name="item.name">
+        <footer class="home-footer">
+          <router-view></router-view>
+        </footer>
+      </el-tab-pane>
+    </el-tabs>
+
   </div>
 </template>
 
@@ -42,10 +38,13 @@ export default {
   mounted() {
     this.$store.dispatch("getUserInfo");
     this.$store.dispatch("getRecommendInfo");
+    this.activeName = this.homeRoutes[0].name;
+    window.addEventListener("scroll", this.handleScroll);
   },
   data() {
     return {
       homeRoutes,
+      activeName: "",
     };
   },
   computed: {
@@ -54,12 +53,21 @@ export default {
       recommendInfo: (state) => state.home.recommendInfo,
     }),
   },
-  mounted() {},
+  beforeDestroy() {
+    window.removeEventListener("scroll", this.handleScroll);
+  },
+  methods: {
+    handleClick(tab, event) {
+      this.$router.push({ path: tab.name });
+    },
+    handleScroll() {
+      this.$refs.mask.style.opacity = window.scrollY / 100;
+    },
+  },
 };
 </script>
 
 <style lang="less" scoped>
-@import "@/css/color.less";
 .home {
   position: relative;
   transition: all 0.5s;
@@ -92,7 +100,7 @@ export default {
       padding: 0.5rem;
       position: absolute;
       right: 0;
-      bottom: 0;
+      bottom: .5rem;
       border-radius: 50%;
       box-shadow: 0px 5px 10px 1px rgba(0, 0, 0, 0.1);
       text-shadow: 1px 0px 0px @purple, 1px 1px 0px @purple, 0px 1px 0px @purple,
@@ -108,6 +116,11 @@ export default {
     width: 100%;
     height: 4rem;
     left: 0;
+    overflow: hidden;
+
+    &-scroll {
+      overflow: auto;
+    }
 
     &::-webkit-scrollbar {
       display: none;
@@ -115,10 +128,11 @@ export default {
 
     &-list {
       display: flex;
-      flex-wrap: nowrap;
-      width: 100%;
+      width: fit-content;
       justify-content: space-evenly;
       align-items: center;
+      overflow-x: overlay;
+      gap: 1rem;
 
       &-item {
         position: relative;
@@ -138,47 +152,49 @@ export default {
       }
     }
   }
-  &-nav {
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
-    padding: calc(constant(safe-area-inset-top) + 1rem) 0 1rem;
-    padding: calc(env(safe-area-inset-top) + 1rem) 0 1rem;
-    border-radius: 0 0 10px 10px;
-    transform: translateX(-1.5rem);
-    padding-left: 1.5rem;
-    width: 100vw;
-    margin-left: -1px;
-    border-bottom: 1px solid @lightPurple;
-    z-index: 99;
-    position: sticky;
-    background: white;
-    top: 0;
 
-    &-item {
-      margin-right: 1rem;
-      font-size: 1.2rem;
-      font-weight: 500;
-      letter-spacing: 1px;
+  @nav-height: 3rem;
+
+  &-titlemask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: calc(constant(safe-area-inset-top) + @nav-height);
+    height: calc(env(safe-area-inset-top) + @nav-height);
+    background: linear-gradient(rgba(255, 255, 255, 1) 75%, rgba(255, 255, 255, 0.5));
+    z-index: 1;
+    opacity: 0;
+  }
+
+  /deep/ .el-tabs__header {
+    position: sticky;
+    top: 0;
+    top: constant(safe-area-inset-top);
+    top: env(safe-area-inset-top);
+    z-index: 999;
+    height: @nav-height;
+    margin: 0;
+
+    .el-tabs__active-bar {
+      background-color: @purple;
     }
 
-    .active {
-      font-weight: 700;
-      position: relative;
+    .el-tabs__item {
+      height: @nav-height;
+      line-height: @nav-height;
+      font-size: 1.2rem;
 
-      &::after {
-        content: "";
-        display: block;
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-        bottom: -0.5rem;
-        width: 3rem;
-        border-radius: 10px;
-        height: 0.3rem;
-        background-color: @purple;
+      &:active {
+        color: @purple;
+      }
+
+      &:hover {
+        color: @purple;
+      }
+
+      &.is-active {
+        color: @purple;
       }
     }
   }

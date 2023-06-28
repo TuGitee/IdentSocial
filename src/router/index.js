@@ -26,9 +26,6 @@ let router = new VueRouter({
     routes,
     linkActiveClass: "active",
     scrollBehavior(to, from, savedPosition) {
-        if(!(to.fullPath.indexOf('/home') > -1)) {
-            return { y: 0 }
-        }
     },
 })
 

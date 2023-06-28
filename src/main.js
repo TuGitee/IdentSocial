@@ -31,6 +31,11 @@ import preview from 'vue-photo-preview'
 import 'vue-photo-preview/dist/skin.css'
 Vue.use(preview,options)
 
+import axios from 'axios';
+Vue.prototype.$axios = axios.create({
+  baseURL: 'http://47.120.2.219:16998/',
+  timeout: 5000
+})
 
 new Vue({
   render: h => h(App),

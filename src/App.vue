@@ -12,6 +12,10 @@ export default {
   components: {
     ChangePage,
   },
+  data(){
+    return {
+    }
+  },
   mounted() {
     let agent = navigator.userAgent.toLowerCase();
     let iLastTouchTime = null;
@@ -36,8 +40,8 @@ export default {
   margin: 0;
   padding: 0;
   -webkit-tap-highlight-color: transparent;
-  font-family: Helvetica, Tahoma, Arial, "Heiti SC", "Microsoft YaHei", "WenQuanYi Micro Hei";
   font-family: Helvetica, Tahoma, Arial, "PingFang SC", "Hiragino Sans GB", "Heiti SC", "Microsoft YaHei", "WenQuanYi Micro Hei";
+  box-sizing: border-box;
 
   &::-webkit-scrollbar {
     display: none;
@@ -45,10 +49,6 @@ export default {
 
   #app {
     height: 100vh;
-    // 设置灰色滤色
-    // *{
-    //    filter: grayscale(100%);
-    // }
   }
 
   a {

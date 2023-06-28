@@ -14,17 +14,17 @@
           <div>
             <i class="el-icon-mobile sign-in-box-icon"></i>
             <input
-              type="text"
-              class="sign-in-box-phone"
-              v-model="phone"
-              placeholder="输入您的手机号码"
+              type="email"
+              class="sign-in-box-mail"
+              v-model="mail"
+              placeholder="输入您的邮箱"
               @keyup="regCheck"
             />
 
             <el-tooltip
               class="sign-in-box-item"
               effect="dark"
-              content="手机号码需要13位数字"
+              content="邮箱需要合法"
               placement="top"
               ><i class="el-icon-warning-outline" style="color: grey"></i>
             </el-tooltip>
@@ -70,7 +70,7 @@ export default {
   data() {
     return {
       password: "",
-      phone: "",
+      mail: "",
       isActive: false,
       isExit: true,
     //   phoneReg: /^1(3\d|4[5-9]|5[0-35-9]|6[567]|7[0-8]|8\d|9[0-35-9])\d{8}$/,
@@ -83,7 +83,7 @@ export default {
     regCheck() {
       if (
         this.passwordReg.test(this.password) &&
-        this.phoneReg.test(this.phone)
+        this.phoneReg.test(this.mail)
       ) {
         this.isActive = true;
         this.isExit = true;
@@ -101,7 +101,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import "@/css/color.less";
 .sign-in {
   color: white;
   padding-top: constant(safe-area-inset-top);
@@ -144,11 +143,11 @@ export default {
     height: 3rem;
     margin-left: 1.5rem;
     line-height: 3rem;
+    font-weight: 700;
 
     i {
       font-size: 1.2rem;
       color: white;
-      font-weight: 1000;
     }
 
     span {
@@ -179,6 +178,7 @@ export default {
     &-title {
       color: black;
       margin-bottom: 1rem;
+      font-size: 2rem;
     }
 
     &-message {
@@ -186,7 +186,7 @@ export default {
       margin-bottom: 1rem;
     }
 
-    &-phone,
+    &-mail,
     &-password {
       position: relative;
       margin: 0;

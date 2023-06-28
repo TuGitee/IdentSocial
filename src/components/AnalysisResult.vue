@@ -35,7 +35,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import "@/css/color.less";
 .analysis-result {
     width: 100%;
     display: flex;
@@ -47,7 +46,7 @@ export default {
     &-title {
         width: 100%;
         border-radius: 10px;
-        height: 8vh;
+        height: 3rem;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -86,7 +85,7 @@ export default {
 
     &-panel {
         width: 100%;
-        height: 100%;
+        padding: 1rem 0;
         display: flex;
         flex-direction: column;
         justify-content: flex-start;

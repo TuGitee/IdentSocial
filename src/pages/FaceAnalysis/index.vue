@@ -133,7 +133,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import "@/css/color.less";
 .face-analysis {
   touch-action: pan-y !important;
   display: flex;
@@ -295,7 +294,7 @@ export default {
       display: flex;
       justify-content: space-between;
       width: 100%;
-      height: 3rem;
+      height: 5rem;
       padding: 1rem 0;
 
       @borderRadius : 15px;

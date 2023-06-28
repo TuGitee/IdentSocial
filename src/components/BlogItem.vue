@@ -1,7 +1,7 @@
 <template>
     <div class="blog-item">
         <div class="blog-item-header">
-            <div class="blog-item-header-avatar">
+            <div class="blog-item-header-avatar" @click="toUserDetail">
                 <img :src="require('@/pages/Home/images/Avatars/' + item.avatar)" alt="">
             </div>
             <div class="blog-item-header-info">
@@ -19,9 +19,8 @@
             </div>
             <ul class="blog-item-content-img">
                 <li class="blog-item-content-img-item" v-for="(image, index) in item.img" :key="index">
-                    <img :src="require('@/pages/Home/images/Blogs/' + image)" alt="" :preview="item.id+item.time" />
+                    <img :src="require('@/pages/Home/images/Blogs/' + image)" alt="" :preview="item.id + item.time" />
                 </li>
-
             </ul>
         </div>
         <div class="blog-item-footer">
@@ -29,9 +28,9 @@
                 <i :class="isLike ? 'el-icon-star-on active' : 'el-icon-star-off'"></i>
                 <span>{{ item.like }}</span>
             </div>
-            <div class="blog-item-footer-item">
-                <i class="el-icon-chat-round"></i>
-                <span>{{ item.comment }}</span>
+            <div class="blog-item-footer-item" @click.capture="toBlogDetail">
+                <i class="el-icon-chat-round" @touchstart.stop="onComment"></i>
+                <span @touchstart.stop="onComment">{{ item.comment }}</span>
             </div>
             <div class="blog-item-footer-item">
                 <i class="el-icon-share"></i>
@@ -51,6 +50,25 @@ export default {
         }
     },
     methods: {
+        onComment(){
+            this.$emit('click')
+        },
+        toUserDetail() {
+            this.$router.push({
+                name: 'UserDetail',
+                params: {
+                    uid: this.item.name
+                }
+            })
+        },
+        toBlogDetail() {
+            this.$router.push({
+                name: 'BlogDetail',
+                params: {
+                    bid: this.item.id
+                }
+            })
+        },
         onLike() {
             if (this.isLike) {
                 this.item.like--;
@@ -64,7 +82,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import "@/css/color.less";
 .blog-item {
 
     transition: all .5s;
@@ -152,7 +169,7 @@ export default {
                 }
             }
 
-            &-item:nth-last-child(1):first-child{
+            &-item:nth-last-child(1):first-child {
                 width: 12rem;
                 height: 12rem;
             }

@@ -6,79 +6,78 @@
       </router-link>
     </nav>
 
-    <transition appear name="move-up">
+    <transition appear name="move-in">
       <div class="sign-up-box">
         <h2 class="sign-up-box-title">注册</h2>
         <p class="sign-up-box-message">请输入您的相关信息以完成注册。</p>
-        <form>
-          <div>
-            <i class="el-icon-mobile sign-up-box-icon"></i>
-            <input
-              type="text"
-              class="sign-up-box-phone"
-              v-model="phone"
-              placeholder="输入您的手机号码"
-              @keyup="regCheck"
-            />
 
-            <el-tooltip
-              class="sign-up-box-item"
-              effect="dark"
-              content="手机号码需要13位数字"
-              placement="top"
-              ><i class="el-icon-warning-outline" style="color: grey"></i>
-            </el-tooltip>
-          </div>
+        <el-steps :active="Number(current)" class="sign-up-box-steps">
+          <el-step title="步骤 1" @click.native="jumpToStep(0)" icon="el-icon-edit"></el-step>
+          <el-step title="步骤 2" @click.native="jumpToStep(1)" icon="el-icon-setting"></el-step>
+          <el-step title="步骤 3" @click.native="jumpToStep(2)" icon="el-icon-check"></el-step>
+        </el-steps>
 
-          <div>
-            <i class="el-icon-lock sign-up-box-icon"></i>
-            <input
-              type="password"
-              class="sign-up-box-password"
-              v-model="password"
-              autocomplete="true"
-              @keyup="regCheck"
-              placeholder="输入您的密码"
-            />
+        <el-tabs v-model="current" class="sign-up-box-tabs">
+          <el-tab-pane disabled name="0">
+            <form>
+              <div>
+                <i class="el-icon-mobile sign-up-box-icon"></i>
+                <input type="email" class="sign-up-box-mail" v-model="mail" placeholder="输入您的邮箱" @input="regCheck" />
 
-            <el-tooltip
-              class="sign-up-box-item"
-              effect="dark"
-              content="密码需要6-20个字符"
-              placement="bottom"
-            >
-              <i class="el-icon-warning-outline"></i>
-            </el-tooltip>
-          </div>
+                <el-tooltip class="sign-up-box-item" effect="dark" content="邮箱需要合法" placement="top"><i
+                    class="el-icon-warning-outline" style="color: grey"></i>
+                </el-tooltip>
+              </div>
 
-          <div>
-            <i class="el-icon-lock sign-up-box-icon"></i>
-            <input
-              type="password"
-              class="sign-up-box-password"
-              v-model="makesure"
-              autocomplete="true"
-              @keyup="regCheck"
-              placeholder="确认您的密码"
-            />
+              <div>
+                <i class="el-icon-lock sign-up-box-icon"></i>
+                <input type="password" class="sign-up-box-password" v-model="password" autocomplete="true"
+                  placeholder="输入您的密码" @input="regCheck" />
 
-            <el-tooltip
-              class="sign-up-box-item"
-              effect="dark"
-              content="确认密码需要和您的密码一致"
-              placement="bottom"
-            >
-              <i class="el-icon-warning-outline"></i>
-            </el-tooltip>
-          </div>
-        </form>
-        <button
-          :class="{ active: isActive }"
-          class="sign-up-box-submit"
-          @click="goHome"
-          @keydown.enter="goHome"
-        >
-          <i class="el-icon-right"></i>
+                <el-tooltip class="sign-up-box-item" effect="dark" content="密码需要6-20个字符" placement="bottom">
+                  <i class="el-icon-warning-outline"></i>
+                </el-tooltip>
+              </div>
+
+              <div>
+                <i class="el-icon-check sign-up-box-icon"></i>
+                <input type="password" class="sign-up-box-password" v-model="makesure" autocomplete="true"
+                  placeholder="确认您的密码" @input="regCheck" />
+
+                <el-tooltip class="sign-up-box-item" effect="dark" content="确认密码需要和您的密码一致" placement="bottom">
+                  <i class="el-icon-warning-outline"></i>
+                </el-tooltip>
+              </div>
+            </form>
+          </el-tab-pane>
+          <el-tab-pane disabled name="1">
+            <div>
+              <p class="sign-up-box-title">已经将验证码发送到您的邮箱
+                <button class="sign-up-box-resend" :disabled="time > 0" @click="sendCaptcha">重新发送{{ time > 0 ? `(${time})`
+                  : '' }}</button>
+              </p>
+              <p class="sign-up-box-subtitle">请注意查收 <i class="el-icon-message"></i></p>
+              <div class="sign-up-box-check">
+                <input type="number" class="sign-up-box-check-input" v-model="Captcha" autocomplete="true"
+                  placeholder="输入您的验证码" />
+
+                <div class="captcha">
+                  <div class="captcha-item" v-for="i, index in computedCaptcha" :key="index">{{ i }}</div>
+                </div>
+              </div>
+
+            </div>
+          </el-tab-pane>
+          <el-tab-pane disabled name="2">
+            <p class="sign-up-box-success">注册成功</p>
+          </el-tab-pane>
+        </el-tabs>
+
+        <button :class="{ active: isActive }" :disabled="!isActive" class="sign-up-box-submit" @click="nextStep"
+          @keydown.enter="nextStep">
+          <i class="el-icon-check" v-if="current === '2'"></i>
+          <i class="el-icon-right" v-else></i>
+
         </button>
       </div>
     </transition>
@@ -90,28 +89,82 @@ export default {
   name: "SignUp",
   data() {
     return {
-      phone: "",
+      mail: "",
       password: "",
       makesure: "",
-      isActive: false
+      isActive: false,
+      current: "0",
+      Captcha: "",
+      finished: "0",
+      time: 60,
+      timer: null
     };
   },
-  methods: {
-    regCheck() {
-      if (
-        this.phone.length === 11 &&
-        this.password.length >= 6 &&
-        this.password.length <= 20 &&
-        this.password === this.makesure
-      ) {
+  mounted() {
+    this.timer = setInterval(() => {
+      this.time--;
+      if (this.time <= 0) {
+        clearInterval(this.timer);
+      }
+    }, 1000);
+  },
+  computed: {
+    computedCaptcha() {
+      return this.Captcha.padEnd(6, " ").split("");
+    },
+  },
+  watch: {
+    Captcha(newVal) {
+      if (newVal.length === 6) {
         this.isActive = true;
-      } else {
+      }
+      else {
+        this.Captcha = newVal.slice(0, 6);
         this.isActive = false;
+      }
+    },
+  },
+  methods: {
+    sendCaptcha() {
+      this.time = 60;
+      this.timer = setInterval(() => {
+        this.time--;
+        if (this.time <= 0) {
+          clearInterval(this.timer);
+        }
+      }, 1000)
+    },
+    jumpToStep(index) {
+      if (this.finished >= index) {
+        this.current = String(index);
       }
     },
     goHome() {
       if (this.isActive) {
         this.$router.push({ path: "/user" });
+      }
+    },
+    regCheck() {
+      const mailReg = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$/;
+      if (mailReg.test(this.mail) && this.password.length >= 6 && this.password.length <= 20 && this.password === this.makesure) {
+        this.isActive = true;
+        console.log(1);
+      }
+      else {
+        this.isActive = false;
+      }
+    },
+    nextStep() {
+      this.isActive = false;
+      if (this.current < 2) {
+        this.current = String(Number(this.current) + 1);
+        this.finished = String(Number(this.finished) + 1);
+      }
+      else {
+        this.$router.replace({ path: "/user" });
+      }
+      if (this.current === "2") {
+        this.isActive = true;
       }
     }
   }
@@ -120,7 +173,6 @@ export default {
 
 
 <style lang="less" scoped>
-@import "@/css/color.less";
 .sign-up {
   color: white;
   padding-top: constant(safe-area-inset-top);
@@ -129,6 +181,15 @@ export default {
   width: 100vw;
   position: fixed;
   transition: all 1s;
+
+  /deep/ .is-finish {
+    color: @purple;
+    border-color: @purple;
+  }
+
+  /deep/ .el-tabs__content {
+    overflow: inherit;
+  }
 
   .move-in-enter-active {
     animation: move-in 0.5s ease;
@@ -163,11 +224,11 @@ export default {
     height: 3rem;
     margin-left: 1.5rem;
     line-height: 3rem;
+    font-weight: 700;
 
     i {
       font-size: 1.2rem;
       color: white;
-      font-weight: 1000;
     }
 
     span {
@@ -190,6 +251,99 @@ export default {
     box-sizing: border-box;
     padding: 2rem;
 
+    &-title {
+      color: black;
+      margin-bottom: 1rem;
+      font-size: 2rem;
+      line-height: 1.5;
+      position: relative;
+
+      .sign-up-box-resend {
+        font-size: 1rem;
+        color: white;
+        background-color: @purple;
+        border-radius: .5rem;
+        line-height: 1;
+        padding: 0.5rem;
+        border: none;
+        vertical-align: text-top;
+
+        &:disabled {
+          filter: brightness(0.8);
+        }
+      }
+    }
+
+    &-subtitle {
+      color: black;
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+
+      i {
+        font-weight: 700;
+      }
+    }
+
+    &-check {
+      position: relative;
+
+      &-input {
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        opacity: 0;
+        z-index: 999;
+      }
+
+      .captcha {
+        display: flex;
+        justify-content: space-between;
+        gap: .5rem;
+      }
+
+      .captcha-item {
+        flex: 1;
+        height: 3rem;
+        border-radius: .5rem;
+        box-shadow: 0 2px 15px -5px @purple;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.5rem;
+        color: grey;
+        cursor: pointer;
+      }
+    }
+
+
+
+    &-message {
+      color: black;
+      margin-bottom: 1rem;
+    }
+
+    &-steps {
+      margin: 1rem 1rem 0;
+      color: @purple;
+    }
+
+    &-tabs {
+      margin: 1rem 1rem 0;
+      color: @purple;
+
+      /deep/ .el-tabs__nav-scroll {
+        display: none;
+      }
+    }
+
+    &-success {
+      font-size: 3rem;
+      color: @purple;
+      margin: 2rem;
+      text-align: center;
+    }
+
     form {
       display: block;
       width: 100%;
@@ -205,7 +359,7 @@ export default {
       margin-bottom: 1rem;
     }
 
-    &-phone,
+    &-mail,
     &-password {
       position: relative;
       margin: 0;
@@ -220,7 +374,6 @@ export default {
       height: 3rem;
       border-radius: 2rem;
       margin-top: 2rem;
-      box-shadow: 0px 0px 10px -1px rgb(164, 147, 255);
       outline: none;
     }
 
