@@ -1,25 +1,27 @@
-import { getUUID } from "@/utils/uuid_token";
 import { getToken, setToken, removeToken } from "@/utils/token";
-import { reqMockUserInfo } from "@/api";
+import { reqUserInfo } from "@/api";
 const getters = {
 }
 const actions = {
-    async getUserInfo({ commit }) {
-        let result = await reqMockUserInfo();
-        if (result.code === 200) {
-            commit("GETUSERINFO", result.data);
+    async getUserInfo(state) {
+        let result = await reqUserInfo(state.state.token);
+        if (result.code) {
+            state.commit("GETUSERINFO", result.data);
         } else {
             return Promise.reject(new Error("Request Fail!"));
         }
-    },
+    }
 }
 const mutations = {
     GETUSERINFO(state, userInfo) {
         state.userInfo = userInfo;
     },
+    SETTOKEN(state, token) {
+        state.token = token;
+        setToken(token);
+    }
 }
 const state = {
-    uuid_token: getUUID(),
     token: getToken(),
     userInfo: {},
 }

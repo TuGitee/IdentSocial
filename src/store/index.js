@@ -9,6 +9,6 @@ import home from './home'
 export default new Vuex.Store({
     modules: {
         user,
-        home
+        home,
     }
 })

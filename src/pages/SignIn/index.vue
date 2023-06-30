@@ -13,50 +13,24 @@
         <form>
           <div>
             <i class="el-icon-mobile sign-in-box-icon"></i>
-            <input
-              type="email"
-              class="sign-in-box-mail"
-              v-model="mail"
-              placeholder="输入您的邮箱"
-              @keyup="regCheck"
-            />
+            <input type="email" class="sign-in-box-mail" v-model="mail" placeholder="输入您的邮箱" @keyup="regCheck" />
 
-            <el-tooltip
-              class="sign-in-box-item"
-              effect="dark"
-              content="邮箱需要合法"
-              placement="top"
-              ><i class="el-icon-warning-outline" style="color: grey"></i>
+            <el-tooltip class="sign-in-box-item" effect="dark" content="邮箱需要合法" placement="top"><i
+                class="el-icon-warning-outline" style="color: grey"></i>
             </el-tooltip>
           </div>
 
           <div>
             <i class="el-icon-lock sign-in-box-icon"></i>
-            <input
-              type="password"
-              class="sign-in-box-password"
-              v-model="password"
-              autocomplete="true"
-              @keyup="regCheck"
-              placeholder="输入您的密码"
-            />
+            <input type="password" class="sign-in-box-password" v-model="password" autocomplete="true" @keyup="regCheck"
+              placeholder="输入您的密码" />
 
-            <el-tooltip
-              class="sign-in-box-item"
-              effect="dark"
-              content="密码需要6-20个字符"
-              placement="bottom"
-            >
+            <el-tooltip class="sign-in-box-item" effect="dark" content="密码需要6-20个字符" placement="bottom">
               <i class="el-icon-warning-outline"></i>
             </el-tooltip>
           </div>
         </form>
-        <button
-          :class="{ active: isActive }"
-          class="sign-in-box-submit"
-          @click="goHome"
-          @keydown.enter="goHome"
-        >
+        <button :class="{ active: isActive }" class="sign-in-box-submit" @click="goHome" @keydown.enter="goHome">
           <i class="el-icon-right"></i>
         </button>
       </div>
@@ -73,17 +47,15 @@ export default {
       mail: "",
       isActive: false,
       isExit: true,
-    //   phoneReg: /^1(3\d|4[5-9]|5[0-35-9]|6[567]|7[0-8]|8\d|9[0-35-9])\d{8}$/,
-    //   passwordReg: /^[0-9A-Za-z~!@#$%^&*._?]{6,20}$/,
-      phoneReg: /.?/,
-      passwordReg: /.?/,
+      mailReg: /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$/,
+      passwordReg: /^[0-9A-Za-z~!@#$%^&*._?]{6,20}$/,
     };
   },
   methods: {
     regCheck() {
       if (
         this.passwordReg.test(this.password) &&
-        this.phoneReg.test(this.mail)
+        this.mailReg.test(this.mail)
       ) {
         this.isActive = true;
         this.isExit = true;
@@ -91,9 +63,26 @@ export default {
         this.isActive = false;
       }
     },
-    goHome() {
+    async goHome() {
       if (this.isActive && this.isExit) {
-        this.$router.replace({ name: "Home" });
+        let res = await this.$userAxios.post("/user/login", {
+          email: this.mail,
+          password: this.password,
+        });
+
+        if (res.data.code) {
+          this.$store.commit("SETTOKEN", res.data.data);
+          this.$router.replace({ name: "Home" });
+        }
+        else {
+          this.$notify({
+            title: "登录失败",
+            message: "请检查您的邮箱和密码是否正确!",
+            type: "error",
+            duration: 2000,
+            offset: parseInt(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top")),
+          });
+        }
       }
     },
   },

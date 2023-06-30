@@ -15,37 +15,45 @@
     </h2>
 
     <div class="face-analysis-box" :class="!isUnfold ? 'move-down' : 'move-up'" ref="box">
-      <v-touch @swipeup="listenMoveUp" @swipedown="listenMoveDown">
+      <v-touch style="width: 100%;" class="face-analysis-box-touch" @swipeup="listenMoveUp" @swipedown="listenMoveDown">
         <p class="face-analysis-box-thumb" @touchstart="listenMoveUp"></p>
         <h2 class="face-analysis-box-title">
-          <span class="face-analysis-box-title-text">点击<i>&nbsp;上传&nbsp;</i>上传一张图片</span>
-          <el-tooltip class="item" effect="dark" content="上传一张图片，进行人脸打分"
-            placement="top-start">
+          <span class="face-analysis-box-title-text"><i>&nbsp;上传&nbsp;</i>人像图片</span>
+          <el-tooltip class="item" effect="dark" content="上传一张图片，进行人脸打分" placement="top-start">
             <i class="el-icon-info face-analysis-box-title-icon"></i>
           </el-tooltip>
         </h2>
 
-
         <div class="face-analysis-box-choice">
           <div class="face-analysis-box-choice-camera">
             <input type="file" @change="changePicture" class="face-analysis-box-choice-camera-file" accept="image/*"
-              ref="file" />
-            <button class="face-analysis-box-choice-camera-button">上传</button>
+              ref="file" :disabled="isLoading" />
+            <button class="face-analysis-box-choice-camera-button" :disabled="isLoading">上传</button>
           </div>
           <button class="face-analysis-box-choice-submit" :disabled="!imgSrc" @click="submit"
             v-show="!isLoading">提交</button>
           <button class="face-analysis-box-choice-cancel" @click="cancel" v-show="isLoading">取消</button>
         </div>
       </v-touch>
-      <transition name="el-fade-in-linear" :duration="1000">
-        <AnalysisResult v-show="isUnfold" :analysisList="userInfo.analysisList" />
-      </transition>
+      <div class="face-analysis-box-analysis">
+        <transition name="el-fade-in-linear" :duration="1000">
+          <AnalysisResult v-show="isUnfold" :analysisList="userInfo.analysisList" :title="text" :result="result" />
+        </transition>
+        <transition name="el-fade-in-linear" :duration="1000">
+          <div class="face-analysis-box-analysis-btns" v-if="isResult">
+            <button class="face-analysis-box-analysis-btns-button" @click="publish">发表动态</button>
+            <button class="face-analysis-box-analysis-btns-button">美颜</button>
+            <button class="face-analysis-box-analysis-btns-button">历史数据</button>
+          </div>
+        </transition>
+      </div>
+
     </div>
   </div>
 </template>
 
 <script>
-import AnalysisResult from '@/components/AnalysisResult.vue';
+import AnalysisResult from './AnalysisResult';
 import { mapState } from 'vuex';
 export default {
   name: "FaceAnalysis",
@@ -54,22 +62,38 @@ export default {
   },
   data() {
     return {
+      file: '',
       imgSrc: '',
       imgHeight: 0,
       imgWidth: 0,
       isLoading: false,
       isUnfold: true,
+      text: '最近一次打分结果',
+      result: {
+        score: 92.513,
+        age: "(25-32)",
+        gender: "Male",
+        stars: [
+          {
+            name: "泰勒·斯威夫特",
+            url: "https://focnal-test.oss-cn-chengdu.aliyuncs.com/work/test/xlz.jpg?OSSAccessKeyId=LTAI5tJ6d5ETG985CEeqdXpD&Expires=1688174723&Signature=nEMzfaDtka4ecugQGBD6L0oW61M%3D",
+          },
+          {
+            name: '张婧仪',
+            url: "http://focnal-test.oss-cn-chengdu.aliyuncs.com/work/test/zjy.jpg?Expires=1688401333&OSSAccessKeyId=LTAI5tJ6d5ETG985CEeqdXpD&Signature=Ltuy5YJMmjYZ1two0zUkSkXI6mI%3D"
+          }
+        ]
+      }
     }
   },
   methods: {
     changePicture() {
       let file = this.$refs.file.files[0];
+      this.file = file;
       if (window.createObjectURL != undefined) {
         this.imgSrc = window.createObjectURL(file);
-
       } else if (window.URL != undefined) {
         this.imgSrc = window.URL.createObjectURL(file);
-
       } else if (window.webkitURL != undefined) {
         this.imgSrc = window.webkitURL.createObjectURL(file);
       }
@@ -85,24 +109,33 @@ export default {
         canvas.width = width * filter;
         canvas.height = height * filter;
         context.drawImage(img, 0, 0, width * filter, height * filter);
-        this.imgSrc = canvas.toDataURL('image/jpeg', 0.5);
         this.imgHeight = height;
         this.imgWidth = width;
         this.isUnfold = false;
       }
     },
-    submit() {
+    publish() {
+      this.$router.push('/upload');
+    },
+    async submit() {
       this.isLoading = true;
-      setTimeout(() => {
-        try {
-          if (this.isLoading) {
-            this.isLoading = false;
-            throw new Error('fail');
+      try {
+        const fd = new FormData();
+        fd.append('picture', this.file);
+        let res = await this.$api.post('/recognition/request', fd, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
           }
-        } catch (e) {
-          alert("Unexpeted Error! Submit Failed!");
-        }
-      }, 5000);
+        })
+        this.result = res.data.data
+        localStorage.setItem('result', JSON.stringify(this.result));
+        this.isLoading = false;
+        this.isUnfold = true;
+        this.text = '本次打分结果';
+      } catch (e) {
+        this.isLoading = false;
+        alert("Unexpeted Error! Submit Failed!");
+      }
     },
     cancel() {
       this.isLoading = false;
@@ -120,6 +153,7 @@ export default {
   },
   mounted() {
     this.$store.dispatch('getUserInfo');
+    this.result = JSON.parse(localStorage.getItem('result'));
   },
   computed: {
     ...mapState({
@@ -127,6 +161,9 @@ export default {
     }),
     delta() {
       return (window.screen.height - this.imgHeight) / 4;
+    },
+    isResult() {
+      return this.result && Object.keys(this.result).length > 0;
     }
   },
 }
@@ -142,11 +179,13 @@ export default {
   width: 100%;
   padding-top: constant(safe-area-inset-top);
   padding-top: env(safe-area-inset-top);
-  // padding-bottom: calc(constant(safe-area-inset-bottom) + 4rem);
-  // padding-bottom: calc(env(safe-area-inset-bottom) + 4rem);
   height: 100vh;
   user-select: none;
   position: relative;
+
+  * {
+    transition: all .3s;
+  }
 
   @keyframes MoveDown {
     0% {
@@ -154,8 +193,9 @@ export default {
     }
 
     100% {
-      transform: translateY(calc(100vh - 20rem - constant(safe-area-inset-top) - constant(safe-area-inset-bottom)));
-      transform: translateY(calc(100vh - 20rem - env(safe-area-inset-top) - env(safe-area-inset-bottom)));
+      transform: translateY(calc(100vh - 10rem - 4rem - 3rem - constant(safe-area-inset-top) - constant(safe-area-inset-bottom)));
+      transform: translateY(calc(100vh - 10rem - 4rem - 3rem - env(safe-area-inset-top) - env(safe-area-inset-bottom)));
+
     }
   }
 
@@ -171,8 +211,8 @@ export default {
 
   @keyframes MoveUp {
     0% {
-      transform: translateY(calc(100vh - 20rem - constant(safe-area-inset-top) - constant(safe-area-inset-bottom)));
-      transform: translateY(calc(100vh - 20rem - env(safe-area-inset-top) - env(safe-area-inset-bottom)));
+      transform: translateY(calc(100vh - 10rem - 4rem - 3rem - constant(safe-area-inset-top) - constant(safe-area-inset-bottom)));
+      transform: translateY(calc(100vh - 10rem - 4rem - 3rem - env(safe-area-inset-top) - env(safe-area-inset-bottom)));
     }
 
     100% {
@@ -198,7 +238,11 @@ export default {
     line-height: 4rem;
     left: 1.5rem;
     right: 1.5rem;
-    z-index: -1;
+    z-index: 1;
+
+    span {
+      filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.5));
+    }
 
     i {
       font-size: 1.5rem;
@@ -214,6 +258,7 @@ export default {
     min-width: 100vw;
     min-height: 100vh;
     z-index: -9;
+    transform: scale(1.03);
     overflow: hidden;
     padding-bottom: calc(constant(safe-area-inset-bottom) + 4rem);
     background-size: cover !important;
@@ -244,24 +289,29 @@ export default {
 
   &-box {
     position: fixed;
-    top: calc(constant(safe-area-inset-top) + 1rem);
-    top: calc(env(safe-area-inset-top) + 1rem);
+    top: calc(constant(safe-area-inset-top) + 4rem);
+    top: calc(env(safe-area-inset-top) + 4rem);
     bottom: 0;
+    gap: 1rem;
     z-index: 99;
     padding: 0 2rem;
-    // height: fit-content;
-    height: calc(100vh - constant(safe-area-inset-bottom) - constant(safe-area-inset-top) - 4rem);
-    height: calc(100vh - env(safe-area-inset-bottom) - env(safe-area-inset-top) - 4rem);
-    padding-bottom: calc(constant(safe-area-inset-bottom) + 4rem);
-    padding-bottom: calc(env(safe-area-inset-bottom) + 4rem);
+    height: calc(100vh - constant(safe-area-inset-top) - 4rem);
+    height: calc(100vh - env(safe-area-inset-top) - 4rem);
+    padding-bottom: calc(constant(safe-area-inset-bottom) + 3rem);
+    padding-bottom: calc(env(safe-area-inset-bottom) + 3rem);
     background-color: #fff;
     width: 100%;
     border-radius: 20px 20px 0 0;
-    margin-top: 4rem;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     align-items: center;
+
+    &-touch {
+      width: 100%;
+      height: fit-content;
+      max-height: 10rem;
+    }
 
     &-thumb {
       height: .3rem;
@@ -278,7 +328,7 @@ export default {
       text-align: center;
       box-sizing: border-box;
       line-height: 2rem;
-      padding: 1rem;
+      padding: 1rem 0 0.5rem;
 
       .face-analysis-box-title-icon {
         font-size: 1.5rem;
@@ -326,6 +376,13 @@ export default {
           box-shadow: 0px 0px 10px 0px @purple;
           font-size: 1rem;
           color: black;
+
+          &:disabled {
+            filter: brightness(.9);
+            cursor: not-allowed;
+            box-shadow: 0 0 0 0 grey;
+            border: none;
+          }
         }
       }
 
@@ -335,7 +392,7 @@ export default {
         height: 3rem;
         border: none;
         background-color: @purple;
-        box-shadow: 0px 10px 10px 0px #a393ff76;
+        box-shadow: 0px 10px 10px -3px @lightPurple;
         font-size: 1rem;
         color: white;
         border-radius: @borderRadius;
@@ -356,6 +413,35 @@ export default {
         color: white;
         background-color: #F56C6C;
         box-shadow: 0px 10px 10px 0px #F56C6C76;
+      }
+    }
+
+    &-analysis {
+      width: 100%;
+      height: 100%;
+      overflow-y: scroll;
+      overflow-x: unset;
+
+      &-btns {
+        width: 100%;
+        height: 5rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: .8rem;
+        padding: 1rem 0;
+
+        &-button {
+          width: 80%;
+          height: 3rem;
+          border: none;
+          border-radius: 1rem;
+          background-color: @purple;
+          color: white;
+          font-size: 1rem;
+          font-weight: 400;
+          box-shadow: 0px 10px 10px -5px @lightPurple;
+        }
       }
     }
   }

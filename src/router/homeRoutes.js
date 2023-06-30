@@ -6,6 +6,7 @@ export default [
         meta: {
             footerShow: true,
             name: '推荐',
+            keepAlive: true,
         },
     },
     {
@@ -15,15 +16,16 @@ export default [
         meta: {
             footerShow: true,
             name: '关注',
+            keepAlive: true,
         },
     },
-    {
-        name: 'Nearby',
-        path: 'nearby',
-        component: () => import('@/pages/Home/Nearby/index.vue'),
-        meta: {
-            footerShow: true,
-            name: '附近',
-        }
-    },
+    // {
+    //     name: 'Nearby',
+    //     path: 'nearby',
+    //     component: () => import('@/pages/Home/Nearby/index.vue'),
+    //     meta: {
+    //         footerShow: true,
+    //         name: '喜欢',
+    //     }
+    // },
 ]

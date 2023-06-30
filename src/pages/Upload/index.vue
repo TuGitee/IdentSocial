@@ -9,14 +9,15 @@
                 <span class="upload-header-center-send">发表动态</span>
             </div>
             <div class="upload-header-right">
-                <span class="upload-header-right-send" @click="submit">发布</span>
+                <span class="upload-header-right-send" @click="submit"><i class="el-icon-loading"
+                        v-if="isLoading"></i>发布</span>
             </div>
         </div>
         <div class="upload-content">
             <el-input type="textarea" :rows="4" placeholder="这一刻的想法..." v-model="textarea" resize="none"
                 autosize></el-input>
-            <el-upload action="#" class="upload-content-image" list-type="picture-card" ref="upload" :auto-upload="false" multiple
-                :limit="9" :on-change="handleChange" accept="image/*">
+            <el-upload action="#" class="upload-content-image" list-type="picture-card" ref="upload" :auto-upload="false"
+                multiple :limit="9" :on-change="handleChange" accept="image/*">
                 <i slot="default" class="el-icon-plus"></i>
 
                 <div slot="file" slot-scope="{file}">
@@ -32,17 +33,19 @@
 
             <div class="upload-content-choices">
                 <button class="upload-content-choices-item" @click="clearAll">
-                    <span class="upload-content-choices-item-left"><i class="el-icon-delete"></i>清空所有图片</span><span class="upload-content-choices-item-right"><i class="el-icon-arrow-right"></i></span>
+                    <span class="upload-content-choices-item-left"><i class="el-icon-delete"></i>清空所有图片</span><span
+                        class="upload-content-choices-item-right"><i class="el-icon-arrow-right"></i></span>
                 </button>
-                <button class="upload-content-choices-item" >
-                    <span class="upload-content-choices-item-left"><i class="el-icon-location-outline"></i>所在位置</span><span class="upload-content-choices-item-right"><i class="el-icon-arrow-right"></i></span>
+                <button class="upload-content-choices-item">
+                    <span class="upload-content-choices-item-left"><i class="el-icon-location-outline"></i>所在位置</span><span
+                        class="upload-content-choices-item-right"><i class="el-icon-arrow-right"></i></span>
                 </button>
-                <button class="upload-content-choices-item" >
-                    <span class="upload-content-choices-item-left"><i class="el-icon-view"></i>谁可以看</span><span class="upload-content-choices-item-right"><i class="el-icon-arrow-right"></i></span>
+                <button class="upload-content-choices-item">
+                    <span class="upload-content-choices-item-left"><i class="el-icon-view"></i>谁可以看</span><span
+                        class="upload-content-choices-item-right"><i class="el-icon-arrow-right"></i></span>
                 </button>
             </div>
         </div>
-
 
     </div>
 </template>
@@ -54,7 +57,7 @@ export default {
         return {
             textarea: '',
             length: 0,
-            isDrag: false
+            isLoading: false
         }
     },
     methods: {
@@ -68,11 +71,125 @@ export default {
             }
             this.$previewRefresh()
         },
-        submit() {
+        async submit() {
+            if (this.isLoading) return;
+            this.isLoading = true;
+            let files = this.$refs.upload.uploadFiles
+            // files压缩
+            for (let i = 0; i < files.length; i++) {
+                let file = files[i].raw
+                let reader = new FileReader()
+                reader.readAsDataURL(file)
+                await new Promise((resolve) => {
+                    reader.onload = (e) => {
+                        let img = new Image()
+                        img.src = e.target.result
+                        img.onload = () => {
+                            let canvas = document.createElement('canvas')
+                            let ctx = canvas.getContext('2d')
+                            let width = img.width
+                            let height = img.height
+                            canvas.width = width
+                            canvas.height = height
+                            ctx.drawImage(img, 0, 0, width, height)
+                            let base64 = canvas.toDataURL('image/jpeg', 0.5)
+                            files[i].raw = this.dataURLtoFile(base64, file.name)
+                            resolve()
+                        }
+                    }
+                })
+            }
+            console.log(files);
+
+            let filesList = []
+            for (let i = 0; i < files.length; i++) {
+                const fd = new FormData()
+                fd.append('picture', files[i].raw)
+                try {
+                    let res = await this.$api.post("/picture/upload", fd, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    })
+                    if (res.status !== 200) {
+                        this.$notify.error({
+                            title: "错误",
+                            message: "上传失败",
+                            duration: 2000,
+                            offset: parseInt(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top")),
+                        })
+                        return;
+                    }
+                    filesList.push(res.data.data.link)
+                } catch (err) {
+                    this.isLoading = false;
+                    this.$notify.error({
+                        title: "错误",
+                        message: "上传失败",
+                        duration: 2000,
+                        offset: parseInt(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top")),
+                    })
+                    return;
+                }
+            }
+
+            this.$blogAxios.post('/post', {
+                content: this.textarea,
+                userId: this.$store.state.user.token
+            }).then(res => {
+                this.textarea = ''
+
+                this.$blogAxios.post(`/picture`, {
+                    postId: res.data.data,
+                    paths: filesList
+                }).catch(err => {
+                    throw new Error('fail');
+                })
+
+                this.$notify({
+                    title: "成功",
+                    message: "发布成功",
+                    type: "success",
+                    duration: 2000,
+                    offset: parseInt(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top")),
+                })
+                this.isLoading = false;
+                this.$router.go(-1)
+                this.$bus.$emit('reload')
+            }).catch(err => {
+                this.isLoading = false;
+                this.$notify.error({
+                    title: "错误",
+                    message: "发布失败",
+                    duration: 2000,
+                    offset: parseInt(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top")),
+                })
+            })
 
         },
+        dataURLtoFile(dataurl, filename) {
+            let arr = dataurl.split(','),
+                mime = arr[0].match(/:(.*?);/)[1],
+                bstr = atob(arr[1]),
+                n = bstr.length,
+                u8arr = new Uint8Array(n)
+            while (n--) {
+                u8arr[n] = bstr.charCodeAt(n)
+            }
+            return new File([u8arr], filename, {
+                type: mime
+            })
+        },
         clearAll() {
-            this.$refs.upload.clearFiles()
+            if (this.length === 0) return;
+            this.$confirm("确认删除所有图片？", "提示", {
+                confirmButtonText: "确定",
+                cancelButtonText: "取消",
+                type: "warning",
+                closeOnClickModal: true,
+            }).then(() => {
+                this.$refs.upload.clearFiles()
+            }).catch(() => { })
         },
     },
     mounted() {
@@ -113,7 +230,7 @@ export default {
             align-items: center;
 
             i {
-                font-size: 1rem;
+                font-size: 1.1rem;
             }
         }
 
@@ -124,7 +241,7 @@ export default {
             justify-content: center;
             align-items: center;
             font-weight: 700;
-            font-size: 1rem;
+            font-size: 1.1rem;
         }
 
         .upload-header-right {
@@ -206,6 +323,7 @@ export default {
             margin-top: 1rem;
             padding-bottom: calc(constant(safe-area-inset-bottom) + 3rem);
             padding-bottom: calc(env(safe-area-inset-bottom) + 3rem);
+
             &-item {
                 font-size: 1rem;
                 line-height: 1;
@@ -217,13 +335,14 @@ export default {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                
+
 
                 .upload-content-choices-item-left {
                     font-size: 1rem;
                     line-height: 1;
                     display: flex;
                     align-items: center;
+
                     i {
                         font-size: 1.2rem;
                         margin-right: 1rem;
@@ -236,6 +355,7 @@ export default {
                     line-height: 1;
                     display: flex;
                     align-items: center;
+
                     i {
                         font-size: 1.2rem;
                         margin-left: .5rem;

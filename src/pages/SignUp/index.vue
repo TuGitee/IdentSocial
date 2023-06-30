@@ -65,7 +65,9 @@
                   <div class="captcha-item" v-for="i, index in computedCaptcha" :key="index">{{ i }}</div>
                 </div>
               </div>
-
+              <transition name="fade" mode="out-in">
+                <p class="sign-up-box-warn" v-if="warning"><i class="el-icon-warning"></i>验证码错误！</p>
+              </transition>
             </div>
           </el-tab-pane>
           <el-tab-pane disabled name="2">
@@ -97,16 +99,9 @@ export default {
       Captcha: "",
       finished: "0",
       time: 60,
-      timer: null
+      timer: null,
+      warning: false,
     };
-  },
-  mounted() {
-    this.timer = setInterval(() => {
-      this.time--;
-      if (this.time <= 0) {
-        clearInterval(this.timer);
-      }
-    }, 1000);
   },
   computed: {
     computedCaptcha() {
@@ -125,12 +120,16 @@ export default {
     },
   },
   methods: {
-    sendCaptcha() {
+    async sendCaptcha() {
+      if (this.timer) return;
       this.time = 60;
+      let res = await this.$api.post(`/verification/sendcode?email=${this.mail}`)
+      console.log(res);
       this.timer = setInterval(() => {
         this.time--;
         if (this.time <= 0) {
           clearInterval(this.timer);
+          this.timer = null;
         }
       }, 1000)
     },
@@ -148,26 +147,85 @@ export default {
       const mailReg = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$/;
       if (mailReg.test(this.mail) && this.password.length >= 6 && this.password.length <= 20 && this.password === this.makesure) {
         this.isActive = true;
-        console.log(1);
       }
       else {
         this.isActive = false;
       }
     },
-    nextStep() {
+    async checkCaptcha() {
+      try {
+        let res = await this.$api.post('/verification/checkout', {
+          email: this.mail,
+          code: String(this.Captcha),
+          type: "REGISTER",
+        })
+        if (res.status == 200) {
+          return true;
+        }
+      } catch (e) {
+        this.warning = true;
+        setTimeout(() => {
+          this.warning = false;
+        }, 2000);
+        return false;
+      }
+    },
+    toNext() {
+      this.current = String(Number(this.current) + 1);
+      this.finished = String(Number(this.finished) + 1);
+    },
+    async nextStep() {
       this.isActive = false;
-      if (this.current < 2) {
-        this.current = String(Number(this.current) + 1);
-        this.finished = String(Number(this.finished) + 1);
-      }
-      else {
-        this.$router.replace({ path: "/user" });
-      }
-      if (this.current === "2") {
-        this.isActive = true;
+      switch (this.current) {
+        case "0":
+          let res = await this.$userAxios.get(`/user/sign?email=${this.mail}`)
+          if (!res.data.code) {
+            this.$notify.error({
+              title: "注册失败",
+              message: "您的邮箱已被注册!",
+              offset: parseInt(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top")),
+              duration: 2000,
+            });
+            return;
+          }
+          this.toNext();
+          this.sendCaptcha();
+          break;
+        case "1":
+          let flag = await this.checkCaptcha()
+          if (flag) {
+            let res = await this.$userAxios.post("/user/sign", { email: this.mail, password: this.password })
+            if (!res.data.data) {
+              this.$notify.error({
+                title: "注册失败",
+                message: "您的邮箱已被注册!",
+                offset: parseInt(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top")),
+                duration: 2000,
+              });
+              this.finished = "0";
+              this.current = "0";
+              this.mail = "";
+              this.password = "";
+              this.makesure = "";
+              this.Captcha = "";
+              this.isActive = false;
+              this.time = 60;
+              clearInterval(this.timer);
+              this.timer = null;
+              this.warning = false;
+              return;
+            }
+            this.toNext();
+            this.isActive = true;
+            this.finished = -1;
+          }
+          break;
+        case "2":
+          this.$router.replace({ path: "/" });
+          break;
       }
     }
-  }
+  },
 };
 </script>
 
@@ -251,6 +309,8 @@ export default {
     box-sizing: border-box;
     padding: 2rem;
 
+
+
     &-title {
       color: black;
       margin-bottom: 1rem;
@@ -313,6 +373,38 @@ export default {
         font-size: 1.5rem;
         color: grey;
         cursor: pointer;
+      }
+    }
+
+    .fade-enter-active {
+      animation: fade 0.5s ease;
+    }
+
+    .fade-leave-active {
+      animation: fade 0.5s ease reverse;
+    }
+
+    @keyframes fade {
+      0% {
+        opacity: 0;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+
+    &-warn {
+      color: red;
+      position: absolute;
+      text-align: center;
+      margin-top: 1rem;
+      width: 100%;
+      font-size: 1rem;
+      font-weight: 700;
+
+      i {
+        margin-right: .5rem;
       }
     }
 

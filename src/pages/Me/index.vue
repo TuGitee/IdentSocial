@@ -2,15 +2,15 @@
   <div class="me">
     <header class="me-header">
       <div class="me-header-avatar">
-        <img class="me-header-avatar-img" :src="require('@/pages/Me/images/' + userInfo.avatar)" alt="" />
+        <img class="me-header-avatar-img" v-if="userInfo.avatarPath" :src="require('@/assets/images/' + userInfo.avatarPath + '.png')" alt="" />
         <i class="el-icon-arrow-right me-header-avatar-arrow"></i>
       </div>
       <div class="me-header-info">
         <div class="me-header-info-name">
-          <span class="me-header-info-name-input" maxlength="8">{{ userInfo.name }}</span>
+          <span class="me-header-info-name-input">{{ userInfo.nickname }}</span>
         </div>
         <div class="me-header-info-intro">
-          {{ userInfo.intro }}
+          简介：{{ userInfo.intro ?? '这个人很懒，什么也没有留下...' }}
         </div>
       </div>
     </header>
@@ -18,15 +18,15 @@
       <div class="me-drawers-header">
         <div class="me-drawers-header-item">
           <span class="me-drawers-header-item-text">人脸分数</span>
-          <span class="me-drawers-header-item-number">{{ userInfo.faceScore }}</span>
+          <span class="me-drawers-header-item-number">{{ userInfo.faceScore ?? 0 }}</span>
         </div>
         <div class="me-drawers-header-item">
           <span class="me-drawers-header-item-text">关注</span>
-          <span class="me-drawers-header-item-number">{{ following }}</span>
+          <span class="me-drawers-header-item-number">{{ following ?? 0 }}</span>
         </div>
         <div class="me-drawers-header-item">
           <span class="me-drawers-header-item-text">粉丝</span>
-          <span class="me-drawers-header-item-number">{{ followers }}</span>
+          <span class="me-drawers-header-item-number">{{ followers ?? 0 }}</span>
         </div>
       </div>
       <ul class="me-drawers-list">
@@ -69,8 +69,8 @@ export default {
           text: "分享过的"
         },
         {
-          icon:"el-icon-message-solid",
-          text:"消息"
+          icon: "el-icon-message-solid",
+          text: "消息"
         },
         {
           icon: "el-icon-s-tools",
@@ -189,7 +189,11 @@ export default {
         user-select: none;
 
         &-input {
+          display: block;
           max-width: 12rem;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
           font-size: 1.5rem;
           font-weight: bold;
           color: #000;
@@ -215,6 +219,7 @@ export default {
         font-size: 1rem;
         padding: 10px;
         color: #5C5C5C;
+        word-break: break-all;
         text-align: center;
       }
     }

@@ -60,7 +60,7 @@ class MonitorKeyboard {
         }
         if (this.type == 2) {
             // iOS系统
-            window.addEventListener('focusin', this.onFocusin);
+            window.addEventListener('resize', this.onFocusin);
             window.addEventListener('focusout', this.onFocusout);
         }
     }

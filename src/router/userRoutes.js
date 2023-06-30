@@ -8,6 +8,7 @@ export default [
         meta: {
             footerShow: true,
             icon: "el-icon-s-home",
+            keepAlive: true,
         },
         children: [...homeRoutes],
         redirect: { 
@@ -20,7 +21,8 @@ export default [
         component: () => import('@/pages/FaceAnalysis/index.vue'),
         meta: {
             footerShow: true,
-            icon: "el-icon-camera-solid"
+            icon: "el-icon-camera-solid",
+            keepAlive: true,
         }
     },
     {
@@ -31,6 +33,7 @@ export default [
             footerShow: true,
             icon: "el-icon-message-solid",
             isDot: true,
+            keepAlive: true,
         },
     },
     {
@@ -41,6 +44,7 @@ export default [
             footerShow: true,
             icon: "el-icon-user-solid",
             isDot: true,
+            keepAlive: true,
         },
     }
 ]

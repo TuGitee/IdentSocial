@@ -1,6 +1,6 @@
 <template>
   <div id="box">
-    <BlogItem v-for="(item, index) in followingInfo" :key="item.id" :item="item" />
+    <BlogItem v-for="(item, index) in followingInfo" :key="item.postId" :item="item" />
   </div>
 </template>
 
@@ -13,7 +13,7 @@ export default {
     BlogItem
   },
   mounted() {
-    this.$store.dispatch('getFollowingInfo');
+    this.$store.dispatch('getFollowingInfo', { id: this.$store.state.user.token });
   },
   computed: {
     ...mapState({
@@ -28,7 +28,6 @@ export default {
   width: 100%;
   height: fit-content;
   margin-top: 1rem;
-  padding-bottom: calc(constant(safe-area-inset-bottom) + 4rem);
-  padding-bottom: calc(env(safe-area-inset-bottom) + 4rem);
+  padding-bottom: 2rem;
 }
 </style>

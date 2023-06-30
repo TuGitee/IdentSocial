@@ -1,6 +1,6 @@
 <template>
-  <div id="box">
-    <BlogItem v-for="(item,index) in recommendInfo" :key="item.id" :item="item"/>
+  <div id="box" ref="root">
+    <BlogItem v-for="item in recommendInfo" :key="item.postId+Math.random()" :item="item" />
   </div>
 </template>
 
@@ -12,15 +12,15 @@ export default {
   components: {
     BlogItem
   },
-  mounted() {
-    this.$store.dispatch('getRecommendInfo');
-  },
   computed: {
     ...mapState({
       recommendInfo: state => state.home.recommendInfo,
     })
   },
-
+  methods: {
+  },
+  mounted() {
+  },
 }
 </script>
 
@@ -29,7 +29,6 @@ export default {
   width: 100%;
   height: fit-content;
   margin-top: 1rem;
-  padding-bottom: calc(constant(safe-area-inset-bottom) + 4rem);
-  padding-bottom: calc(env(safe-area-inset-bottom) + 4rem);
+  padding-bottom: 2rem;
 }
 </style>

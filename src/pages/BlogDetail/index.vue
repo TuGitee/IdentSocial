@@ -15,12 +15,12 @@
         </div>
         <div class="blog-content">
             <BlogItem :item="item" @click="comment"></BlogItem>
-            <CommentItem v-for="item in 3" :key="item" />
+            <CommentItem v-for="comment in commentList" :key="comment.commentId" :userList="userList" :comment="comment"
+                @click="changeTarget" />
         </div>
-
         <div class="blog-footer" v-if="isComment">
-            <input type="text" class="blog-footer-input" place-holder="说点什么..." autofocus />
-            <button class="blog-footer-btn" @click="publish">发布</button>
+            <input type="text" class="blog-footer-input" place-holder="说点什么..." autofocus ref="input" v-model="text" />
+            <button class="blog-footer-btn" @touchstart="publish">发布</button>
         </div>
     </div>
 </template>
@@ -37,31 +37,62 @@ export default {
     },
     data() {
         return {
-            item: {
-                id: 1,
-                name: '小明',
-                time: '2019-10-10',
-                text: '这是一条测试数据',
-                img: ['Blog1.png', 'Blog2.png', 'Blog3.png'],
-                avatar: 'avatar1.png',
-                like: 10,
-                comment: 20,
-                share: 30
-            },
+            item: {},
             monitorKeyboard: null,
-            isComment: false
+            isComment: false,
+            text: '',
+            target: null,
+            targetUser: null,
+            commentList: []
         }
     },
     methods: {
+        changeTarget(id, user) {
+            this.target = id;
+            this.targetUser = user;
+            this.isComment = true;
+            this.$nextTick(() => {
+                this.$refs.input.focus();
+            })
+        },
+        async init() {
+            let res = await this.$blogAxios.get(`/post?postId=${this.$route.params.bid}`)
+            this.item = res.data.data;
+            this.getKeyboardState();
+            this.getCommentList();
+        },
         toTop() {
-            console.log(1);
             document.querySelector('.blog-content').scrollTop = 0;
         },
         publish() {
-            console.log('发布');
+            console.log(this.target);
+            this.$blogAxios.post('/comment', {
+                content: this.text,
+                commentTo: this.targetUser ? this.targetUser : null,
+                userId: this.$store.state.user.token,
+                belongPost: this.bid,
+                belongComment: this.target ? this.target : null
+            }).then(res => {
+                this.$notify({
+                    title: "成功",
+                    message: "评论成功",
+                    type: "success",
+                    duration: 2000,
+                    offset: parseInt(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top")),
+                })
+                this.isComment = false;
+                this.text = '';
+                this.$router.go(0);
+                location.reload();
+            })
         },
         comment() {
             this.isComment = true;
+            this.target = null;
+            this.targetUser = null;
+            this.$nextTick(() => {
+                this.$refs.input.focus();
+            })
         },
         goBack() {
             this.$router.go(-1)
@@ -72,6 +103,7 @@ export default {
 
             this.monitorKeyboard.onShow(() => {
                 let blogContent = document.querySelector('.blog-content');
+                if (!blogContent) return;
                 blogContent.style.height = `calc(100vh - constant(safe-area-inset-top) - 3rem)`;
                 blogContent.style.height = `calc(100vh - env(safe-area-inset-top) - 3rem)`;
             })
@@ -79,16 +111,49 @@ export default {
             this.monitorKeyboard.onHidden(() => {
                 this.isComment = false;
             })
-        }
+        },
+        async getCommentList() {
+            let res = await this.$blogAxios.get(`/comment/post?postId=${this.bid}`)
+            let tree = []
+            console.log(res.data.data);
+            res.data.data.forEach(item => {
+                if (item.belongComment === null) {
+                    tree.push(item);
+                }
+            });
+            res.data.data.forEach(item => {
+                tree.forEach(treeItem => {
+                    if (item.belongComment === treeItem.commentId) {
+                        if (!treeItem.children) {
+                            treeItem.children = [];
+                        }
+                        treeItem.children.push(item);
+                    }
+                })
+            });
+            this.commentList = tree;
+            console.log(this.commentList);
+        },
     },
     computed: {
         bid() {
             return this.$route.params.bid
+        },
+        treeComment() {
+            let res = [];
+            this.commentList.forEach(item => {
+                if (item.commentTo === -1) {
+                    res.push(item);
+                }
+            })
+            return res;
+        },
+        userList() {
+            return [...new Set((this.commentList.map(item => [item.userId, item.commentTo])).flat(Infinity))].filter(item => item);
         }
     },
     mounted() {
-        console.log(this.bid);
-        this.getKeyboardState();
+        this.init();
     },
     beforeDestroy() {
         this.monitorKeyboard.onEnd();
