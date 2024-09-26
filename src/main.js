@@ -47,14 +47,8 @@ Vue.prototype.$notify = (options) => {
   })
 }
 
-const originViewTransition = document.viewTransition;
-document.viewTransition = function (callback) {
-  if (originViewTransition) {
-    originViewTransition(callback)
-  } else {
-    setTimeout(callback, 0)
-  }
-}
+const originViewTransition = document.viewTransition || document.mozViewTransition || document.webkitViewTransition || document.msViewTransition || document.oViewTransition || (callback => callback());
+document.viewTransition = originViewTransition;
 
 new Vue({
   render: h => h(App),
