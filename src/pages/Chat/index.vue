@@ -14,7 +14,7 @@
     </div>
     <div class="chat-body">
       <ul class="chat-body-list">
-        <li class="chat-body-list-item" @click="toChat(item.id)" v-for="(item) in userLists" :key="item.id">
+        <li class="chat-body-list-item" @click="toChat(item.id, item.username, item.avatar)" v-for="(item) in userLists" :key="item.id">
           <div class="chat-body-list-item-avatar">
             <img :src="require(`@/assets/images/${item.avatar ?? 0}.png`)" alt="" />
           </div>
@@ -25,7 +25,7 @@
             <div class="chat-body-list-item-content-desc">
               <span class="chat-body-list-item-content-desc-text">{{ item.last }}</span><span
                 class="chat-body-list-item-content-desc-text divide">·</span><span
-                class="chat-body-list-item-content-desc-text">2021-08-08</span>
+                class="chat-body-list-item-content-desc-text">{{ formatTime(item.time)}}</span>
             </div>
           </div>
         </li>
@@ -36,12 +36,14 @@
 
 <script>
 import "@/css/user.less"
-import { WebSocketType } from "@/ws";
+import { WebSocketType, WebSocketPort } from "@/ws";
+import io from "./js/socketio.js"
 export default {
   name: "Chat",
   data() {
     return {
-      userLists: []
+      userLists: [],
+      io: null
     };
   },
   methods: {
@@ -54,36 +56,50 @@ export default {
         time
       }
     },
-    toChat(id) {
-      console.log(id);
+    toChat(id,username,avatar) {
       if (id == -1) {
         this.$router.push({
-          name: "WorldDetail"
+          name: "WorldDetail",
+          params: {
+            username,
+            avatar
+          }
         })
       }
       else {
         this.$router.push({
           name: "ChatDetail",
           params: {
-            cid: id
+            cid: id,
+            username,
+            avatar
           }
         })
       }
+    },
+    formatTime(time) {
+      const t = new Date(time)
+      return `${t.getFullYear()}-${t.getMonth() + 1}-${t.getDate()} ${t.getHours() < 10 ? '0' + t.getHours() : t.getHours()}:${t.getMinutes() < 10 ? '0' + t.getMinutes() : t.getMinutes()}:${t.getSeconds() < 10 ? '0' + t.getSeconds() : t.getSeconds()}`;
     }
   },
   mounted() {
-    this.$ws.emit(WebSocketType.GroupList, this.createMessage(this.$store.state.user.token, "你好", '', this.$store.state.user.token, new Date().getTime()))
-    this.$ws.on(WebSocketType.GroupList, (data) => {
+    if(!this.io)
+    this.io = io(`${WebSocketPort}?token=${this.$store.state.user.token}`);
+
+    this.io.emit(WebSocketType.GroupList, this.createMessage(this.$store.state.user.token, "你好", '', this.$store.state.user.token, new Date().getTime()))
+
+    this.io.on(WebSocketType.GroupList, (data) => {
       console.log(data)
       this.userLists = data.data
     })
-    this.$ws.on(WebSocketType.System, (data) => {
+    
+    this.io.on(WebSocketType.System, (data) => {
       console.log(data)
     })
   },
   beforeDestroy() {
-    this.$ws.off(WebSocketType.GroupList)
-    this.$ws.off(WebSocketType.System)
+    this.io.off(WebSocketType.GroupList)
+    this.io.off(WebSocketType.System)
   }
 };
 </script>
@@ -158,7 +174,7 @@ export default {
         }
 
         .chat-body-list-item-content {
-          width: 100%;
+          width: calc(100% - 7rem);
           height: 100%;
           flex: 1;
           display: flex;
@@ -198,9 +214,16 @@ export default {
             .chat-body-list-item-content-desc-text {
               font-size: 1rem;
               color: grey;
+              white-space: nowrap;
+              width: min-content;
 
               &.divide {
                 margin: 0 .3rem;
+              }
+
+              &:last-child {
+                width: fit-content;
+                max-width: max-content;
               }
             }
           }

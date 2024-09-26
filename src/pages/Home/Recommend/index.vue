@@ -1,6 +1,6 @@
 <template>
   <div id="box" ref="root">
-    <BlogItem v-for="item in recommendInfo" :key="item.postId+Math.random()" :item="item" />
+    <BlogItem v-for="item in recommendInfo" :key="item.id" :item="item" />
   </div>
 </template>
 
@@ -29,6 +29,5 @@ export default {
   width: 100%;
   height: fit-content;
   margin-top: 1rem;
-  padding-bottom: 2rem;
 }
 </style>

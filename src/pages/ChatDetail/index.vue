@@ -6,10 +6,10 @@
             </div>
             <div class="chat-detail-header-icon">
                 <div class="chat-detail-header-icon-img">
-                    <img :src="require(`@/assets/images/${userInfo.avatarPath ?? 0}.png`)" alt="">
+                    <img :src="require(`@/assets/images/${avatar ?? 0}.png`)" alt="">
                 </div>
                 <div class="chat-detail-header-icon-name">
-                    <span>{{ userInfo.nickname }}</span>
+                    <span>{{ username }}</span>
                 </div>
             </div>
             <div class="chat-detail-header-more">
@@ -21,7 +21,7 @@
                 <div class="chat-detail-body-content-item" :class="{ reverse: chat.to_id == cid }" v-for="chat in chatList"
                     :key="chat.private_msg_id">
                     <div class="chat-detail-body-content-item-avatar">
-                        <img v-if="chat.to_id != cid" :src="require(`@/assets/images/${userInfo.avatarPath ?? 0}.png`)"
+                        <img v-if="chat.to_id != cid" :src="require(`@/assets/images/${avatar ?? 0}.png`)"
                             alt="">
                         <img v-else :src="require(`@/assets/images/${$store.state.user.userInfo.avatarPath ?? 0}.png`)"
                             alt="">
@@ -35,21 +35,23 @@
             </div>
         </div>
         <div class="chat-footer">
-            <input type="text" class="chat-footer-input" place-holder="说点什么..." v-model="input" />
+            <input type="text" class="chat-footer-input" place-holder="说点什么..." v-model="input" @keydown.enter="send" />
             <button class="chat-footer-btn" @touchstart="send">发送</button>
         </div>
     </div>
 </template>
 
 <script>
-import { WebSocketType } from "@/ws";
+import { WebSocketType, WebSocketPort } from "@/ws";
+import io from "../Chat/js/socketio.js"
 export default {
     name: "ChatDetail",
     data() {
         return {
             input: '',
             userInfo: {},
-            chatList: []
+            chatList: [],
+            io: null
         }
     },
     methods: {
@@ -58,7 +60,7 @@ export default {
         },
         send() {
             if (!this.input.trim()) return
-            this.$ws.emit(WebSocketType.PrivateChat, this.createMessage(this.$store.state.user.token, this.$route.params.cid, this.input, new Date().getTime()))
+            this.io.emit(WebSocketType.PrivateChat, this.createMessage(this.$store.state.user.token, this.$route.params.cid, this.input, new Date().getTime()))
             this.chatList.push({
                 message: this.input,
                 to_id: this.$route.params.cid,
@@ -66,10 +68,6 @@ export default {
             })
             this.input = ''
             this.goPageEnd()
-        },
-        async getUserInfo() {
-            let res = await this.$userAxios.get(`/user?userId=${this.$route.params.cid}`)
-            this.userInfo = res.data.data
         },
         createMessage(user, to, data, time) {
             return {
@@ -89,17 +87,21 @@ export default {
         },
     },
     mounted() {
-        this.getUserInfo()
-        this.$store.dispatch('getUserInfo')
-        this.$ws.emit(WebSocketType.PrivateList, this.createMessage(this.$store.state.user.token, this.$route.params.cid))
-        this.$ws.on(WebSocketType.PrivateList, (data) => {
+        this.$store.state.user.token??this.$store.dispatch('getUserInfo')
+
+        this.io = io(`${WebSocketPort}?token=${this.$store.state.user.token}`);
+
+
+        this.io.emit(WebSocketType.PrivateList, this.createMessage(this.$store.state.user.token, this.$route.params.cid))
+        this.io.on(WebSocketType.PrivateList, (data) => {
             this.chatList = data.data
             this.$nextTick(() => {
                 this.goPageEnd()
             })
         })
-        this.$ws.on(WebSocketType.PrivateChat, (data) => {
+        this.io.on(WebSocketType.PrivateChat, (data) => {
             console.log(data);
+            if(this.cid != this.$store.state.user.token)
             this.chatList.push({
                 message: data.data,
                 to_id: data.to,
@@ -114,6 +116,12 @@ export default {
     computed: {
         cid() {
             return this.$route.params.cid
+        },
+        username(){
+            return this.$route.params.username
+        },
+        avatar(){
+            return this.$route.params.avatar
         }
     }
 }

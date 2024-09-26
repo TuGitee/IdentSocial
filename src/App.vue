@@ -1,8 +1,6 @@
 <template>
   <div id="app">
-    <keep-alive exclude="BlogDetail,ChatDetail,BlogItem,WorldDetail,Home">
-      <router-view :key="$store.name"></router-view>
-    </keep-alive>
+    <router-view :key="$store.name"></router-view>
     <ChangePage v-if="$route.meta.footerShow" />
   </div>
 </template>
@@ -22,7 +20,7 @@ export default {
     let agent = navigator.userAgent.toLowerCase();
     let iLastTouchTime = null;
     if (agent.indexOf('iphone') >= 0 || agent.indexOf('ipad') >= 0) {
-      document.addEventListener('touchend', function (event) {
+      document.addEventListener('touchend', function () {
         let iNowTime = new Date().getTime();
         iLastTouchTime = iLastTouchTime || iNowTime + 1;
         let delta = iNowTime - iLastTouchTime;
@@ -31,12 +29,16 @@ export default {
         }
         iLastTouchTime = iNowTime;
       }, false);
-    };
+    }
   }
 }
 </script>
 
 <style lang="less">
+::view-transition-group(root) {
+    animation-duration: .3s;
+}
+
 :root {
   --safe-area-inset-top: constant(safe-area-inset-top);
   --safe-area-inset-top: env(safe-area-inset-top);

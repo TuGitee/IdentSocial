@@ -14,7 +14,7 @@ Vue.use(VueTouch, { name: 'v-touch' })
 
 Vue.config.productionTip = false
 
-import '@/mock/mockServe'
+import "@/mock/index"
 
 let options = {
   fullscreenEl: false, //关闭全屏按钮
@@ -32,30 +32,29 @@ import 'vue-photo-preview/dist/skin.css'
 Vue.use(preview, options)
 
 import axios from 'axios';
-Vue.prototype.$userAxios = axios.create({
-  baseURL: 'http://152.136.113.148:8081/',
-  timeout: 5000
-})
-Vue.prototype.$blogAxios = axios.create({
-  baseURL: 'http://152.136.113.148:8083/',
-  timeout: 5000
-})
+import { userRequest, blogRequest } from './api/request';
+Vue.prototype.$userAxios = userRequest
+Vue.prototype.$blogAxios = blogRequest
 Vue.prototype.$api = axios.create({
   baseURL: 'https://focnal.xyz/api',
   timeout: 5000
 })
+const originalNotify = Vue.prototype.$notify;
+Vue.prototype.$notify = (options) => {
+  originalNotify({
+    ...options,
+    offset: parseInt(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top"))
+  })
+}
 
-import {socket} from './ws'
-Vue.prototype.$ws=socket
-
-socket.on('disconnect',()=>{
-  console.log('disconnect')
-})
-
-socket.on('connect',()=>{
-  console.log('connect')
-})
-
+const originViewTransition = document.viewTransition;
+document.viewTransition = function (callback) {
+  if (originViewTransition) {
+    originViewTransition(callback)
+  } else {
+    setTimeout(callback, 0)
+  }
+}
 
 new Vue({
   render: h => h(App),

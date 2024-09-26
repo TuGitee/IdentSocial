@@ -8,7 +8,6 @@ export default [
         meta: {
             footerShow: true,
             icon: "el-icon-s-home",
-            keepAlive: true,
         },
         children: [...homeRoutes],
         redirect: { 
@@ -33,7 +32,6 @@ export default [
             footerShow: true,
             icon: "el-icon-message-solid",
             isDot: true,
-            keepAlive: true,
         },
     },
     {
@@ -44,7 +42,6 @@ export default [
             footerShow: true,
             icon: "el-icon-user-solid",
             isDot: true,
-            keepAlive: true,
         },
     }
 ]

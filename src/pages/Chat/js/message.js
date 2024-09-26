@@ -80,7 +80,7 @@ function formatMessage(node) {
                     switch (reg) {
                         case 'img':
                             if (p1){ 
-                                if(/^\/uploads/.test(p1)) return `<img src="http://47.120.2.219:3000${p1}" />`
+                                if(/^\/uploads/.test(p1)) return `<img src="https://zeqichat.xyz${p1}" />`
                                 return `<img src="${p1}" />`
                             }
                             else return `${leftArrow}${reg}${rightArrow}${leftArrow}/${reg}${rightArrow}`

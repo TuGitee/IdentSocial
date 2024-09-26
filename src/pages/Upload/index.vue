@@ -112,22 +112,22 @@ export default {
                         }
                     })
                     if (res.status !== 200) {
-                        this.$notify.error({
+                        this.$notify({
                             title: "错误",
                             message: "上传失败",
                             duration: 2000,
-                            offset: parseInt(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top")),
+                            type: "error"
                         })
                         return;
                     }
                     filesList.push(res.data.data.link)
                 } catch (err) {
                     this.isLoading = false;
-                    this.$notify.error({
+                    this.$notify({
                         title: "错误",
                         message: "上传失败",
                         duration: 2000,
-                        offset: parseInt(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top")),
+                        type: "error",
                     })
                     return;
                 }
@@ -151,18 +151,17 @@ export default {
                     message: "发布成功",
                     type: "success",
                     duration: 2000,
-                    offset: parseInt(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top")),
+                    
                 })
                 this.isLoading = false;
                 this.$router.go(-1)
-                this.$bus.$emit('reload')
-            }).catch(err => {
+            }).catch(() => {
                 this.isLoading = false;
-                this.$notify.error({
+                this.$notify({
                     title: "错误",
                     message: "发布失败",
                     duration: 2000,
-                    offset: parseInt(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top")),
+                    type: "error",
                 })
             })
 

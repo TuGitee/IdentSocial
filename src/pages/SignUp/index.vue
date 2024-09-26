@@ -53,7 +53,8 @@
           <el-tab-pane disabled name="1">
             <div>
               <p class="sign-up-box-title">已经将验证码发送到您的邮箱
-                <button class="sign-up-box-resend" :disabled="time > 0" @click="sendCaptcha">重新发送{{ time > 0 ? `(${time})`
+                <button class="sign-up-box-resend" :disabled="time > 0" @click="sendCaptcha">重新发送{{ time > 0 ?
+                  `(${time})`
                   : '' }}</button>
               </p>
               <p class="sign-up-box-subtitle">请注意查收 <i class="el-icon-message"></i></p>
@@ -65,9 +66,6 @@
                   <div class="captcha-item" v-for="i, index in computedCaptcha" :key="index">{{ i }}</div>
                 </div>
               </div>
-              <transition name="fade" mode="out-in">
-                <p class="sign-up-box-warn" v-if="warning"><i class="el-icon-warning"></i>验证码错误！</p>
-              </transition>
             </div>
           </el-tab-pane>
           <el-tab-pane disabled name="2">
@@ -87,6 +85,8 @@
 </template>
 
 <script>
+import { reqMockUser, reqMockUserLogin, reqMockUserRegister, reqMockVerify, reqMockVerifyCode } from '@/api';
+
 export default {
   name: "SignUp",
   data() {
@@ -100,7 +100,6 @@ export default {
       finished: "0",
       time: 60,
       timer: null,
-      warning: false,
     };
   },
   computed: {
@@ -120,11 +119,9 @@ export default {
     },
   },
   methods: {
-    async sendCaptcha() {
+    sendCaptcha() {
       if (this.timer) return;
       this.time = 60;
-      let res = await this.$api.post(`/verification/sendcode?email=${this.mail}`)
-      console.log(res);
       this.timer = setInterval(() => {
         this.time--;
         if (this.time <= 0) {
@@ -132,6 +129,17 @@ export default {
           this.timer = null;
         }
       }, 1000)
+      return reqMockVerifyCode(this.mail).then(res => {
+        this.$notify({
+          title: "验证码",
+          message: `您的验证码为${res.data}`,
+          type: "info",
+          duration: 0,
+
+        })
+        return res;
+      })
+      // return this.$api.post(`/verification/sendcode?email=${this.mail}`);
     },
     jumpToStep(index) {
       if (this.finished >= index) {
@@ -152,23 +160,28 @@ export default {
         this.isActive = false;
       }
     },
-    async checkCaptcha() {
-      try {
-        let res = await this.$api.post('/verification/checkout', {
-          email: this.mail,
-          code: String(this.Captcha),
-          type: "REGISTER",
-        })
-        if (res.status == 200) {
+    checkCaptcha() {
+      return reqMockVerify(this.mail, this.Captcha).then((res) => {
+        if (res.code == 200) {
           return true;
+        } else {
+          this.$notify({
+            title: "验证码错误",
+            message: "请检查验证码是否正确",
+            duration: 2000,
+            type: "error",
+          })
+          return false;
         }
-      } catch (e) {
-        this.warning = true;
-        setTimeout(() => {
-          this.warning = false;
-        }, 2000);
-        return false;
-      }
+      })
+      // let res = await this.$api.post('/verification/checkout', {
+      //   email: this.mail,
+      //   code: String(this.Captcha),
+      //   type: "REGISTER",
+      // })
+      // if (res.status == 200) {
+      //   return true;
+      // }
     },
     toNext() {
       this.current = String(Number(this.current) + 1);
@@ -178,47 +191,62 @@ export default {
       this.isActive = false;
       switch (this.current) {
         case "0":
-          let res = await this.$userAxios.get(`/user/sign?email=${this.mail}`)
-          if (!res.data.code) {
-            this.$notify.error({
-              title: "注册失败",
-              message: "您的邮箱已被注册!",
-              offset: parseInt(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top")),
-              duration: 2000,
-            });
-            return;
-          }
-          this.toNext();
-          this.sendCaptcha();
-          break;
-        case "1":
-          let flag = await this.checkCaptcha()
-          if (flag) {
-            let res = await this.$userAxios.post("/user/sign", { email: this.mail, password: this.password })
-            if (!res.data.data) {
-              this.$notify.error({
+          reqMockUserLogin(this.mail, this.password).then((res) => {
+            if (res.code !== 200) {
+              this.toNext();
+              this.sendCaptcha();
+            } else {
+              this.$notify({
                 title: "注册失败",
                 message: "您的邮箱已被注册!",
-                offset: parseInt(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top")),
                 duration: 2000,
+                type: "error",
               });
-              this.finished = "0";
-              this.current = "0";
-              this.mail = "";
-              this.password = "";
-              this.makesure = "";
-              this.Captcha = "";
-              this.isActive = false;
-              this.time = 60;
-              clearInterval(this.timer);
-              this.timer = null;
-              this.warning = false;
-              return;
             }
-            this.toNext();
-            this.isActive = true;
-            this.finished = -1;
-          }
+          }).catch(() => { });
+          // const res = await this.$userAxios.get(`/user/sign?email=${this.mail}`)
+          // if (!res.data.code) {
+          //   this.$notify.error({
+          //     title: "注册失败",
+          //     message: "您的邮箱已被注册!",
+          //     
+          //     duration: 2000,
+          //   });
+          //   return;
+          // }
+          break;
+        case "1":
+          const flag = await this.checkCaptcha();
+          if (!flag) break;
+          // if (flag) {
+          // let res = await this.$userAxios.post("/user/sign", { email: this.mail, password: this.password })
+          //   if (!res.data.data) {
+          //     this.$notify.error({
+          //       title: "注册失败",
+          //       message: "您的邮箱已被注册!",
+          //       
+          //       duration: 2000,
+          //     });
+          //     this.finished = "0";
+          //     this.current = "0";
+          //     this.mail = "";
+          //     this.password = "";
+          //     this.makesure = "";
+          //     this.Captcha = "";
+          //     this.isActive = false;
+          //     this.time = 60;
+          //     clearInterval(this.timer);
+          //     this.timer = null;
+          //     return;
+          //   }
+          //   this.toNext();
+          //   this.isActive = true;
+          //   this.finished = -1;
+          // }
+          await reqMockUserRegister(this.mail, this.password);
+          this.toNext();
+          this.isActive = true;
+          this.finished = -1;
           break;
         case "2":
           this.$router.replace({ path: "/" });

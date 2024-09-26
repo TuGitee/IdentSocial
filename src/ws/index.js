@@ -1,5 +1,3 @@
-import { io } from './socketio.js';
-export const socket = io(`ws://47.120.2.219:8084?token=${localStorage.getItem('token')}`);
 export const WebSocketType = {
     Error: 0,
     GroupList: 1,
@@ -12,3 +10,5 @@ export const WebSocketType = {
     PrivateList: 8,
     WorldList: 9,
 }
+
+export const WebSocketPort = 'ws://localhost:8084/'

@@ -22,7 +22,7 @@
         </div>
         <div class="analysis-result-faces" v-for="item in result.stars" :key="item.name">
             <div class="analysis-result-faces-left">
-                <img class="analysis-result-faces-left-img" :src="item.url" alt="">
+                <el-image class="analysis-result-faces-left-img" :src="item.url" alt=""></el-image>
             </div>
             <div class="analysis-result-faces-right">
                 <span class="analysis-result-faces-right-name">{{ item.name }}</span>
@@ -73,7 +73,7 @@ export default {
     },
     methods: {
         formatAge(age) {
-            return parseInt(age.replace(/[\(\)]/g, '').split('-').reduce((prev, cur) => {
+            return parseInt(age.replace(/[()]/g, '').split('-').reduce((prev, cur) => {
                 return prev + parseInt(cur);
             }, 0) / 2);
         },

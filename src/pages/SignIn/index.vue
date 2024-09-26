@@ -39,6 +39,8 @@
 </template>
 
 <script>
+import { reqMockUserLogin } from '@/api';
+
 export default {
   name: "SignIn",
   data() {
@@ -65,23 +67,21 @@ export default {
     },
     async goHome() {
       if (this.isActive && this.isExit) {
-        let res = await this.$userAxios.post("/user/login", {
-          email: this.mail,
-          password: this.password,
-        });
-
-        if (res.data.code) {
-          this.$store.commit("SETTOKEN", res.data.data);
-          this.$router.replace({ name: "Home" });
-        }
-        else {
+        // let res = await this.$userAxios.post("/user/login", {
+        //   email: this.mail,
+        //   password: this.password,
+        // });
+        const res = await reqMockUserLogin(this.mail, this.password);
+        if (res.code == 400) {
           this.$notify({
             title: "登录失败",
             message: "请检查您的邮箱和密码是否正确!",
             type: "error",
             duration: 2000,
-            offset: parseInt(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top")),
           });
+        } else {
+          this.$store.commit("SETTOKEN", res.data.id);
+          this.$router.replace({ name: "Home" });
         }
       }
     },

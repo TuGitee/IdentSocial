@@ -2,19 +2,20 @@
     <div class="blog-item">
         <div class="blog-item-header">
             <div class="blog-item-header-avatar" @click="toUserDetail">
-                <img v-if="userInfo?.avatarPath" :src="require(`@/assets/images/${userInfo?.avatarPath}.png`)" alt="">
+                <img :src="item.user.avatar" alt="">
             </div>
             <div class="blog-item-header-info">
                 <div class="blog-item-header-info-name">
-                    {{ userInfo.nickname }}
+                    {{ item.user?.nickname }}
                 </div>
                 <div class="blog-item-header-info-time">
-                    {{ formatTime(item.createTime) }}
+                    {{ formatTime(item.time) }}
                 </div>
             </div>
             <div class="blog-item-header-focus">
                 <button class="blog-item-header-focus-button" v-if="!isFollow" @click="follow(item.userId)"><i
-                        class="el-icon-plus" v-if="!isFollowLoading"></i><i class="el-icon-loading" v-else></i> 关注</button>
+                        class="el-icon-plus" v-if="!isFollowLoading"></i><i class="el-icon-loading" v-else></i>
+                    关注</button>
                 <button class="blog-item-header-focus-button" @click="unfollow(item.userId)" v-else><i
                         class="el-icon-check"></i>
                     已关注</button>
@@ -22,11 +23,11 @@
         </div>
         <div class="blog-item-content">
             <div class="blog-item-content-text">
-                {{ item.content }}
+                {{ item.text }}
             </div>
             <ul class="blog-item-content-img">
-                <li class="blog-item-content-img-item" v-for="img in imgList" :key="img.pictureId">
-                    <img :src="img.path" :preview="item.postId" />
+                <li class="blog-item-content-img-item" v-for="(img, ii) in item.img" :key="ii">
+                    <img :src="require(`@/assets/images/${img.slice(4,)}`)" :preview="item.id" />
                 </li>
             </ul>
             <div class="blog-item-content-share" v-if="item.postFrom" @click="toRawBlog(item.postFrom)">
@@ -51,11 +52,11 @@
             </div>
             <div class="blog-item-footer-item" @click="toBlogDetail">
                 <i class="el-icon-chat-round" @touchstart.stop="onComment"></i>
-                <span @touchstart.stop="onComment">{{ item.commentNum ?? 0 }}</span>
+                <span @touchstart.stop="onComment">{{ item.comment ?? 0 }}</span>
             </div>
             <div class="blog-item-footer-item" @touchstart.stop="onForward">
                 <i class="el-icon-share"></i>
-                <span>{{ item.forwardNum ?? 0 }}</span>
+                <span>{{ item.share ?? 0 }}</span>
             </div>
         </div>
     </div>
@@ -78,7 +79,7 @@ export default {
             postFrom: {},
             isFollow: false,
             imgList: [],
-            starNum: 0,
+            starNum: this.item.like ?? 0,
         }
     },
     methods: {
@@ -94,7 +95,7 @@ export default {
             })
         },
         async onForward() {
-            let to = this.item.postId;
+            let to = this.item.id;
             if (this.item.postFrom) {
                 to = this.item.postFrom;
             }
@@ -123,7 +124,7 @@ export default {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
-            }).then(res => {
+            }).then(() => {
                 this.isFollow = true;
                 this.isFollowLoading = false;
                 this.$bus.$emit('follow', id);
@@ -166,11 +167,13 @@ export default {
             })
         },
         toBlogDetail() {
-            this.$router.push({
-                name: 'BlogDetail',
-                params: {
-                    bid: this.item.postId
-                }
+            document.startViewTransition(() => {
+                this.$router.push({
+                    name: 'BlogDetail',
+                    params: {
+                        bid: this.item.id
+                    }
+                })
             })
         },
         toRawBlog(id) {
@@ -192,18 +195,17 @@ export default {
     },
     mounted() {
         this.isFollow = this.item.isFollow;
-        this.starNum = this.item.starNum ?? 0;
+        this.isLike = this.item.isLike;
+        // this.$blogAxios.get(`/picture/1?postId=${this.item.postId}`).then(res => {
+        //     this.imgList = res.data.data
+        //     console.log(this.imgList.length, this.imgList[0]);
+        // })
 
-        this.$blogAxios.get(`/picture/1?postId=${this.item.postId}`).then(res => {
-            this.imgList = res.data.data
-            console.log(this.imgList.length, this.imgList[0]);
-        })
-
-        if (this.item.userId)
-            this.getUserInfo(this.item.userId);
-        if (this.item.postFrom && !this.postFrom.name) {
-            this.searchBlog(this.item.postFrom);
-        }
+        // if (this.item.userId)
+        //     this.getUserInfo(this.item.userId);
+        // if (this.item.postFrom && !this.postFrom.name) {
+        //     this.searchBlog(this.item.postFrom);
+        // }
         this.$bus.$on('follow', id => {
             if (id === this.item.userId) {
                 this.isFollow = true;
@@ -215,24 +217,24 @@ export default {
             }
         })
 
-        this.$nextTick(()=>{
+        this.$nextTick(() => {
             this.$previewRefresh();
         })
     },
     watch: {
-        item: {
-            handler() {
-                this.$nextTick(() => {
-                    try {
-                        this.getUserInfo(this.item.userId);
-                        if (this.item.postFrom && !this.postFrom.name) {
-                            this.searchBlog(this.item.postFrom);
-                        }
-                    } catch (e) { }
-                })
-            },
-            deep: true,
-        }
+        // item: {
+        //     handler() {
+        //         this.$nextTick(() => {
+        //             try {
+        //                 this.getUserInfo(this.item.userId);
+        //                 if (this.item.postFrom && !this.postFrom.name) {
+        //                     this.searchBlog(this.item.postFrom);
+        //                 }
+        //             } catch (e) { }
+        //         })
+        //     },
+        //     deep: true,
+        // }
     }
 }
 </script>

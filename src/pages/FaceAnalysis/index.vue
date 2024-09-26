@@ -152,8 +152,8 @@ export default {
     }
   },
   mounted() {
-    this.$store.dispatch('getUserInfo');
-    this.result = JSON.parse(localStorage.getItem('result'));
+    // this.$store.dispatch('getUserInfo');
+    // this.result = JSON.parse(localStorage.getItem('result'));
   },
   computed: {
     ...mapState({

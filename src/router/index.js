@@ -26,6 +26,12 @@ let router = new VueRouter({
     routes,
     linkActiveClass: "active",
     scrollBehavior(to, from, savedPosition) {
+        const { top } = savedPosition || { top: 0 };
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                resolve({ top })
+            }, 0)
+        });
     },
 })
 

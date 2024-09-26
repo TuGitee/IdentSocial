@@ -7,8 +7,7 @@ const request = axios.create({
 
 request.interceptors.request.use(config => {
     return config;
-}
-);
+});
 request.interceptors.response.use((res)=>{
     return res.data
 },(error)=>{

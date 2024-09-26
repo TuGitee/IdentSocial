@@ -13,22 +13,24 @@
                 </span>
             </div>
         </div>
-        <div class="blog-content">
-            <BlogItem :item="item" @click="comment"></BlogItem>
+        <div class="blog-content" @click.prevent.stop>
+            <BlogItem v-if="item" :item="item" @click="comment"></BlogItem>
             <CommentItem v-for="comment in commentList" :key="comment.commentId" :userList="userList" :comment="comment"
-                @click="changeTarget" />
+                @click="changeTarget" ref="comments" />
         </div>
-        <div class="blog-footer" v-if="isComment">
-            <input type="text" class="blog-footer-input" place-holder="说点什么..." autofocus ref="input" v-model="text" />
+        <div class="blog-footer" @click.stop v-if="isComment">
+            <input type="text" class="blog-footer-input" :placeholder="placeholder" autofocus ref="input" v-model="text"
+                @blur="closeComment" />
             <button class="blog-footer-btn" @touchstart="publish">发布</button>
         </div>
     </div>
 </template>
-  
+
 <script>
 import BlogItem from "@/components/BlogItem.vue";
 import CommentItem from "./CommentItem";
 import MonitorKeyboard from '@/utils/MonitorKeyboard.js'
+import { reqMockAddPostComment, reqMockPost, reqMockPostComment } from "@/api";
 export default {
     name: "BlogDetail",
     components: {
@@ -37,62 +39,77 @@ export default {
     },
     data() {
         return {
-            item: {},
+            item: null,
             monitorKeyboard: null,
             isComment: false,
             text: '',
             target: null,
-            targetUser: null,
             commentList: []
         }
     },
     methods: {
-        changeTarget(id, user) {
-            this.target = id;
-            this.targetUser = user;
+        changeTarget(comment) {
+            this.target = comment;
             this.isComment = true;
-            this.$nextTick(() => {
-                this.$refs.input.focus();
-            })
+            setTimeout(() => {
+                this.$refs.input.focus()
+            }, 100)
         },
         async init() {
-            let res = await this.$blogAxios.get(`/post?postId=${this.$route.params.bid}`)
-            this.item = res.data.data;
+            // let res = await this.$blogAxios.get(`/post?postId=${this.$route.params.bid}`)
+            const res = await reqMockPost(this.$route.params.bid);
+            this.item = res.data;
             this.getKeyboardState();
             this.getCommentList();
+        },
+        closeComment() {
+            this.isComment = false;
+        },
+        toggleComment() {
+            this.isComment = !this.isComment
         },
         toTop() {
             document.querySelector('.blog-content').scrollTop = 0;
         },
         publish() {
-            console.log(this.target);
-            this.$blogAxios.post('/comment', {
-                content: this.text,
-                commentTo: this.targetUser ? this.targetUser : null,
-                userId: this.$store.state.user.token,
-                belongPost: this.bid,
-                belongComment: this.target ? this.target : null
-            }).then(res => {
+            if (!this.text.trim()) return;
+            reqMockAddPostComment(this.bid, this.target?.id, this.text).then(() => {
                 this.$notify({
                     title: "成功",
                     message: "评论成功",
                     type: "success",
                     duration: 2000,
-                    offset: parseInt(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top")),
                 })
                 this.isComment = false;
                 this.text = '';
-                this.$router.go(0);
-                location.reload();
+                this.target = null;
+                this.getCommentList();
             })
+            // this.$blogAxios.post('/comment', {
+            //     content: this.text,
+            //     userId: this.$store.state.user.token,
+            //     belongPost: this.bid,
+            //     belongComment: this.target ? this.target : null
+            // }).then(() => {
+            //     this.$notify({
+            //         title: "成功",
+            //         message: "评论成功",
+            //         type: "success",
+            //         duration: 2000,
+
+            //     })
+            //     this.isComment = false;
+            //     this.text = '';
+            //     this.$router.go(0);
+            //     location.reload();
+            // })
         },
         comment() {
-            this.isComment = true;
+            this.toggleComment();
             this.target = null;
-            this.targetUser = null;
-            this.$nextTick(() => {
-                this.$refs.input.focus();
-            })
+            setTimeout(() => {
+                this.$refs.input?.focus();
+            }, 300)
         },
         goBack() {
             this.$router.go(-1)
@@ -109,33 +126,41 @@ export default {
             })
 
             this.monitorKeyboard.onHidden(() => {
-                this.isComment = false;
+                // this.isComment = false;
             })
         },
         async getCommentList() {
-            let res = await this.$blogAxios.get(`/comment/post?postId=${this.bid}`)
-            let tree = []
-            console.log(res.data.data);
-            res.data.data.forEach(item => {
-                if (item.belongComment === null) {
+            // let res = await this.$blogAxios.get(`/comment/post?postId=${this.bid}`)
+            const res = await reqMockPostComment(this.bid);
+            const tree = []
+            res.data.forEach(item => {
+                if (!item.cid) {
                     tree.push(item);
                 }
             });
-            res.data.data.forEach(item => {
+            for (let i = res.data.length - 1; i >= 0; i--) {
+                const item = res.data[i];
                 tree.forEach(treeItem => {
-                    if (item.belongComment === treeItem.commentId) {
+                    if (item.cid === treeItem.id) {
                         if (!treeItem.children) {
                             treeItem.children = [];
                         }
                         treeItem.children.push(item);
+                    } else if (treeItem.children && treeItem.children.find(child => child.id === item.cid)) {
+                        const parent = treeItem.children.find(child => child.id === item.cid);
+                        item.pid = parent.id;
+                        item.puser = parent.user;
+                        treeItem.children.push(item);
                     }
                 })
-            });
+            }
             this.commentList = tree;
-            console.log(this.commentList);
         },
     },
     computed: {
+        placeholder() {
+            return this.target ? `回复 ${this.target.user.nickname} : ${this.target.text}` : "说点什么";
+        },
         bid() {
             return this.$route.params.bid
         },
@@ -160,7 +185,7 @@ export default {
     }
 }
 </script>
-  
+
 <style scoped lang="less">
 .blog-detail {
     width: 100%;

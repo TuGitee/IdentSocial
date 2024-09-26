@@ -3,8 +3,17 @@
     <header class="home-header">
       <h2 class="home-header-hello">你好，</h2>
       <h1 class="home-header-name">{{ userInfo.nickname }}</h1>
-      <router-link to="/upload">
-        <i class="el-icon-plus home-header-plus"></i></router-link>
+      <el-dropdown trigger="click" @command="handleCommand">
+        <a href="javascript:;">
+          <i class="el-icon-plus home-header-plus"></i>
+        </a>
+
+        <el-dropdown-menu slot="dropdown">
+          <el-dropdown-item command="pk">人脸PK</el-dropdown-item>
+          <el-dropdown-item command="post">发表动态</el-dropdown-item>
+        </el-dropdown-menu>
+      </el-dropdown>
+
     </header>
     <div class="home-middle">
       <div class="home-middle-scroll">
@@ -21,6 +30,7 @@
       <el-tab-pane v-for="(item, index) in homeRoutes" :key="index" :label="item.meta.name" :name="item.name">
         <footer class="home-footer">
           <router-view :followingList="followingList" :key="$route.name"></router-view>
+          <p class="loading"><i class="el-icon el-icon-loading"></i></p>
         </footer>
       </el-tab-pane>
     </el-tabs>
@@ -51,13 +61,13 @@ export default {
     this.activeName = this.$route.name;
 
     window.addEventListener("scroll", this.handleScroll);
-    window.addEventListener("scroll", (e) => {
+    window.addEventListener("scroll", () => {
       if (this.timer) return;
       if (window.scrollY + window.innerHeight >= this.$refs?.root?.offsetHeight) {
         this.timer = setTimeout(() => {
           this.getData()
           this.timer = null;
-        }, 1000);
+        }, 300);
       }
     });
 
@@ -86,9 +96,26 @@ export default {
     }),
   },
   beforeDestroy() {
+    this.monitorKeyboard.onEnd();
     window.removeEventListener("scroll", this.handleScroll);
   },
   methods: {
+    handleCommand(command) {
+      console.log(command);
+      switch (command) {
+        case 'pk':
+          this.$router.push({
+            path: "/pk",
+          })
+          break;
+      
+        case 'post':
+          this.$router.push({
+            path: "/upload",
+          })
+          break;
+      }
+    },
     getData() {
       this.$store.dispatch("getRecommendInfo", { page: this.pageNo, limit: this.pageSize, userId: this.$store.state.user.token });
       this.pageNo++;
@@ -115,7 +142,7 @@ export default {
           title: "成功",
           message: "转发成功",
           type: "success",
-          offset: parseInt(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top")),
+          
         });
         this.isComment = false;
         this.$route.meta.footerShow = true;
@@ -137,13 +164,16 @@ export default {
       })
     }
   },
-  beforeDestroy() {
-    this.monitorKeyboard.onEnd();
-  },
 };
 </script>
 
 <style lang="less" scoped>
+.loading {
+  text-align: center;
+  color: @purple;
+  padding: 1.6rem 0 2rem;
+}
+
 .home {
   position: relative;
   transition: all 0.5s;
@@ -226,6 +256,12 @@ export default {
       white-space: nowrap;
       font-size: 2.5rem;
       font-weight: 500;
+    }
+
+    .el-dropdown {
+      position: absolute;
+      right: 0;
+      top: 80px;
     }
 
     &-plus {

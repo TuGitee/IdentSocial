@@ -2,7 +2,8 @@
   <div class="me">
     <header class="me-header">
       <div class="me-header-avatar">
-        <img class="me-header-avatar-img" v-if="userInfo.avatarPath" :src="require('@/assets/images/' + userInfo.avatarPath + '.png')" alt="" />
+        <el-image class="me-header-avatar-img" :src="userInfo.avatar" alt="">{{
+          userInfo.nickname }}</el-image>
         <i class="el-icon-arrow-right me-header-avatar-arrow"></i>
       </div>
       <div class="me-header-info">
@@ -95,13 +96,11 @@ export default {
       ]
     };
   },
-  methods: {
-  },
   mounted() {
     this.$store.dispatch('getUserInfo');
   },
   computed: {
-    ...mapState({ userInfo: state => state.user.userInfo }),
+    ...mapState({ userInfo: state => state.user.userInfo ?? {} }),
     followers() {
       if (this.userInfo.followers > 1000) {
         return (this.userInfo.followers / 1000).toFixed(1) + 'K';
@@ -115,7 +114,7 @@ export default {
       } else {
         return this.userInfo.following;
       }
-    },
+    }
   }
 }
 </script>

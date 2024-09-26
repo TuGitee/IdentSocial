@@ -6,7 +6,6 @@ export default [
         meta: {
             footerShow: true,
             name: '推荐',
-            keepAlive: true,
         },
     },
     {
@@ -16,7 +15,6 @@ export default [
         meta: {
             footerShow: true,
             name: '关注',
-            keepAlive: true,
         },
     },
     // {

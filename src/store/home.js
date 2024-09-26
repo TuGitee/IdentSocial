@@ -1,44 +1,41 @@
-import { reqMockRecommendInfo, reqMockFollowingInfo, reqMockNearbyInfo } from "@/api"
-import { reqRecommendInfo, reqFollowingInfo, findUserBlog } from "@/api"
+import { reqFollowingInfo, findUserBlog, reqMockPostList } from "@/api"
 const state = {
     recommendInfo: [],
     followingInfo: [],
-    nearbyInfo: [],
     followingList: [],
     pageNo: 1,
     pageSize: 10,
     isMore: true
 }
 const actions = {
-    async getRecommendInfo({ state, commit }, data) {
-        if(!state.isMore) return
-        let result = await reqRecommendInfo(data.page, data.limit)
-        let followingList = await reqFollowingInfo(data.userId)
-        result.data.forEach(item => {
-            item.isFollow = followingList.data.includes(item.userId)
-        });
-        let recommendList = result.data;
-        if(!recommendList.length) state.isMore = false
-        if (result.code) {
-            recommendList = [...recommendList, ...state.recommendInfo].filter((item, index, arr) => {
-                return arr.findIndex((item1) => {
-                    return item1.postId === item.postId
-                }) === index
-            }).sort((a, b) => {
-                return new Date(b.createTime).getTime() - new Date(a.createTime).getTime()
-            })
-            commit("GETRECOMMENDINFO", recommendList)
-        } else {
-            return Promise.reject(new Error("Request Fail!"))
-        }
-    },
-    async getNearbyInfo({ commit }) {
-        let result = await reqMockNearbyInfo()
-        if (result.code === 200) {
-            commit("GETNEARBYINFO", result.data)
-        } else {
-            return Promise.reject(new Error("Request Fail!"))
-        }
+    async getRecommendInfo({ state, commit }) {
+        if (!state.isMore) return
+        reqMockPostList(state.pageNo, state.pageSize).then(res => {
+            commit("GETRECOMMENDINFO", res.data)
+            if (res.data.length < state.pageSize) {
+                state.isMore = false
+            }
+            state.pageNo++;
+        })
+        // let result = await reqRecommendInfo(data.page, data.limit)
+        // let followingList = await reqFollowingInfo(data.userId)
+        // result.data.forEach(item => {
+        //     item.isFollow = followingList.data.includes(item.userId)
+        // });
+        // let recommendList = result.data;
+        // if(!recommendList.length) state.isMore = false
+        // if (result.code) {
+        //     recommendList = [...recommendList, ...state.recommendInfo].filter((item, index, arr) => {
+        //         return arr.findIndex((item1) => {
+        //             return item1.postId === item.postId
+        //         }) === index
+        //     }).sort((a, b) => {
+        //         return new Date(b.createTime).getTime() - new Date(a.createTime).getTime()
+        //     })
+        //     commit("GETRECOMMENDINFO", recommendList)
+        // } else {
+        //     return Promise.reject(new Error("Request Fail!"))
+        // }
     },
     async getFollowingList({ commit }, data) {
         let result = await reqFollowingInfo(data.userId)
@@ -66,10 +63,7 @@ const actions = {
 }
 const mutations = {
     GETRECOMMENDINFO(state, recommendInfo) {
-        state.recommendInfo = recommendInfo
-    },
-    GETNEARBYINFO(state, nearbyInfo) {
-        state.nearbyInfo = nearbyInfo
+        state.recommendInfo.push(...recommendInfo);
     },
     GETFOLLOWINGINFO(state, followingInfo) {
         state.followingInfo = followingInfo

@@ -6,10 +6,10 @@
             </div>
             <div class="chat-detail-header-icon">
                 <div class="chat-detail-header-icon-img">
-                    <img :src="require(`@/assets/images/${userInfo.avatarPath ?? 0}.png`)" alt="">
+                    <img :src="require(`@/assets/images/${avatar ?? 0}.png`)" alt="">
                 </div>
                 <div class="chat-detail-header-icon-name">
-                    <span>{{ userInfo.nickname }}</span>
+                    <span>{{ username }}</span>
                 </div>
             </div>
             <div class="chat-detail-header-more">
@@ -21,16 +21,21 @@
                 <div class="chat-detail-body-content-item" :class="{ reverse: chat.from_id == $store.state.user.token }"
                     v-for="chat in chatList" :key="chat.private_msg_id">
                     <div class="chat-detail-body-content-item-avatar">
-                        <img v-if="chat.from_id != $store.state.user.token"
-                            :src="require(`@/assets/images/${chat.avatar_path ?? 0}.png`)" alt="">
-                        <img v-else :src="require(`@/assets/images/${$store.state.user.userInfo.avatarPath ?? 0}.png`)"
-                            alt="">
+                        <img :src="require(`@/assets/images/${chat.avatar_path ?? 0}.png`)" alt="">
                     </div>
-                    <p class="chat-detail-body-content-item-content">
+                    <div>
+                        <p class="chat-detail-body-content-item-nickname" v-if="chat.from_id != $store.state.user.token">
+                        <span>
+                            {{ chat.nickname }}
+                        </span>
+                    </p>
+                        <p class="chat-detail-body-content-item-content">
                         <span>
                             {{ chat.message }}
                         </span>
                     </p>
+                    </div>
+                    
                 </div>
             </div>
         </div>
@@ -42,14 +47,16 @@
 </template>
 
 <script>
-import { WebSocketType } from "@/ws";
+import { WebSocketType, WebSocketPort } from "@/ws";
+import io from "../Chat/js/socketio.js"
 export default {
     name: "WorldDetail",
     data() {
         return {
             input: '',
             userInfo: {},
-            chatList: []
+            chatList: [],
+            io: null
         }
     },
     methods: {
@@ -66,7 +73,7 @@ export default {
         },
         send() {
             if (!this.input.trim()) return
-            this.$ws.emit(WebSocketType.GroupChat, this.createMessage(this.$store.state.user.token, -1, this.input, new Date().getTime()))
+            this.io.emit(WebSocketType.GroupChat, this.createMessage(this.$store.state.user.token, -1, this.input, new Date().getTime()))
             this.chatList.push({
                 message: this.input,
                 to_id: -1,
@@ -85,15 +92,18 @@ export default {
         }
     },
     mounted() {
-        this.$store.dispatch('getUserInfo')
-        this.$ws.emit(WebSocketType.WorldList, this.createMessage(this.$store.state.user.token))
-        this.$ws.on(WebSocketType.WorldList, (data) => {
+        this.$store.state.user.token ?? this.$store.dispatch('getUserInfo')
+        this.io = io(`${WebSocketPort}?token=${this.$store.state.user.token}`);
+        this.io.emit(WebSocketType.WorldList, this.createMessage(this.$store.state.user.token))
+        this.io.on(WebSocketType.WorldList, (data) => {
+            console.log(data.data)
             this.chatList = data.data
             this.$nextTick(() => {
                 this.goPageEnd()
             })
         })
-        this.$ws.on(WebSocketType.GroupChat, (data) => {
+        this.io.on(WebSocketType.GroupChat, (data) => {
+            console.log(data)
             this.chatList.push({
                 message: data.data,
                 from_id: data.user,
@@ -104,6 +114,14 @@ export default {
             })
         })
 
+    },
+    computed:{
+        username(){
+            return this.$route.params.username
+        },
+        avatar(){
+            return this.$route.params.avatar
+        }
     }
 }
 </script>
@@ -236,6 +254,16 @@ export default {
                     img {
                         height: 100%;
                     }
+                }
+
+                .chat-detail-body-content-item-nickname {
+                    max-width: 60vw;
+    white-space: nowrap;
+    margin: 1rem .5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: grey;
+    font-size: .8rem;
                 }
 
                 .chat-detail-body-content-item-content {

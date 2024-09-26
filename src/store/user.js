@@ -1,10 +1,11 @@
-import { getToken, setToken, removeToken } from "@/utils/token";
-import { reqUserInfo } from "@/api";
+import { getToken, setToken } from "@/utils/token";
+import { reqMockUser } from "@/api";
 const getters = {
 }
 const actions = {
     async getUserInfo(state) {
-        let result = await reqUserInfo(state.state.token);
+        let result = await reqMockUser(state.state.token);
+        // let result = await reqUserInfo(state.state.token);
         if (result.code) {
             state.commit("GETUSERINFO", result.data);
         } else {

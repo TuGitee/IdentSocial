@@ -4,42 +4,27 @@ export default [
         name: 'Login',
         path: '/login',
         component: () => import('@/pages/Login'),
-        meta: {
-            keepAlive: true,
-        }
     },
     {
         name: 'SignIn',
         path: '/signin',
         component: () => import('@/pages/SignIn'),
-        meta: {
-            keepAlive: true,
-        }
     },
     {
         name: 'SignUp',
         path: '/signup',
         component: () => import('@/pages/SignUp'),
-        meta: {
-            keepAlive: true,
-        }
     },
     {
         path: '/user',
         children: [...userRoutes],
-        component: () => import('@/EmptyLayout'),
+        component: () => import('@/pages/EmptyLayout'),
         redirect: '/user/home',
-        meta: {
-            keepAlive: true,
-        }
     },
     {
         path: '/upload',
         name: 'Upload',
         component: () => import('@/pages/Upload'),
-        meta: {
-            keepAlive: true,
-        }
     },
     {
         path: '/blog-detail/:bid',
@@ -62,13 +47,12 @@ export default [
         component: () => import('@/pages/WorldDetail'),
     },
     {
-        path: '/empty',
-        name: 'Empty',
-        component: () => import('@/EmptyLayout'),
+        path: '/setting',
+        name: 'Setting',
+        component: () => import('@/pages/Setting'),
     },
     {
         path: '/',
-        component: () => import('@/pages/Error'),
         redirect: '/login',
     },
     {
