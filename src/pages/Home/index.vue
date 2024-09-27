@@ -3,16 +3,9 @@
     <header class="home-header">
       <h2 class="home-header-hello">你好，</h2>
       <h1 class="home-header-name">{{ userInfo.nickname }}</h1>
-      <el-dropdown trigger="click" @command="handleCommand">
-        <a href="javascript:;">
-          <i class="el-icon-plus home-header-plus"></i>
-        </a>
-
-        <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item command="pk">人脸PK</el-dropdown-item>
-          <el-dropdown-item command="post">发表动态</el-dropdown-item>
-        </el-dropdown-menu>
-      </el-dropdown>
+      <router-link to="/upload">
+        <i class="el-icon-plus home-header-plus"></i>
+      </router-link>
 
     </header>
     <div class="home-middle">
@@ -83,8 +76,6 @@ export default {
       to: null,
       text: "",
       monitorKeyboard: null,
-      pageNo: 1,
-      pageSize: 10,
       timer: null,
     };
   },
@@ -100,25 +91,8 @@ export default {
     window.removeEventListener("scroll", this.handleScroll);
   },
   methods: {
-    handleCommand(command) {
-      console.log(command);
-      switch (command) {
-        case 'pk':
-          this.$router.push({
-            path: "/pk",
-          })
-          break;
-      
-        case 'post':
-          this.$router.push({
-            path: "/upload",
-          })
-          break;
-      }
-    },
     getData() {
-      this.$store.dispatch("getRecommendInfo", { page: this.pageNo, limit: this.pageSize, userId: this.$store.state.user.token });
-      this.pageNo++;
+      this.$store.dispatch("getRecommendInfo");
     },
     handleClick(tab, event) {
       event.preventDefault();
@@ -126,7 +100,7 @@ export default {
     },
     handleScroll() {
       if (this.$refs.mask)
-        this.$refs.mask.style.opacity = window.scrollY / 100;
+        this.$refs.mask.style.opacity = (window.scrollY - 160) / 100;
     },
     async publish() {
       let res = await this.$blogAxios.post("/post/forward", {
@@ -142,7 +116,7 @@ export default {
           title: "成功",
           message: "转发成功",
           type: "success",
-          
+
         });
         this.isComment = false;
         this.$route.meta.footerShow = true;
@@ -242,6 +216,7 @@ export default {
     position: relative;
     margin: 1rem 0;
     box-sizing: border-box;
+    z-index: 99;
 
     &-hello {
       font-size: 2rem;
@@ -258,14 +233,9 @@ export default {
       font-weight: 500;
     }
 
-    .el-dropdown {
-      position: absolute;
-      right: 0;
-      top: 80px;
-    }
-
     &-plus {
       padding: 0.5rem;
+      z-index: 9999999;
       position: absolute;
       right: 0;
       bottom: .5rem;
@@ -330,8 +300,9 @@ export default {
     width: 100vw;
     height: calc(constant(safe-area-inset-top) + @nav-height);
     height: calc(env(safe-area-inset-top) + @nav-height);
-    background: linear-gradient(rgba(255, 255, 255, 1) 75%, rgba(255, 255, 255, 0.5));
-    z-index: 1;
+    background: linear-gradient(rgba(255, 255, 255, 1) 70%, rgba(255, 255, 255, 0));
+    z-index: 999;
+    backdrop-filter: blur(10px);
     opacity: 0;
   }
 

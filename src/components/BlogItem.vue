@@ -22,12 +22,12 @@
             </div>
         </div>
         <div class="blog-item-content">
-            <div class="blog-item-content-text">
+            <div class="blog-item-content-text" v-if="item.text">
                 {{ item.text }}
             </div>
             <ul class="blog-item-content-img">
                 <li class="blog-item-content-img-item" v-for="(img, ii) in item.img" :key="ii">
-                    <img :src="require(`@/assets/images/${img.slice(4,)}`)" :preview="item.id" />
+                    <el-image fit="cover" :src="img" :preview="item.id"></el-image>
                 </li>
             </ul>
             <div class="blog-item-content-share" v-if="item.postFrom" @click="toRawBlog(item.postFrom)">
@@ -63,6 +63,8 @@
 </template>
 
 <script>
+import { get } from '@/utils/storage';
+
 export default {
     name: "BlogItem",
     props: {
@@ -92,6 +94,11 @@ export default {
                 params: {
                     uid: id
                 }
+            })
+        },
+        getImage(img) {
+            return get(img).then(res => {
+                return URL.createObjectURL(res);
             })
         },
         async onForward() {
@@ -167,14 +174,13 @@ export default {
             })
         },
         toBlogDetail() {
-            document.startViewTransition(() => {
-                this.$router.push({
-                    name: 'BlogDetail',
-                    params: {
-                        bid: this.item.id
-                    }
+            if (document.viewTransition) {
+                document.startViewTransition(() => {
+                    this.toRawBlog(this.item.id);
                 })
-            })
+            } else {
+                this.toRawBlog(this.item.id);
+            }
         },
         toRawBlog(id) {
             this.$router.push({
@@ -243,6 +249,7 @@ export default {
 .blog-item {
     transition: all .5s;
     width: 100%;
+    padding: .5rem 0;
     background-color: white;
     border-radius: 10px;
     margin-bottom: 10px;
@@ -311,12 +318,12 @@ export default {
         &-text {
             font-size: 1rem;
             color: #333;
+            margin-bottom: 10px;
         }
 
         &-img {
             width: 100%;
             height: fit-content;
-            margin-top: 10px;
             display: flex;
             justify-content: flex-start;
             flex-wrap: wrap;
@@ -347,6 +354,11 @@ export default {
                 img {
                     border-radius: 10px;
                     object-fit: cover;
+                    width: 100%;
+                    height: 100%;
+                }
+
+                .el-image {
                     width: 100%;
                     height: 100%;
                 }

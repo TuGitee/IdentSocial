@@ -29,10 +29,10 @@
               <i class="el-icon-warning-outline"></i>
             </el-tooltip>
           </div>
+          <button :class="{ active: isActive }" class="sign-in-box-submit" @click="goHome" @keydown.enter="goHome">
+            <i class="el-icon-right"></i>
+          </button>
         </form>
-        <button :class="{ active: isActive }" class="sign-in-box-submit" @click="goHome" @keydown.enter="goHome">
-          <i class="el-icon-right"></i>
-        </button>
       </div>
     </transition>
   </div>

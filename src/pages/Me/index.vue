@@ -216,10 +216,40 @@ export default {
 
       &-intro {
         font-size: 1rem;
-        padding: 10px;
+        margin: 10px;
         color: #5C5C5C;
         word-break: break-all;
         text-align: center;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+        overflow: hidden;
+      }
+    }
+
+    &-follow {
+      user-select: none;
+      margin-top: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: 0 1rem;
+
+        &-number {
+          font-size: 1.2rem;
+          font-weight: bold;
+        }
+
+        &-text {
+          
+        }
       }
     }
   }

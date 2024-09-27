@@ -16,14 +16,5 @@ export default [
             footerShow: true,
             name: '关注',
         },
-    },
-    // {
-    //     name: 'Nearby',
-    //     path: 'nearby',
-    //     component: () => import('@/pages/Home/Nearby/index.vue'),
-    //     meta: {
-    //         footerShow: true,
-    //         name: '喜欢',
-    //     }
-    // },
+    }
 ]

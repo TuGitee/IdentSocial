@@ -1,5 +1,5 @@
 #root {
-    padding: 1.5rem;
+    padding: 1.2rem;
     box-sizing: border-box;
     min-height: 100vh;
     width: 100vw;
@@ -9,15 +9,25 @@
     padding-bottom: calc(env(safe-area-inset-bottom) + 3rem);
     position: relative;
 
-    &::after {
+    &::after,
+    &::before {
         position: fixed;
-        top: 0;
-        left: 0;
         content: "";
-        width: 100vw;
-        height: 100vh;
+        width: 400px;
+        height: 400px;
+        left: 0;
+        top: 0;
+        transform: translate(-30%, calc(-70% + constant(safe-area-inset-top)));
+        transform: translate(-30%, calc(-70% + env(safe-area-inset-top)));
+        background: radial-gradient(circle at center, @purple, #fff0 70%);
         z-index: -999;
-        background: linear-gradient(180deg, #9a89ff 0, #FFFFFF calc(constant(safe-area-inset-bottom) + 2rem));
-        background: linear-gradient(180deg, #9a89ff 0, #FFFFFF calc(env(safe-area-inset-bottom) + 2rem));
+    }
+
+    &::after {
+        left: auto;
+        right: 0;
+        transform: translate(30%, calc(-70% + constant(safe-area-inset-top)));
+        transform: translate(30%, calc(-70% + env(safe-area-inset-top)));
+        background: radial-gradient(circle at center, @pink, #fff0 70%);
     }
 }

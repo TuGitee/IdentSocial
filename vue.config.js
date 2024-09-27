@@ -21,5 +21,10 @@ module.exports = defineConfig({
         path.resolve(__dirname, './src/css/color.less'),
       ]
     }
+  },
+  configureWebpack: {
+    experiments: {
+      topLevelAwait: true
+    }
   }
 })

@@ -257,6 +257,7 @@ export default {
 
                 /deep/ .el-progress-bar__inner {
                     transform: translateX(-100%);
+                    line-height: 0;
                     animation: move .5s ease-in-out forwards .5s, color 1s linear forwards infinite;
                     background: linear-gradient(90deg, @lightPurple 0%, @purple 100%);
                 }

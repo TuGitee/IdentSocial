@@ -1,5 +1,8 @@
 import Mock from 'mockjs';
 import { v4 as uuid } from 'uuid';
+import { getAllKeys } from '@/utils/storage';
+
+const images = await getAllKeys();
 
 const userCount = 100;
 const postCount = 100;
@@ -52,18 +55,18 @@ export const generateMockUsers = (n = userCount) => {
 
 export const userList = localStorage.getItem('userList') ? JSON.parse(localStorage.getItem('userList')) : generateMockUsers();
 
-export const mockPost = (uid, text, time, id = uuid()) => Mock.mock({
+export const mockPost = (uid, text, time, img, id = uuid()) => Mock.mock({
     id,
     'text': text ?? '@cparagraph',
     'time': time ?? Mock.Random.datetime('yyyy/MM/dd HH:mm:ss'),
-    img() {
+    img: img ?? (() => {
         const imgCount = Mock.Random.integer(0, 5);
         const imgUrls = [];
         for (let j = 0; j < imgCount; j++) {
-            imgUrls.push(`Blog${Mock.Random.integer(0, 9)}.png`);
+            imgUrls.push(images[Math.floor(Math.random() * images.length)]);
         }
         return imgUrls;
-    },
+    }),
     'like': '@integer(0, 100)',
     'comment': '@integer(0, 50)',
     'share': '@integer(0, 30)',

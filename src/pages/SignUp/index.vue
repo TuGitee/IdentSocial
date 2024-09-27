@@ -48,10 +48,14 @@
                   <i class="el-icon-warning-outline"></i>
                 </el-tooltip>
               </div>
+              <button :class="{ active: isActive }" :disabled="!isActive" class="sign-up-box-submit" @click="nextStep"
+                @keydown.enter="nextStep">
+                <i class="el-icon-right"></i>
+              </button>
             </form>
           </el-tab-pane>
           <el-tab-pane disabled name="1">
-            <div>
+            <form>
               <p class="sign-up-box-title">已经将验证码发送到您的邮箱
                 <button class="sign-up-box-resend" :disabled="time > 0" @click="sendCaptcha">重新发送{{ time > 0 ?
                   `(${time})`
@@ -61,31 +65,31 @@
               <div class="sign-up-box-check">
                 <input type="number" class="sign-up-box-check-input" v-model="Captcha" autocomplete="true"
                   placeholder="输入您的验证码" />
-
                 <div class="captcha">
                   <div class="captcha-item" v-for="i, index in computedCaptcha" :key="index">{{ i }}</div>
                 </div>
               </div>
-            </div>
+              <button type="submit" :class="{ active: isActive }" :disabled="!isActive" class="sign-up-box-submit" @click="nextStep"
+                @keydown.enter="nextStep">
+                <i class="el-icon-right"></i>
+              </button>
+            </form>
           </el-tab-pane>
           <el-tab-pane disabled name="2">
             <p class="sign-up-box-success">注册成功</p>
+            <button :class="{ active: isActive }" :disabled="!isActive" class="sign-up-box-submit" @click="nextStep"
+              @keydown.enter="nextStep">
+              <i class="el-icon-check"></i>
+            </button>
           </el-tab-pane>
         </el-tabs>
-
-        <button :class="{ active: isActive }" :disabled="!isActive" class="sign-up-box-submit" @click="nextStep"
-          @keydown.enter="nextStep">
-          <i class="el-icon-check" v-if="current === '2'"></i>
-          <i class="el-icon-right" v-else></i>
-
-        </button>
       </div>
     </transition>
   </div>
 </template>
 
 <script>
-import { reqMockUser, reqMockUserLogin, reqMockUserRegister, reqMockVerify, reqMockVerifyCode } from '@/api';
+import { reqMockUserLogin, reqMockUserRegister, reqMockVerify, reqMockVerifyCode } from '@/api';
 
 export default {
   name: "SignUp",
@@ -134,8 +138,7 @@ export default {
           title: "验证码",
           message: `您的验证码为${res.data}`,
           type: "info",
-          duration: 0,
-
+          duration: 10000,
         })
         return res;
       })

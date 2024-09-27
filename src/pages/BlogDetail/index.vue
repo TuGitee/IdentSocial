@@ -13,7 +13,7 @@
                 </span>
             </div>
         </div>
-        <div class="blog-content" @click.prevent.stop>
+        <div class="blog-content">
             <BlogItem v-if="item" :item="item" @click="comment"></BlogItem>
             <CommentItem v-for="comment in commentList" :key="comment.commentId" :userList="userList" :comment="comment"
                 @click="changeTarget" ref="comments" />
@@ -29,6 +29,7 @@
 <script>
 import BlogItem from "@/components/BlogItem.vue";
 import CommentItem from "./CommentItem";
+import { get } from "@/utils/storage";
 import MonitorKeyboard from '@/utils/MonitorKeyboard.js'
 import { reqMockAddPostComment, reqMockPost, reqMockPostComment } from "@/api";
 export default {
@@ -49,16 +50,15 @@ export default {
     },
     methods: {
         changeTarget(comment) {
+            this.comment();
             this.target = comment;
-            this.isComment = true;
-            setTimeout(() => {
-                this.$refs.input.focus()
-            }, 100)
         },
         async init() {
             // let res = await this.$blogAxios.get(`/post?postId=${this.$route.params.bid}`)
             const res = await reqMockPost(this.$route.params.bid);
             this.item = res.data;
+            this.item.img = await Promise.all(this.item.img.map(item=>get(item)))
+            this.item.img = this.item.img.map(item=>URL.createObjectURL(item))
             this.getKeyboardState();
             this.getCommentList();
         },
@@ -109,7 +109,7 @@ export default {
             this.target = null;
             setTimeout(() => {
                 this.$refs.input?.focus();
-            }, 300)
+            }, 1000)
         },
         goBack() {
             this.$router.go(-1)
@@ -308,7 +308,7 @@ export default {
     }
 
     .blog-footer {
-        width: 100%;
+        width: 100vw;
         height: 3rem;
         position: fixed;
         bottom: 0;

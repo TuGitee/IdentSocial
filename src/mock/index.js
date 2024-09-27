@@ -1,5 +1,6 @@
 import Mock from 'mockjs';
-import { userList, postList, mockUser, commentList, mockComment } from './data';
+import { userList, postList, mockUser, commentList, mockComment, mockPost } from './data';
+import { get } from '@/utils/storage';
 
 Mock.mock(/\/mock\/user\/\w+/, 'get', (req) => {
     const id = req.url.split('/').pop();
@@ -51,9 +52,20 @@ Mock.mock(/\/mock\/post/, 'get', (req) => {
         return acc;
     }, {});
     const data = postList.slice((page - 1) * limit, page * limit);
-    data.forEach(item => item.user = userList.find(user => user.id === item.uid));
-    return Mock.mock({ code: 200, data });
+    for (let i = 0; i < data.length; i++) {
+        data[i].user = userList.find(user => user.id === data[i].uid);
+    }
+    return Mock.mock({ code: 200, data })
 });
+
+Mock.mock(/\/mock\/post/, 'post', (req) => {
+    const { text, imgs, uid } = JSON.parse(req.body);
+    const post = mockPost(uid, text, new Date().toLocaleString(), imgs);
+    postList.unshift(post);
+    post.user = userList.find(user => user.id === uid);
+    localStorage.setItem('postList', JSON.stringify(postList));
+    return Mock.mock({ code: 200, data: post });
+})
 
 Mock.mock(/\/mock\/comment\/\w+/, 'get', (req) => {
     const id = req.url.split('/').pop();

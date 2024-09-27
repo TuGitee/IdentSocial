@@ -39,13 +39,6 @@
         <transition name="el-fade-in-linear" :duration="1000">
           <AnalysisResult v-show="isUnfold" :analysisList="userInfo.analysisList" :title="text" :result="result" />
         </transition>
-        <transition name="el-fade-in-linear" :duration="1000">
-          <div class="face-analysis-box-analysis-btns" v-if="isResult">
-            <button class="face-analysis-box-analysis-btns-button" @click="publish">发表动态</button>
-            <button class="face-analysis-box-analysis-btns-button">美颜</button>
-            <button class="face-analysis-box-analysis-btns-button">历史数据</button>
-          </div>
-        </transition>
       </div>
 
     </div>

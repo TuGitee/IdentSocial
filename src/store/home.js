@@ -1,4 +1,5 @@
-import { reqFollowingInfo, findUserBlog, reqMockPostList } from "@/api"
+import { reqFollowingInfo, findUserBlog, reqMockPostList, reqMockAddPost } from "@/api"
+import { getAll } from "@/utils/storage"
 const state = {
     recommendInfo: [],
     followingInfo: [],
@@ -8,15 +9,28 @@ const state = {
     isMore: true
 }
 const actions = {
+    async postBlog({ commit }, { text, imgs }) {
+        const res = await reqMockAddPost(text, imgs)
+        if (res.code == 200) {
+            const imgs = await getAll(res.data.img);
+            res.data.img = imgs;
+            commit("POSTBLOG", res.data);
+            return res;
+        } else {
+            throw new Error("发布失败");
+        }
+    },
     async getRecommendInfo({ state, commit }) {
         if (!state.isMore) return
-        reqMockPostList(state.pageNo, state.pageSize).then(res => {
-            commit("GETRECOMMENDINFO", res.data)
-            if (res.data.length < state.pageSize) {
-                state.isMore = false
-            }
-            state.pageNo++;
-        })
+        const res = await reqMockPostList(state.pageNo, state.pageSize);
+        for (let i = 0; i < res.data.length; i++) {
+            res.data[i].img = await getAll(res.data[i].img);
+        }
+        commit("GETRECOMMENDINFO", res.data)
+        if (res.data.length < state.pageSize) {
+            state.isMore = false
+        }
+        state.pageNo++;
         // let result = await reqRecommendInfo(data.page, data.limit)
         // let followingList = await reqFollowingInfo(data.userId)
         // result.data.forEach(item => {
@@ -62,7 +76,16 @@ const actions = {
 
 }
 const mutations = {
+    POSTBLOG(state, postBlog) {
+        state.recommendInfo.unshift(postBlog)
+    },
     GETRECOMMENDINFO(state, recommendInfo) {
+        for (let i = 0; i < recommendInfo.length; i++) {
+            if (state.recommendInfo.find(item => item.id === recommendInfo[i].id)) {
+                recommendInfo.splice(i, 1)
+                i--;
+            }
+        }
         state.recommendInfo.push(...recommendInfo);
     },
     GETFOLLOWINGINFO(state, followingInfo) {

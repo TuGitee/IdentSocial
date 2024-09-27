@@ -47,8 +47,8 @@ Vue.prototype.$notify = (options) => {
   })
 }
 
-const originViewTransition = document.viewTransition || document.mozViewTransition || document.webkitViewTransition || document.msViewTransition || document.oViewTransition || (callback => callback());
-document.viewTransition = originViewTransition;
+import longpress from './directives/longpress';
+Vue.directive('longpress', longpress);
 
 new Vue({
   render: h => h(App),

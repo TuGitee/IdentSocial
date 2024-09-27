@@ -1,5 +1,5 @@
 <template>
-    <div class="upload">
+    <div class="upload" id="root">
         <div class="upload-header">
             <div class="upload-header-left" @click="goBack">
                 <i class="el-icon-arrow-left"></i>
@@ -9,26 +9,29 @@
                 <span class="upload-header-center-send">发表动态</span>
             </div>
             <div class="upload-header-right">
-                <span class="upload-header-right-send" @click="submit"><i class="el-icon-loading"
-                        v-if="isLoading"></i>发布</span>
+                <button class="upload-header-right-send" @click="submit" :disabled="isLoading || !textarea && !fileList.length">
+                    <i class="el-icon-loading" v-if="isLoading"></i>发布
+                </button>
             </div>
         </div>
         <div class="upload-content">
             <el-input type="textarea" :rows="4" placeholder="这一刻的想法..." v-model="textarea" resize="none"
                 autosize></el-input>
-            <el-upload action="#" class="upload-content-image" list-type="picture-card" ref="upload" :auto-upload="false"
-                multiple :limit="9" :on-change="handleChange" accept="image/*">
+            <el-upload action="#" class="upload-content-image" list-type="picture-card" ref="upload"
+                :auto-upload="false" multiple :limit="9" :on-change="handleChange" accept="image/*" close>
                 <i slot="default" class="el-icon-plus"></i>
 
                 <div slot="file" slot-scope="{file}">
-                    <img class="el-upload-list__item-thumbnail" :src="file.url" alt="" preview="上传文件" draggable="true">
+                    <img class="el-upload-list__item-thumbnail" :src="file.url" alt="" preview="上传文件" ref="preview">
+                    <div class="el-upload-list__item-actions">
+                        <span class="el-upload-list__item-delete" @click="handleRemove(file)">
+                            <i class="el-icon-delete"></i>
+                        </span>
+                        <span class="el-upload-list__item-preview" @click="handlePreview(file)">
+                            <i class="el-icon-zoom-in"></i>
+                        </span>
+                    </div>
                 </div>
-
-                <span class="el-upload-list__item-actions">
-                    <span class="el-upload-list__item-delete" @click="handleRemove(file)">
-                        <i class="el-icon-delete"></i>
-                    </span>
-                </span>
             </el-upload>
 
             <div class="upload-content-choices">
@@ -37,7 +40,8 @@
                         class="upload-content-choices-item-right"><i class="el-icon-arrow-right"></i></span>
                 </button>
                 <button class="upload-content-choices-item">
-                    <span class="upload-content-choices-item-left"><i class="el-icon-location-outline"></i>所在位置</span><span
+                    <span class="upload-content-choices-item-left"><i
+                            class="el-icon-location-outline"></i>所在位置</span><span
                         class="upload-content-choices-item-right"><i class="el-icon-arrow-right"></i></span>
                 </button>
                 <button class="upload-content-choices-item">
@@ -49,24 +53,36 @@
 
     </div>
 </template>
-  
+
 <script>
+import * as imageStorage from '@/utils/storage'
+import { v4 as uuid } from 'uuid';
 export default {
     name: "Upload",
     data() {
         return {
             textarea: '',
-            length: 0,
-            isLoading: false
+            isLoading: false,
+            fileList: []
         }
     },
     methods: {
         goBack() {
             this.$router.go(-1)
         },
+        handlePreview(file) {
+            Array.from(document.querySelectorAll(".el-upload-list__item-thumbnail")).forEach(item => {
+                if (item.src === file.url) {
+                    item.click();
+                }
+            })
+        },
+        handleRemove(file) {
+            this.$refs.upload.uploadFiles = this.$refs.upload.uploadFiles.filter(item => item !== file)
+        },
         handleChange(file, fileList) {
-            this.length = fileList.length
             if (fileList.length > 9) {
+                this.$message.error('最多上传9张图片');
                 return;
             }
             this.$previewRefresh()
@@ -74,96 +90,116 @@ export default {
         async submit() {
             if (this.isLoading) return;
             this.isLoading = true;
-            let files = this.$refs.upload.uploadFiles
-            // files压缩
+            let files = this.$refs.upload.uploadFiles;
+            const fileList = []
             for (let i = 0; i < files.length; i++) {
-                let file = files[i].raw
-                let reader = new FileReader()
-                reader.readAsDataURL(file)
-                await new Promise((resolve) => {
-                    reader.onload = (e) => {
-                        let img = new Image()
-                        img.src = e.target.result
-                        img.onload = () => {
-                            let canvas = document.createElement('canvas')
-                            let ctx = canvas.getContext('2d')
-                            let width = img.width
-                            let height = img.height
-                            canvas.width = width
-                            canvas.height = height
-                            ctx.drawImage(img, 0, 0, width, height)
-                            let base64 = canvas.toDataURL('image/jpeg', 0.5)
-                            files[i].raw = this.dataURLtoFile(base64, file.name)
-                            resolve()
-                        }
-                    }
-                })
+                const id = uuid();
+                await imageStorage.set(id, files[i].raw);
+                fileList[i] = id;
             }
-            console.log(files);
-
-            let filesList = []
-            for (let i = 0; i < files.length; i++) {
-                const fd = new FormData()
-                fd.append('picture', files[i].raw)
-                try {
-                    let res = await this.$api.post("/picture/upload", fd, {
-                        headers: {
-                            'Content-Type': 'multipart/form-data'
-                        }
-                    })
-                    if (res.status !== 200) {
-                        this.$notify({
-                            title: "错误",
-                            message: "上传失败",
-                            duration: 2000,
-                            type: "error"
-                        })
-                        return;
-                    }
-                    filesList.push(res.data.data.link)
-                } catch (err) {
-                    this.isLoading = false;
-                    this.$notify({
-                        title: "错误",
-                        message: "上传失败",
-                        duration: 2000,
-                        type: "error",
-                    })
-                    return;
-                }
-            }
-
-            this.$blogAxios.post('/post', {
-                content: this.textarea,
-                userId: this.$store.state.user.token
-            }).then(res => {
-                this.textarea = ''
-
-                this.$blogAxios.post(`/picture`, {
-                    postId: res.data.data,
-                    paths: filesList
-                }).catch(err => {
-                    throw new Error('fail');
-                })
-
-                this.$notify({
-                    title: "成功",
-                    message: "发布成功",
-                    type: "success",
-                    duration: 2000,
-                    
-                })
-                this.isLoading = false;
-                this.$router.go(-1)
+            this.$store.dispatch("postBlog", { text: this.textarea, imgs: fileList }).then(() => {
+                setTimeout(() => {
+                    this.$router.back();
+                });
             }).catch(() => {
-                this.isLoading = false;
                 this.$notify({
-                    title: "错误",
-                    message: "发布失败",
-                    duration: 2000,
-                    type: "error",
+                    title: '失败',
+                    message: '发布失败',
+                    type: 'error',
+                    duration: 2000
                 })
+            }).finally(() => {
+                this.isLoading = false;
             })
+
+            // files压缩
+            // for (let i = 0; i < files.length; i++) {
+            //     let file = files[i].raw
+            //     let reader = new FileReader()
+            //     reader.readAsDataURL(file)
+            //     await new Promise((resolve) => {
+            //         reader.onload = (e) => {
+            //             let img = new Image()
+            //             img.src = e.target.result
+            //             img.onload = () => {
+            //                 let canvas = document.createElement('canvas')
+            //                 let ctx = canvas.getContext('2d')
+            //                 let width = img.width
+            //                 let height = img.height
+            //                 canvas.width = width
+            //                 canvas.height = height
+            //                 ctx.drawImage(img, 0, 0, width, height)
+            //                 let base64 = canvas.toDataURL('image/jpeg', 0.5)
+            //                 files[i].raw = this.dataURLtoFile(base64, file.name)
+            //                 resolve()
+            //             }
+            //         }
+            //     })
+            // }
+
+            // let filesList = []
+            // for (let i = 0; i < files.length; i++) {
+            //     const fd = new FormData()
+            //     fd.append('picture', files[i].raw)
+            //     try {
+            //         let res = await this.$api.post("/picture/upload", fd, {
+            //             headers: {
+            //                 'Content-Type': 'multipart/form-data'
+            //             }
+            //         })
+            //         if (res.status !== 200) {
+            //             this.$notify({
+            //                 title: "错误",
+            //                 message: "上传失败",
+            //                 duration: 2000,
+            //                 type: "error"
+            //             })
+            //             return;
+            //         }
+            //         filesList.push(res.data.data.link)
+            //     } catch (err) {
+            //         this.isLoading = false;
+            //         this.$notify({
+            //             title: "错误",
+            //             message: "上传失败",
+            //             duration: 2000,
+            //             type: "error",
+            //         })
+            //         return;
+            //     }
+            // }
+
+            // this.$blogAxios.post('/post', {
+            //     content: this.textarea,
+            //     userId: this.$store.state.user.token
+            // }).then(res => {
+            //     this.textarea = ''
+
+            //     this.$blogAxios.post(`/picture`, {
+            //         postId: res.data.data,
+            //         paths: filesList
+            //     }).catch(err => {
+            //         throw new Error('fail');
+            //     })
+
+            //     this.$notify({
+            //         title: "成功",
+            //         message: "发布成功",
+            //         type: "success",
+            //         duration: 2000,
+
+            //     })
+            //     this.isLoading = false;
+            //     this.$router.go(-1)
+            // }).catch(() => {
+            //     this.isLoading = false;
+            //     this.$notify({
+            //         title: "错误",
+            //         message: "发布失败",
+            //         duration: 2000,
+            //         type: "error",
+            //     })
+            // })
 
         },
         dataURLtoFile(dataurl, filename) {
@@ -180,7 +216,6 @@ export default {
             })
         },
         clearAll() {
-            if (this.length === 0) return;
             this.$confirm("确认删除所有图片？", "提示", {
                 confirmButtonText: "确定",
                 cancelButtonText: "取消",
@@ -192,11 +227,14 @@ export default {
         },
     },
     mounted() {
+        this.fileList = this.$refs.upload.uploadFiles || [];
     }
 }
 </script>
-  
+
 <style scoped lang="less">
+@import "@/css/user.less";
+
 .upload {
     width: 100%;
     height: 100%;
@@ -209,10 +247,10 @@ export default {
     }
 
     .upload-header {
-        width: 100%;
-        padding: .5rem 1rem;
-        padding-top: calc(constant(safe-area-inset-top) + 0.5rem);
-        padding-top: calc(env(safe-area-inset-top) + 0.5rem);
+        width: calc(100% - 2.4rem);
+        padding: .5rem 0rem;
+        // padding-top: calc(constant(safe-area-inset-top) + 0.5rem);
+        // padding-top: calc(env(safe-area-inset-top) + 0.5rem);
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -255,20 +293,25 @@ export default {
                 background-color: @purple;
                 line-height: 1;
                 border-radius: .5rem;
+                border: none;
                 padding: .5rem .7rem;
+
+                &:disabled {
+                    filter: brightness(.9);
+                }
             }
         }
     }
 
     .upload-content {
-        width: 100%;
+        width: calc(100% - 2.4rem);
         position: fixed;
         overflow: scroll;
         top: calc(constant(safe-area-inset-top) + 3rem);
         top: calc(env(safe-area-inset-top) + 3rem);
         height: calc(100vh - constant(safe-area-inset-top) - 3rem);
         height: calc(100vh - env(safe-area-inset-top) - 3rem);
-        padding: 0 1.2rem;
+        // padding: 0 1.2rem;
 
         /deep/ .el-textarea {
 
@@ -277,6 +320,9 @@ export default {
                 line-height: 1.5;
                 font-size: 1rem;
                 user-select: text;
+                padding-left: 0;
+                padding-right: 0;
+                background-color: transparent;
             }
         }
 
@@ -284,7 +330,7 @@ export default {
             margin-top: 4rem;
             user-select: none;
 
-            @image-size: calc((100vw - 5.4rem) / 3);
+            @image-size: calc((100vw - 5.6rem) / 3);
 
             /deep/ .el-upload--picture-card {
                 margin: 0.5rem;
