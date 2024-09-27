@@ -1,12 +1,14 @@
 import { getToken, setToken } from "@/utils/token";
-import { reqMockUser } from "@/api";
+import { reqMockFollowList, reqMockUser } from "@/api";
 const getters = {
 }
 const actions = {
     async getUserInfo(state) {
         let result = await reqMockUser(state.state.token);
         // let result = await reqUserInfo(state.state.token);
-        if (result.code) {
+        if (result.code == 200) {
+            const followingList = await reqMockFollowList();
+            result.data.followingList = followingList.data || [];
             state.commit("GETUSERINFO", result.data);
         } else {
             return Promise.reject(new Error("Request Fail!"));

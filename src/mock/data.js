@@ -7,6 +7,7 @@ const images = await getAllKeys();
 const userCount = 100;
 const postCount = 100;
 const commentCount = 1000;
+const followCount = userCount * userCount / 3;
 
 export const mockUser = (email, password, id = uuid()) => Mock.mock({
     id,
@@ -49,7 +50,6 @@ export const generateMockUsers = (n = userCount) => {
     for (let i = 0; i < n; i++) {
         users.push(mockUser());
     }
-    localStorage.setItem('userList', JSON.stringify(users));
     return users;
 };
 
@@ -79,7 +79,6 @@ export const generateMockPosts = (n = postCount) => {
         posts.push(mockPost());
     }
     posts.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
-    localStorage.setItem('postList', JSON.stringify(posts));
     return posts;
 };
 
@@ -96,8 +95,41 @@ export const mockComment = (uid, bid, cid, text, time, id = uuid()) => Mock.mock
 
 export const generateMockComments = (n = commentCount) => {
     const commentList = Array.from({ length: n }).map(() => mockComment(userList[Math.floor(Math.random() * userList.length)].id, postList[Math.floor(Math.random() * postList.length)].id, null, '@cparagraph')).sort((a, b) => new Date(b.time) - new Date(a.time));
-    localStorage.setItem('commentList', JSON.stringify(commentList));
     return commentList;
 }
 
 export const commentList = localStorage.getItem('commentList') ? JSON.parse(localStorage.getItem('commentList')) : generateMockComments();
+
+export const mockFollow = (fid, uid, time, isFollow = true, id = uuid()) => Mock.mock({ id, fid, uid, isFollow, time: time ?? Mock.Random.datetime('yyyy/MM/dd HH:mm:ss') });
+
+export const generateMockFollow = (n = followCount) => {
+    const followList = [];
+    for (let i = 0; i < n; i++) {
+        const fid = userList[Math.floor(Math.random() * userList.length)].id;
+        const uid = userList[Math.floor(Math.random() * userList.length)].id;
+        if (fid === uid) {
+            i--;
+            continue;
+        }
+        followList.push(mockFollow(fid, uid, null));
+    }
+    return followList;
+}
+
+export const followList = localStorage.getItem('followList') ? JSON.parse(localStorage.getItem('followList')) : generateMockFollow();
+
+export function checkFollow() {
+    userList.forEach(user => {
+        user.following = followList.filter(follow => follow.uid === user.id).length;
+        user.followers = followList.filter(follow => follow.fid === user.id).length;
+    })
+}
+
+export function checkComment() {
+    postList.forEach(post => {
+        post.comment = commentList.filter(comment => comment.bid === post.id).length;
+    })
+}
+
+checkFollow();
+checkComment();

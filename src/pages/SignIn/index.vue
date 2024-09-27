@@ -10,7 +10,7 @@
       <div class="sign-in-box">
         <h2 class="sign-in-box-title">登录</h2>
         <p class="sign-in-box-message">使用您的账号登录。</p>
-        <form>
+        <form @submit.prevent="submit" action="#">
           <div>
             <i class="el-icon-mobile sign-in-box-icon"></i>
             <input type="email" class="sign-in-box-mail" v-model="mail" placeholder="输入您的邮箱" @keyup="regCheck" />
@@ -29,7 +29,7 @@
               <i class="el-icon-warning-outline"></i>
             </el-tooltip>
           </div>
-          <button :class="{ active: isActive }" class="sign-in-box-submit" @click="goHome" @keydown.enter="goHome">
+          <button :class="{ active: isActive }" class="sign-in-box-submit">
             <i class="el-icon-right"></i>
           </button>
         </form>
@@ -65,7 +65,7 @@ export default {
         this.isActive = false;
       }
     },
-    async goHome() {
+    async submit() {
       if (this.isActive && this.isExit) {
         // let res = await this.$userAxios.post("/user/login", {
         //   email: this.mail,

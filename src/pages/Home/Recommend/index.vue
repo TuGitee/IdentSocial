@@ -1,20 +1,20 @@
 <template>
   <div id="box" ref="root">
-    <BlogItem v-for="item in recommendInfo" :key="item.id" :item="item" />
+    <BlogItem v-for="item in postList" :key="item.id" :item="item" />
   </div>
 </template>
 
 <script>
 import BlogItem from '@/components/BlogItem.vue';
-import { mapState } from 'vuex';
+import { mapGetters } from 'vuex';
 export default {
   name: "Recommend",
   components: {
     BlogItem
   },
   computed: {
-    ...mapState({
-      recommendInfo: state => state.home.recommendInfo,
+    ...mapGetters({
+      postList: 'sortedPostList'
     })
   },
   methods: {

@@ -10,7 +10,8 @@
             </div>
             <div class="upload-header-right">
                 <button class="upload-header-right-send" @click="submit" :disabled="isLoading || !textarea && !fileList.length">
-                    <i class="el-icon-loading" v-if="isLoading"></i>发布
+                    <i class="el-icon-loading" v-if="isLoading"></i>
+                    <span v-else>发布</span>
                 </button>
             </div>
         </div>
@@ -35,10 +36,6 @@
             </el-upload>
 
             <div class="upload-content-choices">
-                <button class="upload-content-choices-item" @click="clearAll">
-                    <span class="upload-content-choices-item-left"><i class="el-icon-delete"></i>清空所有图片</span><span
-                        class="upload-content-choices-item-right"><i class="el-icon-arrow-right"></i></span>
-                </button>
                 <button class="upload-content-choices-item">
                     <span class="upload-content-choices-item-left"><i
                             class="el-icon-location-outline"></i>所在位置</span><span
@@ -214,17 +211,7 @@ export default {
             return new File([u8arr], filename, {
                 type: mime
             })
-        },
-        clearAll() {
-            this.$confirm("确认删除所有图片？", "提示", {
-                confirmButtonText: "确定",
-                cancelButtonText: "取消",
-                type: "warning",
-                closeOnClickModal: true,
-            }).then(() => {
-                this.$refs.upload.clearFiles()
-            }).catch(() => { })
-        },
+        }
     },
     mounted() {
         this.fileList = this.$refs.upload.uploadFiles || [];
@@ -262,8 +249,9 @@ export default {
         .upload-header-left {
             width: fit-content;
             height: 100%;
+            width: 4rem;
             display: flex;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
 
             i {
@@ -283,12 +271,14 @@ export default {
 
         .upload-header-right {
             height: 100%;
+            width: 4rem;
             display: flex;
             justify-content: center;
             align-items: center;
 
             .upload-header-right-send {
                 font-size: 1rem;
+                width: 100%;
                 color: white;
                 background-color: @purple;
                 line-height: 1;
@@ -330,18 +320,21 @@ export default {
             margin-top: 4rem;
             user-select: none;
 
-            @image-size: calc((100vw - 5.6rem) / 3);
+            @image-size: calc((100vw - 3.8rem) / 3);
 
             /deep/ .el-upload--picture-card {
-                margin: 0.5rem;
+                margin: 0.2rem;
                 width: @image-size;
                 height: @image-size;
                 line-height: @image-size;
             }
 
             /deep/ .el-upload-list--picture-card {
+                line-height: 0;
+                font-size: 0;
+
                 .el-upload-list__item {
-                    margin: 0.5rem;
+                    margin: 0.2rem;
                     border: none;
                     border-radius: .5rem;
                     width: @image-size;
@@ -381,6 +374,9 @@ export default {
                 justify-content: space-between;
                 align-items: center;
 
+                &:last-child {
+                    border-bottom: 0.5px solid #ddd;
+                }
 
                 .upload-content-choices-item-left {
                     font-size: 1rem;

@@ -22,7 +22,7 @@ export default {
   },
   computed: {
     ...mapState({
-      nearbyInfo: state => state.home.nearbyInfo,
+      nearbyInfo: state => state.post.nearbyInfo,
     })
   },
 }

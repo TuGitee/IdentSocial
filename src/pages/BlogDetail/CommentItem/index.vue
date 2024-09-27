@@ -126,15 +126,15 @@ export default {
 <style lang="less" scoped>
 .comment-item {
     display: flex;
-    padding: 16px 0;
+    padding: 12px 10px 16px;
 
     &:not(:last-child) {
         border-bottom: 1px solid #eee;
     }
 
     .comment-item-left {
-        width: 3rem;
-        height: 3rem;
+        width: 2rem;
+        height: 2rem;
         border-radius: 50%;
         overflow: hidden;
 
@@ -163,6 +163,7 @@ export default {
         .comment-item-right-top {
             display: flex;
             justify-content: space-between;
+            align-items: center;
 
             &>a {
                 overflow: hidden;
@@ -221,23 +222,23 @@ export default {
                             justify-content: space-between;
 
                             .comment-item-right-bottom-list-item-right-top-name {
-                                font-size: 0.8rem;
+                                font-size: 1rem;
                                 font-weight: 700;
                                 color: #333;
                                 word-break: break-all;
                             }
 
                             .comment-item-right-bottom-list-item-right-top-time {
-                                font-size: 0.6rem;
+                                font-size: 0.8rem;
                                 color: #999;
+                                white-space: nowrap;
                             }
                         }
 
                         .comment-item-right-bottom-list-item-right-bottom {
-                            margin-top: 5px;
 
                             .comment-item-right-bottom-list-item-right-bottom-text {
-                                font-size: 0.8rem;
+                                font-size: 1rem;
                                 color: #333;
                             }
                         }

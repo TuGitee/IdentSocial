@@ -17,7 +17,7 @@ export default {
   },
   computed: {
     ...mapState({
-      followingInfo: state => state.home.followingInfo,
+      followingInfo: state => state.post.followingInfo,
     })
   },
 }
@@ -28,6 +28,5 @@ export default {
   width: 100%;
   height: fit-content;
   margin-top: 1rem;
-  padding-bottom: 2rem;
 }
 </style>

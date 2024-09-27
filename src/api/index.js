@@ -12,6 +12,8 @@ export const reqMockPost = (id) => mockRequest.get(`/post/${id}`);
 export const reqMockAddPost = (text, imgs) => mockRequest.post(`/post`, { text, imgs, uid: getToken() });
 export const reqMockPostComment = (id) => mockRequest.get(`/comment/${id}`);
 export const reqMockAddPostComment = (bid, cid, text) => mockRequest.post(`/comment`, { cid, text, bid, uid: getToken() });
+export const reqMockFollow = (fid, isFollow) => mockRequest.post(`/follow`, { fid, isFollow, uid: getToken() });
+export const reqMockFollowList = () => mockRequest.get(`/follow/${getToken()}`);
 export const reqUserInfo = (id) => userRequest.get(`/user?userId=${id}`);
 export const reqRecommendInfo = (cur, pagesize) => blogRequest.get(`/post/recommend?current=${cur}&pageSize=${pagesize}`);
 export const reqFollowingInfo = (id) => userRequest.get(`/relationship/1?userId=${id}`);

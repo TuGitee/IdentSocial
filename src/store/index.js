@@ -4,11 +4,11 @@ Vue.use(Vuex)
 
 
 import user from './user'
-import home from './home'
+import post from './post'
 
 export default new Vuex.Store({
     modules: {
         user,
-        home,
+        post,
     }
 })

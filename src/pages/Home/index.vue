@@ -11,8 +11,8 @@
     <div class="home-middle">
       <div class="home-middle-scroll">
         <ul class="home-middle-list">
-          <li class="home-middle-list-item" v-for="(item, index) in recommendInfo.slice(0, 8)" :key="item.postId">
-            <img :src="require(`@/assets/images/${index}.png`)" alt="" />
+          <li class="home-middle-list-item" v-for="(user) in userList" :key="user.id">
+            <img :src="user.avatar" alt="" />
           </li>
         </ul>
       </div>
@@ -43,9 +43,11 @@ import MonitorKeyboard from "@/utils/MonitorKeyboard";
 export default {
   name: "Home",
   mounted() {
+    if (this.postList.length <= this.pageSize) {
+      this.getData();
+    }
     this.$store.dispatch("getUserInfo");
     this.getKeyboardState();
-    this.getData();
     this.$bus.$on("forward", (data) => {
       this.to = data;
       this.isComment = true;
@@ -54,19 +56,7 @@ export default {
     this.activeName = this.$route.name;
 
     window.addEventListener("scroll", this.handleScroll);
-    window.addEventListener("scroll", () => {
-      if (this.timer) return;
-      if (window.scrollY + window.innerHeight >= this.$refs?.root?.offsetHeight) {
-        this.timer = setTimeout(() => {
-          this.getData()
-          this.timer = null;
-        }, 300);
-      }
-    });
-
-    this.$bus.$on('reload', () => {
-      location.reload();
-    })
+    window.addEventListener("scroll", this.handleFetchData);
   },
   data() {
     return {
@@ -77,26 +67,58 @@ export default {
       text: "",
       monitorKeyboard: null,
       timer: null,
+      isScrolling: false,
     };
   },
   computed: {
     ...mapState({
       userInfo: (state) => state.user.userInfo,
-      recommendInfo: (state) => state.home.recommendInfo,
-      followingList: (state) => state.home.followingList,
+      postList: (state) => state.post.postList,
+      followingList: (state) => state.post.followingList,
+      pageSize: (state) => state.post.pageSize,
     }),
+    userList() {
+      const arr = [];
+      for (let i = 0; i < this.postList.length; i++) {
+        if (arr.find(item => item.id === this.postList[i].user.id)) {
+          continue;
+        } else {
+          arr.push(this.postList[i].user);
+        }
+      }
+      return arr;
+    }
   },
   beforeDestroy() {
     this.monitorKeyboard.onEnd();
     window.removeEventListener("scroll", this.handleScroll);
+    window.removeEventListener("scroll", this.handleFetchData);
   },
   methods: {
     getData() {
-      this.$store.dispatch("getRecommendInfo");
+      this.$store.dispatch("getPostList");
     },
     handleClick(tab, event) {
       event.preventDefault();
       this.$router.push({ path: tab.name });
+    },
+    handleFetchData() {
+      if (this.timer) return;
+      if (window.scrollY + window.innerHeight >= this.$refs?.root?.offsetHeight) {
+        this.timer = setTimeout(() => {
+          this.getData();
+          this.timer = null;
+        }, 300);
+      } else if (window.scrollY <= 0 && !this.isScrolling) {
+        this.isScrolling = true;
+        this.timer = setTimeout(() => {
+          this.$store.commit("RESET");
+          this.getData();
+          this.timer = null;
+        }, 1000);
+      } else if (window.scrollY > 0) {
+        this.isScrolling = false;
+      }
     },
     handleScroll() {
       if (this.$refs.mask)
@@ -127,7 +149,6 @@ export default {
       this.monitorKeyboard.onStart();
 
       this.monitorKeyboard.onShow(() => {
-        console.log(2);
         this.isComment = true;
         this.$route.meta.footerShow = false;
       });
@@ -300,9 +321,9 @@ export default {
     width: 100vw;
     height: calc(constant(safe-area-inset-top) + @nav-height);
     height: calc(env(safe-area-inset-top) + @nav-height);
-    background: linear-gradient(rgba(255, 255, 255, 1) 70%, rgba(255, 255, 255, 0));
+    background: linear-gradient(#ffffff, #ffffff11);
     z-index: 999;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(20px);
     opacity: 0;
   }
 

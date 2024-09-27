@@ -12,11 +12,11 @@
                     {{ formatTime(item.time) }}
                 </div>
             </div>
-            <div class="blog-item-header-focus">
-                <button class="blog-item-header-focus-button" v-if="!isFollow" @click="follow(item.userId)"><i
+            <div class="blog-item-header-focus" v-if="item.uid !== userInfo.id">
+                <button class="blog-item-header-focus-button" v-if="!isFollow" @click="follow(item.uid)"><i
                         class="el-icon-plus" v-if="!isFollowLoading"></i><i class="el-icon-loading" v-else></i>
                     关注</button>
-                <button class="blog-item-header-focus-button" @click="unfollow(item.userId)" v-else><i
+                <button class="blog-item-header-focus-button" @click="unfollow(item.uid)" v-else><i
                         class="el-icon-check"></i>
                     已关注</button>
             </div>
@@ -25,9 +25,9 @@
             <div class="blog-item-content-text" v-if="item.text">
                 {{ item.text }}
             </div>
-            <ul class="blog-item-content-img">
-                <li class="blog-item-content-img-item" v-for="(img, ii) in item.img" :key="ii">
-                    <el-image fit="cover" :src="img" :preview="item.id"></el-image>
+            <ul class="blog-item-content-img" v-if="item.img">
+                <li class="blog-item-content-img-item" v-for="(_, ii) in item.img" :key="ii">
+                    <img fit="cover" :src="imgList[ii]" :preview="item.id">
                 </li>
             </ul>
             <div class="blog-item-content-share" v-if="item.postFrom" @click="toRawBlog(item.postFrom)">
@@ -63,28 +63,37 @@
 </template>
 
 <script>
-import { get } from '@/utils/storage';
+import { getAll } from '@/utils/storage';
+import { mapState } from 'vuex';
 
 export default {
     name: "BlogItem",
     props: {
         item: {
             type: Object,
-            default: () => { }
+            default: () => ({})
         }
     },
     data() {
         return {
             isLike: false,
             isFollowLoading: false,
-            userInfo: {},
             postFrom: {},
             isFollow: false,
             imgList: [],
             starNum: this.item.like ?? 0,
         }
     },
+    computed: {
+        ...mapState({
+            userInfo: state => state.user.userInfo,
+        })
+    },
     methods: {
+        async init() {
+            const imgs = await getAll(this.item.img);
+            this.imgList = imgs;
+        },
         random(min, max) {
             return Math.floor(Math.random() * (max - min + 1) + min);
         },
@@ -94,11 +103,6 @@ export default {
                 params: {
                     uid: id
                 }
-            })
-        },
-        getImage(img) {
-            return get(img).then(res => {
-                return URL.createObjectURL(res);
             })
         },
         async onForward() {
@@ -118,32 +122,27 @@ export default {
             let t = new Date(time);
             return `${t.getFullYear()}-${t.getMonth() + 1}-${t.getDate()} ${t.getHours() < 10 ? '0' + t.getHours() : t.getHours()}:${t.getMinutes() < 10 ? '0' + t.getMinutes() : t.getMinutes()}:${t.getSeconds() < 10 ? '0' + t.getSeconds() : t.getSeconds()}`;
         },
-        async getUserInfo(id) {
-            let res = await this.$userAxios.get(`/user?userId=${id}`);
-            this.userInfo = res.data.data;
-        },
         follow(id) {
             this.isFollowLoading = true;
-            const fd = new FormData();
-            fd.append('fanId', id);
-            fd.append('userId', this.$store.state.user.token);
-            this.$userAxios.post('/relationship', fd, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            }).then(() => {
-                this.isFollow = true;
-                this.isFollowLoading = false;
-                this.$bus.$emit('follow', id);
-            }).catch(err => {
-                this.isFollowLoading = false;
-                this.$notify({
-                    title: '关注失败',
-                    message: err.response.data.message,
-                    type: 'error'
-                })
-            })
-
+            // const fd = new FormData();
+            // fd.append('fanId', id);
+            // fd.append('userId', this.$store.state.user.token);
+            // this.$userAxios.post('/relationship', fd, {
+            //     headers: {
+            //         'Content-Type': 'multipart/form-data'
+            //     }
+            // }).then(() => {
+            //     this.isFollow = true;
+            //     this.isFollowLoading = false;
+            //     this.$bus.$emit('follow', id);
+            // }).catch(err => {
+            //     this.isFollowLoading = false;
+            //     this.$notify({
+            //         title: '关注失败',
+            //         message: err.response.data.message,
+            //         type: 'error'
+            //     })
+            // })
         },
         unfollow(id) {
             this.isFollowLoading = true;
@@ -200,7 +199,8 @@ export default {
         }
     },
     mounted() {
-        this.isFollow = this.item.isFollow;
+        this.init();
+        this.isFollow = this.userInfo.followingList?.find((item) => item.id === this.item.uid);
         this.isLike = this.item.isLike;
         // this.$blogAxios.get(`/picture/1?postId=${this.item.postId}`).then(res => {
         //     this.imgList = res.data.data
@@ -227,21 +227,6 @@ export default {
             this.$previewRefresh();
         })
     },
-    watch: {
-        // item: {
-        //     handler() {
-        //         this.$nextTick(() => {
-        //             try {
-        //                 this.getUserInfo(this.item.userId);
-        //                 if (this.item.postFrom && !this.postFrom.name) {
-        //                     this.searchBlog(this.item.postFrom);
-        //                 }
-        //             } catch (e) { }
-        //         })
-        //     },
-        //     deep: true,
-        // }
-    }
 }
 </script>
 
@@ -268,6 +253,7 @@ export default {
             img {
                 width: 100%;
                 height: 100%;
+                border: none;
             }
         }
 
@@ -355,12 +341,22 @@ export default {
                     border-radius: 10px;
                     object-fit: cover;
                     width: 100%;
+                    border: none;
+                    outline: none;
                     height: 100%;
                 }
 
                 .el-image {
                     width: 100%;
                     height: 100%;
+
+                    .image-slot {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        width: 100%;
+                        height: 100%;
+                    }
                 }
             }
 

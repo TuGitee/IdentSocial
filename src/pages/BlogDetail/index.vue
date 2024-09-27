@@ -1,5 +1,5 @@
 <template>
-    <div class="blog-detail">
+    <div class="blog-detail" id="root">
         <div class="blog-header" @dblclick="toTop">
             <div class="blog-header-left" @click="goBack">
                 <i class="el-icon-arrow-left"></i>
@@ -14,8 +14,8 @@
             </div>
         </div>
         <div class="blog-content">
-            <BlogItem v-if="item" :item="item" @click="comment"></BlogItem>
-            <CommentItem v-for="comment in commentList" :key="comment.commentId" :userList="userList" :comment="comment"
+            <BlogItem v-if="currentPost" :item="currentPost" @click="comment"></BlogItem>
+            <CommentItem v-for="comment in commentList" :key="comment.commentId" :comment="comment"
                 @click="changeTarget" ref="comments" />
         </div>
         <div class="blog-footer" @click.stop v-if="isComment">
@@ -29,9 +29,9 @@
 <script>
 import BlogItem from "@/components/BlogItem.vue";
 import CommentItem from "./CommentItem";
-import { get } from "@/utils/storage";
 import MonitorKeyboard from '@/utils/MonitorKeyboard.js'
-import { reqMockAddPostComment, reqMockPost, reqMockPostComment } from "@/api";
+import { reqMockAddPostComment, reqMockPostComment } from "@/api";
+import { mapState } from "vuex";
 export default {
     name: "BlogDetail",
     components: {
@@ -40,7 +40,6 @@ export default {
     },
     data() {
         return {
-            item: null,
             monitorKeyboard: null,
             isComment: false,
             text: '',
@@ -54,12 +53,10 @@ export default {
             this.target = comment;
         },
         async init() {
-            // let res = await this.$blogAxios.get(`/post?postId=${this.$route.params.bid}`)
-            const res = await reqMockPost(this.$route.params.bid);
-            this.item = res.data;
-            this.item.img = await Promise.all(this.item.img.map(item=>get(item)))
-            this.item.img = this.item.img.map(item=>URL.createObjectURL(item))
-            this.getKeyboardState();
+            this.isComment = false;
+            this.text = '';
+            this.target = null;
+            await this.$store.dispatch("getPost", this.bid);
             this.getCommentList();
         },
         closeComment() {
@@ -74,35 +71,9 @@ export default {
         publish() {
             if (!this.text.trim()) return;
             reqMockAddPostComment(this.bid, this.target?.id, this.text).then(() => {
-                this.$notify({
-                    title: "成功",
-                    message: "评论成功",
-                    type: "success",
-                    duration: 2000,
-                })
-                this.isComment = false;
-                this.text = '';
-                this.target = null;
+                this.init();
                 this.getCommentList();
             })
-            // this.$blogAxios.post('/comment', {
-            //     content: this.text,
-            //     userId: this.$store.state.user.token,
-            //     belongPost: this.bid,
-            //     belongComment: this.target ? this.target : null
-            // }).then(() => {
-            //     this.$notify({
-            //         title: "成功",
-            //         message: "评论成功",
-            //         type: "success",
-            //         duration: 2000,
-
-            //     })
-            //     this.isComment = false;
-            //     this.text = '';
-            //     this.$router.go(0);
-            //     location.reload();
-            // })
         },
         comment() {
             this.toggleComment();
@@ -130,7 +101,6 @@ export default {
             })
         },
         async getCommentList() {
-            // let res = await this.$blogAxios.get(`/comment/post?postId=${this.bid}`)
             const res = await reqMockPostComment(this.bid);
             const tree = []
             res.data.forEach(item => {
@@ -158,35 +128,30 @@ export default {
         },
     },
     computed: {
+        ...mapState({
+            currentPost: state => state.post.currentPost
+        }),
         placeholder() {
             return this.target ? `回复 ${this.target.user.nickname} : ${this.target.text}` : "说点什么";
         },
         bid() {
             return this.$route.params.bid
-        },
-        treeComment() {
-            let res = [];
-            this.commentList.forEach(item => {
-                if (item.commentTo === -1) {
-                    res.push(item);
-                }
-            })
-            return res;
-        },
-        userList() {
-            return [...new Set((this.commentList.map(item => [item.userId, item.commentTo])).flat(Infinity))].filter(item => item);
         }
     },
-    mounted() {
+    async mounted() {
         this.init();
+        this.getKeyboardState();
     },
     beforeDestroy() {
+        this.$store.commit("RESETCURRENTPOST");
         this.monitorKeyboard.onEnd();
     }
 }
 </script>
 
 <style scoped lang="less">
+@import "@/css/user.less";
+
 .blog-detail {
     width: 100%;
     height: 100%;
@@ -194,18 +159,17 @@ export default {
     flex-direction: column;
 
     .blog-header {
-        width: 100%;
+        width: calc(100% - 2.4rem);
         height: 3rem;
         height: calc(constant(safe-area-inset-top) + 3rem);
         height: calc(env(safe-area-inset-top) + 3rem);
-        padding-left: 1rem;
-        padding-right: 1rem;
         display: flex;
         justify-content: space-between;
         align-items: flex-end;
         font-size: 1rem;
         z-index: 999;
         position: fixed;
+        top: 0;
         user-select: none;
 
         * {
@@ -260,14 +224,13 @@ export default {
     }
 
     .blog-content {
-        width: 100%;
+        width: calc(100% - 2.4rem);
         position: fixed;
         overflow: scroll;
         top: calc(constant(safe-area-inset-top) + 3rem);
         top: calc(env(safe-area-inset-top) + 3rem);
         height: calc(100vh - constant(safe-area-inset-top) - 3rem);
         height: calc(100vh - env(safe-area-inset-top) - 3rem);
-        padding: 0 1.2rem;
         padding-bottom: constant(safe-area-inset-bottom);
         padding-bottom: env(safe-area-inset-bottom);
 
