@@ -60,6 +60,7 @@ export const mockPost = (uid, text, time, img, id = uuid()) => Mock.mock({
     'text': text ?? '@cparagraph',
     'time': time ?? Mock.Random.datetime('yyyy/MM/dd HH:mm:ss'),
     img: img ?? (() => {
+        if (images.length === 0) return [];
         const imgCount = Mock.Random.integer(0, 5);
         const imgUrls = [];
         for (let j = 0; j < imgCount; j++) {
