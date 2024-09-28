@@ -51,7 +51,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 export default {
   name: "Me",
   data() {
@@ -101,6 +101,7 @@ export default {
   },
   computed: {
     ...mapState({ userInfo: state => state.user.userInfo ?? {} }),
+    ...mapGetters(['followCount']),
     followers() {
       if (this.userInfo.followers > 1000) {
         return (this.userInfo.followers / 1000).toFixed(1) + 'K';
@@ -109,10 +110,10 @@ export default {
       }
     },
     following() {
-      if (this.userInfo.following > 1000) {
-        return (this.userInfo.following / 1000).toFixed(1) + 'K';
+      if (this.followCount > 1000) {
+        return (this.followCount / 1000).toFixed(1) + 'K';
       } else {
-        return this.userInfo.following;
+        return this.followCount;
       }
     }
   }

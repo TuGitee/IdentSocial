@@ -12,13 +12,13 @@
                     {{ formatTime(item.time) }}
                 </div>
             </div>
-            <div class="blog-item-header-focus" v-if="item.uid !== userInfo.id">
-                <button class="blog-item-header-focus-button" v-if="!isFollow" @click="follow(item.uid)"><i
-                        class="el-icon-plus" v-if="!isFollowLoading"></i><i class="el-icon-loading" v-else></i>
-                    关注</button>
-                <button class="blog-item-header-focus-button" @click="unfollow(item.uid)" v-else><i
-                        class="el-icon-check"></i>
-                    已关注</button>
+            <div class="blog-item-header-focus" v-if="userInfo.id && item.uid !== userInfo.id">
+                <button class="blog-item-header-focus-button" :disabled="isFollowLoading" @click="follow(item.uid)">
+                    <i class="el-icon-loading" v-if="isFollowLoading"></i>
+                    <i class="el-icon-plus" v-else-if="!isFollow"></i>
+                    <i class="el-icon-check" v-else></i>
+                    <span>{{ isFollowLoading ? '处理中' : isFollow ? '已关注' : '关注' }}</span>
+                </button>
             </div>
         </div>
         <div class="blog-item-content">
@@ -27,7 +27,7 @@
             </div>
             <ul class="blog-item-content-img" v-if="item.img">
                 <li class="blog-item-content-img-item" v-for="(_, ii) in item.img" :key="ii">
-                    <img fit="cover" :src="imgList[ii]" :preview="item.id">
+                    <MyImage :src="imgList[ii]" :preview="item.id"></MyImage>
                 </li>
             </ul>
             <div class="blog-item-content-share" v-if="item.postFrom" @click="toRawBlog(item.postFrom)">
@@ -65,9 +65,13 @@
 <script>
 import { getAll } from '@/utils/storage';
 import { mapState } from 'vuex';
+import MyImage from './MyImage.vue';
 
 export default {
     name: "BlogItem",
+    components: {
+        MyImage
+    },
     props: {
         item: {
             type: Object,
@@ -79,7 +83,6 @@ export default {
             isLike: false,
             isFollowLoading: false,
             postFrom: {},
-            isFollow: false,
             imgList: [],
             starNum: this.item.like ?? 0,
         }
@@ -87,7 +90,17 @@ export default {
     computed: {
         ...mapState({
             userInfo: state => state.user.userInfo,
-        })
+        }),
+        isFollow: {
+            get() {
+                return this.userInfo.followingList?.find((item) => item.fid === this.item.uid)?.isFollow ?? false;
+            },
+            set(isFollow) {
+                const item = this.userInfo.followingList?.find((item) => item.fid === this.item.uid);
+                if (!item) return;
+                item.isFollow = isFollow;
+            }
+        }
     },
     methods: {
         async init() {
@@ -124,6 +137,9 @@ export default {
         },
         follow(id) {
             this.isFollowLoading = true;
+            this.$store.dispatch("followUser", { id, isFollow: !this.isFollow }).finally(() => {
+                this.isFollowLoading = false;
+            });
             // const fd = new FormData();
             // fd.append('fanId', id);
             // fd.append('userId', this.$store.state.user.token);
@@ -200,7 +216,6 @@ export default {
     },
     mounted() {
         this.init();
-        this.isFollow = this.userInfo.followingList?.find((item) => item.id === this.item.uid);
         this.isLike = this.item.isLike;
         // this.$blogAxios.get(`/picture/1?postId=${this.item.postId}`).then(res => {
         //     this.imgList = res.data.data
@@ -294,6 +309,10 @@ export default {
                 padding: 5px 10px;
                 border-radius: 5px;
                 box-shadow: 0px 3px 10px -5px @purple;
+
+                i {
+                    margin-right: 4px;
+                }
             }
         }
     }
@@ -315,54 +334,37 @@ export default {
             flex-wrap: wrap;
 
             &-item {
-                width: 32%;
-                height: 100px;
-                margin-top: 5px;
+                width: 40%;
+                padding-top: 40%;
+                margin-top: 2%;
+                position: relative;
 
                 &:not(:nth-child(3n)) {
                     margin-right: 2%;
-                }
-
-                &:nth-last-child(1):first-child img {
-                    width: 100%;
-                    height: 100%;
-                }
-
-                &:nth-last-child(4):first-child~&:nth-child(even) {
-                    margin-right: 32%;
                 }
 
                 &:nth-last-child(4):first-child~&:nth-child(odd) {
                     margin-right: 2%;
                 }
 
-
-                img {
-                    border-radius: 10px;
-                    object-fit: cover;
-                    width: 100%;
-                    border: none;
-                    outline: none;
-                    height: 100%;
+                &:nth-last-child(1):first-child {
+                    width: 50%;
+                    padding-top: 50%;
                 }
 
-                .el-image {
-                    width: 100%;
-                    height: 100%;
-
-                    .image-slot {
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        width: 100%;
-                        height: 100%;
-                    }
+                &:nth-last-child(3):first-child,
+                &:nth-last-child(3):first-child~&,
+                &:nth-last-child(n+5):first-child,
+                &:nth-last-child(n+5):first-child~& {
+                    width: 32%;
+                    padding-top: 32%;
                 }
-            }
 
-            &-item:nth-last-child(1):first-child {
-                width: 12rem;
-                height: 12rem;
+                .my-image {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                }
             }
         }
 

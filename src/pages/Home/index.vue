@@ -2,7 +2,7 @@
   <div id="root" class="home" ref="root">
     <header class="home-header">
       <h2 class="home-header-hello">你好，</h2>
-      <h1 class="home-header-name">{{ userInfo.nickname }}</h1>
+      <h1 class="home-header-name">{{ userInfo.nickname ?? '加载中...' }}</h1>
       <router-link to="/upload">
         <i class="el-icon-plus home-header-plus"></i>
       </router-link>
@@ -54,9 +54,9 @@ export default {
       this.$route.meta.footerShow = false;
     });
     this.activeName = this.$route.name;
+    this.el = window;
 
-    window.addEventListener("scroll", this.handleScroll);
-    window.addEventListener("scroll", this.handleFetchData);
+    this.el.addEventListener("scroll", this.handleScroll);
   },
   data() {
     return {
@@ -91,8 +91,7 @@ export default {
   },
   beforeDestroy() {
     this.monitorKeyboard.onEnd();
-    window.removeEventListener("scroll", this.handleScroll);
-    window.removeEventListener("scroll", this.handleFetchData);
+    this.el.removeEventListener("scroll", this.handleScroll);
   },
   methods: {
     getData() {
@@ -104,25 +103,26 @@ export default {
     },
     handleFetchData() {
       if (this.timer) return;
-      if (window.scrollY + window.innerHeight >= this.$refs?.root?.offsetHeight) {
+      if (this.el.scrollY + this.el.innerHeight >= this.$refs?.root?.offsetHeight) {
         this.timer = setTimeout(() => {
           this.getData();
           this.timer = null;
         }, 300);
-      } else if (window.scrollY <= 0 && !this.isScrolling) {
+      } else if (this.el.scrollY <= 0 && !this.isScrolling) {
         this.isScrolling = true;
         this.timer = setTimeout(() => {
           this.$store.commit("RESET");
           this.getData();
           this.timer = null;
         }, 1000);
-      } else if (window.scrollY > 0) {
+      } else if (this.el.scrollY > 0) {
         this.isScrolling = false;
       }
     },
     handleScroll() {
+      this.handleFetchData();
       if (this.$refs.mask)
-        this.$refs.mask.style.opacity = (window.scrollY - 160) / 100;
+        this.$refs.mask.style.opacity = (this.el.scrollY - 160) / 100;
     },
     async publish() {
       let res = await this.$blogAxios.post("/post/forward", {

@@ -107,7 +107,7 @@ export const generateMockFollow = (n = followCount) => {
     for (let i = 0; i < n; i++) {
         const fid = userList[Math.floor(Math.random() * userList.length)].id;
         const uid = userList[Math.floor(Math.random() * userList.length)].id;
-        if (fid === uid) {
+        if (fid === uid || followList.find(item => item.uid === uid && item.fid === fid)) {
             i--;
             continue;
         }

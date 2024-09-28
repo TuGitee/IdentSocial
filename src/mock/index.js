@@ -85,20 +85,24 @@ Mock.mock(/\/mock\/comment/, 'post', (req) => {
 Mock.mock(/\/mock\/follow/, 'post', (req) => {
     const { uid, fid, isFollow } = JSON.parse(req.body);
     const item = followList.find(item => item.uid === uid && item.fid === fid);
+    let res = null;
     if (item) {
-        if (!!item.isFollow === isFollow) {
-            return Mock.mock({ code: 400, data: item, msg: "重复操作" });
+        if (item.isFollow == isFollow) {
+            res = Mock.mock({ code: 400, data: item, msg: "重复操作" });
         } else {
             item.isFollow = isFollow;
-            return Mock.mock({ code: 200, data: item });
+            res = Mock.mock({ code: 200, data: item });
         }
+    } else {
+        const follow = mockFollow(fid, uid, getCurrentTime(), true);
+        followList.push(follow);
+        res = Mock.mock({ code: 200, data: follow });
     }
-    const follow = mockFollow(fid, uid, getCurrentTime(), isFollow);
-    followList.push(follow);
-    return Mock.mock({ code: 200, data: follow });
+    localStorage.setItem("followList", JSON.stringify(followList));
+    return res;
 })
 
 Mock.mock(/\/mock\/follow\/\w+/, 'get', (req) => {
     const uid = req.url.split('/').pop();
-    return Mock.mock({ code: 200, data: followList.filter(item => item.uid === uid).map(item => userList.find(user => user.id === item.fid)) });
+    return Mock.mock({ code: 200, data: followList.filter(item => item.uid === uid) });
 })

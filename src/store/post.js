@@ -1,6 +1,7 @@
 import { reqFollowingInfo, findUserBlog, reqMockPostList, reqMockAddPost, reqMockPost } from "@/api"
 const state = {
     postList: [],
+    followingPostList: [],
     currentPost: null,
     pageNo: 1,
     pageSize: 10,
