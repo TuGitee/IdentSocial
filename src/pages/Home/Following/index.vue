@@ -1,24 +1,19 @@
 <template>
   <div id="box">
-    <BlogItem v-for="(item, index) in followingInfo" :key="item.postId" :item="item" />
+    <BlogItem v-for="(item) in followingPostList" :key="item.postId" :item="item" />
   </div>
 </template>
 
 <script>
 import BlogItem from '@/components/BlogItem.vue';
-import { mapState } from 'vuex';
+import { mapGetters } from 'vuex';
 export default {
   name: "Following",
   components: {
     BlogItem
   },
-  mounted() {
-    this.$store.dispatch('getFollowingInfo', { id: this.$store.state.user.token });
-  },
   computed: {
-    ...mapState({
-      followingInfo: state => state.post.followingInfo,
-    })
+    ...mapGetters(['followingPostList']),
   },
 }
 </script>

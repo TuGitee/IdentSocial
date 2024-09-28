@@ -7,7 +7,8 @@ const images = await getAllKeys();
 const userCount = 100;
 const postCount = 100;
 const commentCount = 1000;
-const followCount = userCount * userCount / 3;
+const followCount = userCount * userCount / 5;
+const likeCount = commentCount * userCount / 5;
 
 export const mockUser = (email, password, id = uuid()) => Mock.mock({
     id,
@@ -107,16 +108,28 @@ export const generateMockFollow = (n = followCount) => {
     for (let i = 0; i < n; i++) {
         const fid = userList[Math.floor(Math.random() * userList.length)].id;
         const uid = userList[Math.floor(Math.random() * userList.length)].id;
-        if (fid === uid || followList.find(item => item.uid === uid && item.fid === fid)) {
-            i--;
-            continue;
-        }
+        if (fid === uid || followList.find(item => item.uid === uid && item.fid === fid)) continue;
         followList.push(mockFollow(fid, uid, null));
     }
     return followList;
 }
 
 export const followList = localStorage.getItem('followList') ? JSON.parse(localStorage.getItem('followList')) : generateMockFollow();
+
+export const mockLike = (bid, uid, isLike, time, id = uuid()) => Mock.mock({ id, bid, uid, isLike, time: time ?? Mock.Random.datetime('yyyy/MM/dd HH:mm:ss') })
+
+export const generateMockLike = (n = likeCount) => {
+    const likeList = [];
+    for (let i = 0; i < n; i++) {
+        const bid = Mock.Random.pick(postList).id;
+        const uid = Mock.Random.pick(userList).id;
+        if (likeList.find(item => item.uid === uid && item.bid === bid)) continue;
+        likeList.push(mockLike(bid, uid, true));
+    }
+    return likeList;
+}
+
+export const likeList = localStorage.getItem('likeList') ? JSON.parse(localStorage.getItem('likeList')) : generateMockLike();
 
 export function checkFollow() {
     userList.forEach(user => {
@@ -131,5 +144,12 @@ export function checkComment() {
     })
 }
 
+export function checkLike() {
+    postList.forEach(post => {
+        post.like = likeList.filter(like => like.bid === post.id).length;
+    })
+}
+
 checkFollow();
 checkComment();
+checkLike();

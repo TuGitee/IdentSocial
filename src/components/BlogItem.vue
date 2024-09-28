@@ -20,12 +20,19 @@
                     <span>{{ isFollowLoading ? '处理中' : isFollow ? '已关注' : '关注' }}</span>
                 </button>
             </div>
+            <div class="blog-item-header-focus" v-else>
+                <button class="blog-item-header-focus-button" :disabled="isRemoving" @click="remove">
+                    <i class="el-icon-loading" v-if="isRemoving"></i>
+                    <i class="el-icon-delete" v-else></i>
+                    <span v-if="!isRemoving">删除</span>
+                </button>
+            </div>
         </div>
-        <div class="blog-item-content">
+        <div class="blog-item-content" @click="toBlogDetail">
             <div class="blog-item-content-text" v-if="item.text">
                 {{ item.text }}
             </div>
-            <ul class="blog-item-content-img" v-if="item.img">
+            <ul class="blog-item-content-img" v-if="item.img" @click.stop>
                 <li class="blog-item-content-img-item" v-for="(_, ii) in item.img" :key="ii">
                     <MyImage :src="imgList[ii]" :preview="item.id"></MyImage>
                 </li>
@@ -46,18 +53,18 @@
             </div>
         </div>
         <div class="blog-item-footer">
-            <div class="blog-item-footer-item" @touchstart="onLike">
+            <button class="blog-item-footer-item" :disabled="isLikeLoading" @click="onLike">
                 <i :class="isLike ? 'el-icon-star-on active' : 'el-icon-star-off'"></i>
                 <span>{{ starNum }}</span>
-            </div>
-            <div class="blog-item-footer-item" @click="toBlogDetail">
-                <i class="el-icon-chat-round" @touchstart.stop="onComment"></i>
-                <span @touchstart.stop="onComment">{{ item.comment ?? 0 }}</span>
-            </div>
-            <div class="blog-item-footer-item" @touchstart.stop="onForward">
+            </button>
+            <button class="blog-item-footer-item" @click.stop="onComment">
+                <i class="el-icon-chat-round"></i>
+                <span>{{ item.comment ?? 0 }}</span>
+            </button>
+            <button class="blog-item-footer-item" @click.stop="onForward">
                 <i class="el-icon-share"></i>
                 <span>{{ item.share ?? 0 }}</span>
-            </div>
+            </button>
         </div>
     </div>
 </template>
@@ -80,27 +87,26 @@ export default {
     },
     data() {
         return {
-            isLike: false,
             isFollowLoading: false,
+            isLikeLoading: false,
+            isRemoving: false,
             postFrom: {},
             imgList: [],
-            starNum: this.item.like ?? 0,
         }
     },
     computed: {
         ...mapState({
             userInfo: state => state.user.userInfo,
         }),
-        isFollow: {
-            get() {
-                return this.userInfo.followingList?.find((item) => item.fid === this.item.uid)?.isFollow ?? false;
-            },
-            set(isFollow) {
-                const item = this.userInfo.followingList?.find((item) => item.fid === this.item.uid);
-                if (!item) return;
-                item.isFollow = isFollow;
-            }
-        }
+        isFollow() {
+            return this.userInfo.followingList?.find((item) => item.fid === this.item.uid)?.isFollow ?? false;
+        },
+        isLike() {
+            return this.userInfo.likeList?.some((item) => item.bid === this.item.id) ?? false;
+        },
+        starNum() {
+            return this.item.like || 0;
+        },
     },
     methods: {
         async init() {
@@ -140,45 +146,10 @@ export default {
             this.$store.dispatch("followUser", { id, isFollow: !this.isFollow }).finally(() => {
                 this.isFollowLoading = false;
             });
-            // const fd = new FormData();
-            // fd.append('fanId', id);
-            // fd.append('userId', this.$store.state.user.token);
-            // this.$userAxios.post('/relationship', fd, {
-            //     headers: {
-            //         'Content-Type': 'multipart/form-data'
-            //     }
-            // }).then(() => {
-            //     this.isFollow = true;
-            //     this.isFollowLoading = false;
-            //     this.$bus.$emit('follow', id);
-            // }).catch(err => {
-            //     this.isFollowLoading = false;
-            //     this.$notify({
-            //         title: '关注失败',
-            //         message: err.response.data.message,
-            //         type: 'error'
-            //     })
-            // })
-        },
-        unfollow(id) {
-            this.isFollowLoading = true;
-            this.$userAxios.delete(`/relationship?userId=${this.$store.state.user.token}&fanId=${id}`)
-                .then(res => {
-                    console.log(res);
-                    this.isFollow = false;
-                    this.isFollowLoading = false;
-                    this.$bus.$emit('unfollow', id);
-                }).catch(err => {
-                    this.isFollowLoading = false;
-                    this.$notify({
-                        title: '取消关注失败',
-                        message: err.response.data.message,
-                        type: 'error'
-                    })
-                })
         },
         onComment() {
             this.$emit('click')
+            this.toBlogDetail()
         },
         toUserDetail() {
             this.$router.push({
@@ -206,38 +177,19 @@ export default {
             })
         },
         onLike() {
-            if (this.isLike) {
-                this.starNum--;
-            } else {
-                this.starNum++;
-            }
-            this.isLike = !this.isLike;
+            this.isLikeLoading = true;
+            this.$store.dispatch("likePost", { bid: this.item.id, isLike: !this.isLike }).finally(() => {
+                this.isLikeLoading = false;
+            })
+        },
+        remove() {
+            this.$confirm('确定删除该博客?', '提示').then(() => {
+                this.$store.dispatch("deletePost", this.item.id);
+            }).catch(() => { })
         }
     },
     mounted() {
         this.init();
-        this.isLike = this.item.isLike;
-        // this.$blogAxios.get(`/picture/1?postId=${this.item.postId}`).then(res => {
-        //     this.imgList = res.data.data
-        //     console.log(this.imgList.length, this.imgList[0]);
-        // })
-
-        // if (this.item.userId)
-        //     this.getUserInfo(this.item.userId);
-        // if (this.item.postFrom && !this.postFrom.name) {
-        //     this.searchBlog(this.item.postFrom);
-        // }
-        this.$bus.$on('follow', id => {
-            if (id === this.item.userId) {
-                this.isFollow = true;
-            }
-        })
-        this.$bus.$on('unfollow', id => {
-            if (id === this.item.userId) {
-                this.isFollow = false;
-            }
-        })
-
         this.$nextTick(() => {
             this.$previewRefresh();
         })
@@ -415,6 +367,8 @@ export default {
             display: flex;
             justify-content: center;
             align-items: center;
+            border: none;
+            background-color: transparent;
 
             i {
                 font-size: 1.2rem;

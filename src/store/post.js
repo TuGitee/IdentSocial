@@ -1,11 +1,13 @@
-import { reqFollowingInfo, findUserBlog, reqMockPostList, reqMockAddPost, reqMockPost } from "@/api"
+import { reqMockPostList, reqMockAddPost, reqMockPost, reqMockFollowPostList, reqMockLike, reqMockDeletePost } from "@/api"
+import user from "./user"
 const state = {
     postList: [],
-    followingPostList: [],
     currentPost: null,
-    pageNo: 1,
+    postListNo: 1,
+    followListNo: 1,
     pageSize: 10,
-    isMore: true
+    isMorePost: true,
+    isMoreFollow: true,
 }
 const actions = {
     async postBlog({ commit }, { text, imgs }) {
@@ -18,13 +20,13 @@ const actions = {
         }
     },
     async getPostList({ state, commit }) {
-        if (!state.isMore) return
-        const res = await reqMockPostList(state.pageNo, state.pageSize);
+        if (!state.isMorePost) return
+        const res = await reqMockPostList(state.postListNo, state.pageSize);
         commit("GETPOSTLIST", res.data);
         if (res.data.length < state.pageSize) {
-            state.isMore = false
+            state.isMorePost = false
         }
-        state.pageNo++;
+        state.postListNo++;
     },
     async getPost({ commit }, id) {
         const res = await reqMockPost(id);
@@ -34,34 +36,42 @@ const actions = {
             return Promise.reject(new Error("Request Fail!"));
         }
     },
-    async getFollowingList({ commit }, data) {
-        let result = await reqFollowingInfo(data.userId)
-        result = [...new Set(result.data)]
-        commit("GETFOLLOWINGLIST", result)
-    },
-    async getFollowingInfo({ commit }, data) {
-        let result = await reqFollowingInfo(data.id)
-        result = [...new Set(result.data)]
-        let followingInfo = []
-        for (let i = 0; i < result.length; i++) {
-            let user = await findUserBlog(result[i])
-            followingInfo.push(user.data)
+    async getFollowingPostList({ state, commit }) {
+        if (!state.isMoreFollow) return
+        const res = await reqMockFollowPostList(state.followListNo, state.pageSize);
+        commit("GETPOSTLIST", res.data)
+        if (res.data.length < state.pageSize) {
+            state.isMoreFollow = false
         }
-        followingInfo = followingInfo.flat(1)
-        followingInfo.forEach(item => {
-            item.isFollow = true
-        });
-        commit("GETFOLLOWINGINFO", followingInfo.sort((a, b) => {
-            return new Date(b.createTime).getTime() - new Date(a.createTime).getTime()
-        }))
+        state.followListNo++;
+    },
+    async likePost({ commit }, { bid, isLike }) {
+        const res = await reqMockLike(bid, isLike);
+        if (res.code === 200) {
+            commit("LIKEPOST", res.data);
+            return res;
+        } else {
+            return Promise.reject(new Error("Request Fail!"));
+        }
+    },
+    async deletePost({ commit }, id) {
+        const res  = await reqMockDeletePost(id);
+        if (res.code === 200) {
+            commit("DELETEPOST", id);
+            return res;
+        } else {
+            return Promise.reject(new Error("Request Fail!"));
+        }
     }
 }
 const mutations = {
     RESET(state) {
         state.postList = []
-        state.pageNo = 1
+        state.postListNo = 1
+        state.followListNo = 1
         state.pageSize = 10
-        state.isMore = true
+        state.isMorePost = true
+        state.isMoreFollow = true
     },
     POSTBLOG(state, postBlog) {
         state.postList.unshift(postBlog)
@@ -86,11 +96,33 @@ const mutations = {
     },
     RESETCURRENTPOST(state) {
         state.currentPost = null;
+    },
+    LIKEPOST(state, like) {
+        if (like.isLike) {
+            user.state.userInfo.likeList.push(like);
+            state.postList.find(item => item.id === like.bid).like++;
+        } else {
+            const index = user.state.userInfo.likeList.findIndex(item => item.id === like.id);
+            if (index !== -1) {
+                user.state.userInfo.likeList.splice(index, 1);
+                state.postList.find(item => item.id === like.bid).like--;
+            }
+        }
+    },
+    DELETEPOST(state, id) {
+        const index = state.postList.findIndex(item => item.id === id);
+        if (index !== -1) {
+            state.postList.splice(index, 1);
+        }
     }
 }
 const getters = {
     sortedPostList(state) {
         return state.postList.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+    },
+    followingPostList(state) {
+        const followingList = user.state.userInfo?.followingList?.filter(follow => follow.isFollow).map(item => item.fid) || [];
+        return state.postList.filter(post => followingList.includes(post.uid)).sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
     }
 }
 export default {

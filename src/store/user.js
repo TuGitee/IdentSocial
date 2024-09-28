@@ -1,5 +1,5 @@
 import { getToken, setToken } from "@/utils/token";
-import { reqMockFollow, reqMockFollowList, reqMockUser } from "@/api";
+import { reqMockFollow, reqMockFollowList, reqMockLikeList, reqMockUser } from "@/api";
 const getters = {
     followCount(state) {
         return state.userInfo.followingList?.filter(item => item.isFollow).length || 0;
@@ -8,10 +8,11 @@ const getters = {
 const actions = {
     async getUserInfo(state) {
         let result = await reqMockUser(state.state.token);
-        // let result = await reqUserInfo(state.state.token);
         if (result.code == 200) {
             const followingList = await reqMockFollowList();
             result.data.followingList = followingList.data || [];
+            const likeList = await reqMockLikeList();
+            result.data.likeList = likeList.data || [];
             state.commit("GETUSERINFO", result.data);
         } else {
             return Promise.reject(new Error("Request Fail!"));
@@ -29,12 +30,11 @@ const actions = {
 }
 const mutations = {
     FOLLOWUSER(state, { isFollow, data }) {
-        if (isFollow) {
+        const index = state.userInfo.followingList.findIndex(item => item.id === data.id);
+        if (isFollow && index === -1) {
             state.userInfo.followingList.push(data);
         } else {
-            const index = state.userInfo.followingList.findIndex(item => item.id === data.id);
-            if (index === -1) return;
-            state.userInfo.followingList.splice(index, 1, index);
+            state.userInfo.followingList.splice(index, 1, data);
         }
     },
     GETUSERINFO(state, userInfo) {

@@ -22,7 +22,7 @@
     <el-tabs v-model="activeName" @tab-click="handleClick">
       <el-tab-pane v-for="(item, index) in homeRoutes" :key="index" :label="item.meta.name" :name="item.name">
         <footer class="home-footer">
-          <router-view :followingList="followingList" :key="$route.name"></router-view>
+          <router-view :key="activeName"></router-view>
           <p class="loading"><i class="el-icon el-icon-loading"></i></p>
         </footer>
       </el-tab-pane>
@@ -74,7 +74,6 @@ export default {
     ...mapState({
       userInfo: (state) => state.user.userInfo,
       postList: (state) => state.post.postList,
-      followingList: (state) => state.post.followingList,
       pageSize: (state) => state.post.pageSize,
     }),
     userList() {
@@ -95,7 +94,14 @@ export default {
   },
   methods: {
     getData() {
-      this.$store.dispatch("getPostList");
+      switch (this.activeName.toLowerCase()) {
+        case 'following':
+          this.$store.dispatch('getFollowingPostList');
+          break;
+        default:
+          this.$store.dispatch('getPostList');
+          break;
+      }
     },
     handleClick(tab, event) {
       event.preventDefault();

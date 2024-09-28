@@ -10,12 +10,12 @@
                 <router-link :to="`/user-detail/${comment.uid}`">
                     <span class="comment-item-right-top-name">{{ comment.user.nickname }}</span>
                 </router-link>
-                <span class="comment-item-right-top-time">{{ formatTime(comment.time) }}</span>
             </div>
             <div class="comment-item-right-bottom">
-                <span class="comment-item-right-bottom-text" @click="emitTarget(comment)">{{
-                    comment.text
-                }}</span>
+                <p class="comment-item-right-bottom-text" @click="emitTarget(comment)">
+                    {{ comment.text }}
+                </p>
+                <p class="comment-item-right-bottom-time">{{ formatTime(comment.time) }}</p>
                 <ul class="comment-item-right-bottom-list">
                     <li class="comment-item-right-bottom-list-item" v-for="c in comment.children?.slice(0, sliceNum)"
                         :key="c.id">
@@ -44,13 +44,12 @@
                                         </span>
                                     </router-link>
                                 </p>
-
-                                <span class="comment-item-right-bottom-list-item-right-top-time">{{ c.time
-                                    }}</span>
                             </div>
                             <div class="comment-item-right-bottom-list-item-right-bottom" @click.stop="emitTarget(c)">
-                                <span class="comment-item-right-bottom-list-item-right-bottom-text">{{ c.text
-                                    }}</span>
+                                <p class="comment-item-right-bottom-list-item-right-bottom-text">{{ c.text
+                                    }}</p>
+                                <p class="comment-item-right-bottom-list-item-right-bottom-time">{{ c.time
+                                    }}</p>
                             </div>
                         </div>
                     </li>
@@ -147,6 +146,7 @@ export default {
     .comment-item-right {
         flex: 1;
         padding-left: 10px;
+        min-width: 0;
 
         &-more {
             margin-top: 5px;
@@ -194,12 +194,18 @@ export default {
                 color: #333;
             }
 
+            .comment-item-right-bottom-time {
+                margin-top: 5px;
+                font-size: 0.8rem;
+                color: #999;
+            }
+
             .comment-item-right-bottom-list {
                 margin-top: 5px;
 
                 .comment-item-right-bottom-list-item {
                     display: flex;
-                    padding: 10px 0;
+                    padding: 12px 0 6px;
 
                     .comment-item-right-bottom-list-item-left {
                         width: 2rem;
@@ -215,6 +221,7 @@ export default {
 
                     .comment-item-right-bottom-list-item-right {
                         flex: 1;
+                        min-width: 0;
                         padding-left: 10px;
 
                         .comment-item-right-bottom-list-item-right-top {
@@ -225,7 +232,11 @@ export default {
                                 font-size: 1rem;
                                 font-weight: 700;
                                 color: #333;
+                                max-width: 100%;
                                 word-break: break-all;
+                                white-space: nowrap;
+                                overflow: hidden;
+                                text-overflow: ellipsis;
                             }
 
                             .comment-item-right-bottom-list-item-right-top-time {
@@ -240,6 +251,13 @@ export default {
                             .comment-item-right-bottom-list-item-right-bottom-text {
                                 font-size: 1rem;
                                 color: #333;
+                                margin-top: 4px;
+                            }
+
+                            .comment-item-right-bottom-list-item-right-bottom-time {
+                                font-size: .8rem;
+                                color: #999;
+                                margin-top: 2px;
                             }
                         }
                     }

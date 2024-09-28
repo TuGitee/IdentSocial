@@ -82,8 +82,8 @@ export default {
     justify-content: center;
 
     .el-message-box {
-      width: 90%;
-      padding: .5rem;
+      max-width: 80%;
+      padding-bottom: 14px;
 
       .el-message-box__title {
         font-size: 1.2rem;
@@ -91,19 +91,15 @@ export default {
       }
 
       .el-message-box__content {
-        font-size: 1rem;
-        margin: .5rem 0;
+        padding-top: 0;
+        padding-bottom: 0;
       }
 
       .el-message-box__btns {
         display: flex;
-        padding: .5rem;
 
         .el-button {
           flex: 1;
-          height: 3rem;
-          font-size: 1rem;
-          border-radius: .5rem;
 
           &:active,
           &:hover {
