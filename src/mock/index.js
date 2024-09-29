@@ -1,5 +1,5 @@
 import Mock from 'mockjs';
-import { userList, postList, mockUser, commentList, mockComment, mockPost, mockFollow, followList, checkComment, likeList, mockLike } from './data';
+import { userList, postList, mockUser, commentList, mockComment, mockPost, mockFollow, followList, likeList, mockLike, saveData } from './data';
 import { getCurrentTime } from '@/utils/time';
 
 Mock.mock(/\/mock\/user\/\w+/, 'get', (req) => {
@@ -32,7 +32,7 @@ Mock.mock(/\/mock\/verify/, 'post', (req) => {
 Mock.mock(/\/mock\/user/, 'post', (req) => {
     const { email, password } = JSON.parse(req.body);
     userList.unshift(mockUser(email, password));
-    localStorage.setItem('userList', JSON.stringify(userList));
+    saveData('userList');
     return Mock.mock({ code: 200 });
 });
 
@@ -43,8 +43,18 @@ Mock.mock(/\/mock\/post\/follow\?/, 'get', (req) => {
         return acc;
     }, {});
     const follow = followList.filter(item => item.uid === uid).map(item => item.fid);
-    const post = postList.filter(item => follow.includes(item.uid)).map(item => (item.user = userList.find(user => user.id === item.uid), item));
-    return Mock.mock({ code: 200, data: post.slice((page - 1) * limit, page * limit) });
+    const data = postList.filter(item => follow.includes(item.uid)).slice((page - 1) * limit, page * limit).map(item => (item.user = userList.find(user => user.id === item.uid), item));
+    return Mock.mock({ code: 200, data });
+})
+
+Mock.mock(/\/mock\/post\/user\?/, 'get', (req) => {
+    const { page, limit, uid } = req.url.split('?')[1].split('&').reduce((acc, cur) => {
+        const [key, value] = cur.split('=');
+        acc[key] = value;
+        return acc;
+    }, {});
+    const data = postList.filter(item => item.uid === uid).slice((page - 1) * limit, page * limit).map(item => (item.user = userList.find(user => user.id === item.uid), item));
+    return Mock.mock({ code: 200, data });
 })
 
 Mock.mock(/\/mock\/post\/\w+/, 'get', (req) => {
@@ -55,7 +65,7 @@ Mock.mock(/\/mock\/post\/\w+/, 'get', (req) => {
     return Mock.mock({ code: 200, data: { ...post, user } });
 });
 
-Mock.mock(/\/mock\/post\?/, 'get', (req) => {
+Mock.mock(/\/mock\/post/, 'get', (req) => {
     const { page, limit } = req.url.split('?')[1].split('&').reduce((acc, cur) => {
         const [key, value] = cur.split('=');
         acc[key] = value;
@@ -70,10 +80,10 @@ Mock.mock(/\/mock\/post\?/, 'get', (req) => {
 
 Mock.mock(/\/mock\/post/, 'post', (req) => {
     const { text, imgs, uid } = JSON.parse(req.body);
-    const post = mockPost(uid, text, getCurrentTime(), imgs);
+    const post = mockPost(uid, text, getCurrentTime(), imgs, 0, 0, 0);
     postList.unshift(post);
     post.user = userList.find(user => user.id === uid);
-    localStorage.setItem('postList', JSON.stringify(postList));
+    saveData('postList');
     return Mock.mock({ code: 200, data: post });
 })
 
@@ -82,7 +92,7 @@ Mock.mock(/\/mock\/post/, 'delete', (req) => {
     const index = postList.findIndex(post => post.id === id);
     if (index !== -1) {
         const data = postList.splice(index, 1);
-        localStorage.setItem('postList', JSON.stringify(postList));
+        saveData('postList');
         return Mock.mock({ code: 200, data });
     } else {
         return Mock.mock({ code: 500, data: false });
@@ -100,8 +110,7 @@ Mock.mock(/\/mock\/comment/, 'post', (req) => {
     const { text, cid, uid, bid } = JSON.parse(req.body);
     const comment = mockComment(uid, bid, cid, text, getCurrentTime());
     commentList.unshift(comment);
-    checkComment();
-    localStorage.setItem('commentList', JSON.stringify(commentList));
+    saveData('commentList');
     return Mock.mock({ code: 200, data: comment });
 })
 
@@ -121,13 +130,18 @@ Mock.mock(/\/mock\/follow/, 'post', (req) => {
         followList.push(follow);
         res = Mock.mock({ code: 200, data: follow });
     }
-    localStorage.setItem("followList", JSON.stringify(followList));
+    saveData('followList');
     return res;
 })
 
 Mock.mock(/\/mock\/follow\/\w+/, 'get', (req) => {
     const uid = req.url.split('/').pop();
     return Mock.mock({ code: 200, data: followList.filter(item => item.uid === uid) });
+})
+
+Mock.mock(/\/mock\/follower/, 'get', (req) => {
+    const uid = req.url.split('/').pop();
+    return Mock.mock({ code: 200, data: followList.filter(item => item.fid === uid) });
 })
 
 Mock.mock(/\/mock\/like\/\w+/, 'get', (req) => {
@@ -154,6 +168,6 @@ Mock.mock(/\/mock\/like/, 'post', (req) => {
             return Mock.mock({ code: 400, data: null, msg: "操作失败" });
         }
     }
-    localStorage.setItem('likeList', JSON.stringify(likeList));
+    saveData('likeList');
     return Mock.mock({ code: 200, data });
 })

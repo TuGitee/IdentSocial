@@ -1,9 +1,12 @@
 import { getToken, setToken } from "@/utils/token";
-import { reqMockFollow, reqMockFollowList, reqMockLikeList, reqMockUser } from "@/api";
+import { reqMockFollow, reqMockFollowerList, reqMockFollowList, reqMockLikeList, reqMockUser } from "@/api";
 const getters = {
     followCount(state) {
         return state.userInfo.followingList?.filter(item => item.isFollow).length || 0;
     },
+    followerCount(state) {
+        return state.userInfo.followerList?.filter(item => item.isFollow).length || 0;
+    }
 }
 const actions = {
     async getUserInfo(state) {
@@ -11,6 +14,8 @@ const actions = {
         if (result.code == 200) {
             const followingList = await reqMockFollowList();
             result.data.followingList = followingList.data || [];
+            const followerList = await reqMockFollowerList();
+            result.data.followerList = followerList.data || [];
             const likeList = await reqMockLikeList();
             result.data.likeList = likeList.data || [];
             state.commit("GETUSERINFO", result.data);

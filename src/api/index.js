@@ -8,6 +8,7 @@ export const reqMockUserRegister = (email, password) => mockRequest.post(`/user`
 export const reqMockVerify = (email, code) => mockRequest.post(`/verify`, { email, code });
 export const reqMockVerifyCode = (email) => mockRequest.get(`/verify?email=${email}`);
 export const reqMockPostList = (page = 1, limit = 10) => mockRequest.get(`/post?page=${page}&limit=${limit}`);
+export const reqMockUserPostList = (uid, page = 1, limit = 10) => mockRequest.get(`/post/user?page=${page}&limit=${limit}&uid=${uid}`);
 export const reqMockFollowPostList = (page = 1, limit = 10) => mockRequest.get(`/post/follow?page=${page}&limit=${limit}&uid=${getToken()}`);
 export const reqMockPost = (id) => mockRequest.get(`/post/${id}`);
 export const reqMockAddPost = (text, imgs) => mockRequest.post(`/post`, { text, imgs, uid: getToken() });
@@ -16,6 +17,7 @@ export const reqMockPostComment = (id) => mockRequest.get(`/comment/${id}`);
 export const reqMockAddPostComment = (bid, cid, text) => mockRequest.post(`/comment`, { cid, text, bid, uid: getToken() });
 export const reqMockFollow = (fid, isFollow) => mockRequest.post(`/follow`, { fid, isFollow, uid: getToken() });
 export const reqMockFollowList = () => mockRequest.get(`/follow/${getToken()}`);
+export const reqMockFollowerList = () => mockRequest.get(`/follower/${getToken()}`);
 export const reqMockLikeList = () => mockRequest.get(`/like/${getToken()}`);
 export const reqMockLike = (bid, isLike) => mockRequest.post(`/like`, { bid, isLike, uid: getToken() });
 export const reqUserInfo = (id) => userRequest.get(`/user?userId=${id}`);

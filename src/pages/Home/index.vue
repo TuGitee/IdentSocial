@@ -12,7 +12,9 @@
       <div class="home-middle-scroll">
         <ul class="home-middle-list">
           <li class="home-middle-list-item" v-for="(user) in userList" :key="user.id">
-            <img :src="user.avatar" alt="" />
+            <router-link :to="{ name: 'UserDetail', params: { uid: user.id} }">
+              <MyImage :src="user.avatar" alt="" />
+            </router-link>
           </li>
         </ul>
       </div>
@@ -40,8 +42,12 @@ import "@/css/user.less";
 import { mapState } from "vuex";
 import homeRoutes from "@/router/homeRoutes";
 import MonitorKeyboard from "@/utils/MonitorKeyboard";
+import MyImage from "@/components/MyImage.vue";
 export default {
   name: "Home",
+  components: {
+    MyImage,
+  },
   mounted() {
     if (this.postList.length <= this.pageSize) {
       this.getData();
@@ -306,7 +312,7 @@ export default {
         border-radius: 50%;
         border: 1px dashed @purple;
 
-        img {
+        .my-image {
           width: 90%;
           height: 90%;
           position: absolute;

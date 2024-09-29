@@ -61,6 +61,7 @@ export default {
     .container {
         width: 100%;
         position: absolute;
+        border-radius: inherit;
 
         img {
             position: absolute;
@@ -88,6 +89,7 @@ export default {
             background-color: #f2f2f2;
             color: #aaa;
             display: flex;
+            border-radius: inherit;
             align-items: center;
             justify-content: center;
             z-index: 1;

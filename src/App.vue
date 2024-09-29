@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <div class="title-mask" :style="{opacity}"></div>
     <router-view :key="$store.name"></router-view>
     <ChangePage v-if="$route.meta.footerShow" />
   </div>
@@ -14,21 +15,15 @@ export default {
   },
   data() {
     return {
+      opacity: 0,
     }
   },
   mounted() {
-    let agent = navigator.userAgent.toLowerCase();
-    let iLastTouchTime = null;
-    if (agent.indexOf('iphone') >= 0 || agent.indexOf('ipad') >= 0) {
-      document.addEventListener('touchend', function () {
-        let iNowTime = new Date().getTime();
-        iLastTouchTime = iLastTouchTime || iNowTime + 1;
-        let delta = iNowTime - iLastTouchTime;
-        if (delta < 500 && delta > 0) {
-          return false;
-        }
-        iLastTouchTime = iNowTime;
-      }, false);
+    window.addEventListener('scroll', this.handleScroll);
+  },
+  methods: {
+    handleScroll() {
+      this.opacity = Math.min(1, window.scrollY / 300);
     }
   }
 }
@@ -36,12 +31,23 @@ export default {
 
 <style lang="less">
 ::view-transition-group(root) {
-    animation-duration: .3s;
+  animation-duration: .3s;
 }
 
 :root {
   --safe-area-inset-top: constant(safe-area-inset-top);
   --safe-area-inset-top: env(safe-area-inset-top);
+}
+
+.title-mask {
+  backdrop-filter: blur(20px);
+  height: var(--safe-area-inset-top);
+  mask-image: linear-gradient(to top, transparent, #000 50%, #000);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 999;
 }
 
 * {

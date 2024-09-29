@@ -1,10 +1,11 @@
-import { reqMockPostList, reqMockAddPost, reqMockPost, reqMockFollowPostList, reqMockLike, reqMockDeletePost } from "@/api"
+import { reqMockPostList, reqMockAddPost, reqMockPost, reqMockFollowPostList, reqMockLike, reqMockDeletePost, reqMockUserPostList } from "@/api"
 import user from "./user"
 const state = {
     postList: [],
     currentPost: null,
     postListNo: 1,
     followListNo: 1,
+    userList: {},
     pageSize: 10,
     isMorePost: true,
     isMoreFollow: true,
@@ -27,6 +28,22 @@ const actions = {
             state.isMorePost = false
         }
         state.postListNo++;
+    },
+    async getUserPostList({ commit, state }, id) {
+        if (!state.userList[id]) { 
+            state.userList[id] = {
+                pageNo: 1,
+                isMore: true
+            }; 
+        }
+        if (!state.userList[id].isMore) return
+        const res = await reqMockUserPostList(id);
+        commit("GETPOSTLIST", res.data);
+        if (res.data.length < state.pageSize) {
+            state.userList[id].isMore = false
+        }
+        state.userList[id].pageNo++;
+        return res;
     },
     async getPost({ commit }, id) {
         const res = await reqMockPost(id);
@@ -55,7 +72,7 @@ const actions = {
         }
     },
     async deletePost({ commit }, id) {
-        const res  = await reqMockDeletePost(id);
+        const res = await reqMockDeletePost(id);
         if (res.code === 200) {
             commit("DELETEPOST", id);
             return res;
@@ -72,6 +89,7 @@ const mutations = {
         state.pageSize = 10
         state.isMorePost = true
         state.isMoreFollow = true
+        state.userList = {}
     },
     POSTBLOG(state, postBlog) {
         state.postList.unshift(postBlog)
@@ -98,14 +116,15 @@ const mutations = {
         state.currentPost = null;
     },
     LIKEPOST(state, like) {
+        const item = state.postList.find(item => item.id === like.bid);
         if (like.isLike) {
-            user.state.userInfo.likeList.push(like);
-            state.postList.find(item => item.id === like.bid).like++;
+            user.state.userInfo?.likeList?.push(like);
+            item && (item.like++);
         } else {
             const index = user.state.userInfo.likeList.findIndex(item => item.id === like.id);
             if (index !== -1) {
-                user.state.userInfo.likeList.splice(index, 1);
-                state.postList.find(item => item.id === like.bid).like--;
+                user.state.userInfo?.likeList?.splice(index, 1);
+                item && (item.like--);
             }
         }
     },
@@ -123,6 +142,9 @@ const getters = {
     followingPostList(state) {
         const followingList = user.state.userInfo?.followingList?.filter(follow => follow.isFollow).map(item => item.fid) || [];
         return state.postList.filter(post => followingList.includes(post.uid)).sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+    },
+    userPostList(state) {
+        return (id) => state.postList.filter(post => post.uid === id).sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
     }
 }
 export default {

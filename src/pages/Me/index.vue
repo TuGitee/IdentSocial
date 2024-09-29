@@ -2,9 +2,9 @@
   <div class="me">
     <header class="me-header">
       <div class="me-header-avatar">
-        <el-image class="me-header-avatar-img" :src="userInfo.avatar" alt="">{{
+        <el-image class="me-header-avatar-img" :src="userInfo.avatar" alt="" @click="goUserDetail">{{
           userInfo.nickname }}</el-image>
-        <i class="el-icon-arrow-right me-header-avatar-arrow"></i>
+        <i class="el-icon-arrow-right me-header-avatar-arrow" @click="goUserDetail"></i>
       </div>
       <div class="me-header-info">
         <div class="me-header-info-name">
@@ -116,6 +116,11 @@ export default {
         return this.followCount;
       }
     }
+  },
+  methods: {
+    goUserDetail() {
+      this.$router.push({ name: 'UserDetail', params: { uid: this.userInfo.id } });
+    }
   }
 }
 </script>
@@ -144,7 +149,6 @@ export default {
     top: env(safe-area-inset-top);
     left: 0;
     width: 100%;
-    z-index: -99;
     padding: 20px;
     display: flex;
     flex-direction: column;
@@ -248,15 +252,14 @@ export default {
           font-weight: bold;
         }
 
-        &-text {
-          
-        }
+        &-text {}
       }
     }
   }
 
   &-drawers {
     z-index: 0;
+    position: relative;
     margin-bottom: calc(env(safe-area-inset-bottom) + 4rem);
     background-color: @white;
     border-radius: 20px 20px 0 0;

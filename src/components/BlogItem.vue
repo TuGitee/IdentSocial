@@ -20,7 +20,7 @@
                     <span>{{ isFollowLoading ? '处理中' : isFollow ? '已关注' : '关注' }}</span>
                 </button>
             </div>
-            <div class="blog-item-header-focus" v-else>
+            <div class="blog-item-header-focus" v-else-if="userInfo.id">
                 <button class="blog-item-header-focus-button" :disabled="isRemoving" @click="remove">
                     <i class="el-icon-loading" v-if="isRemoving"></i>
                     <i class="el-icon-delete" v-else></i>
@@ -155,7 +155,7 @@ export default {
             this.$router.push({
                 name: 'UserDetail',
                 params: {
-                    uid: this.item.userId
+                    uid: this.item.uid
                 }
             })
         },

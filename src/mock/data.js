@@ -15,7 +15,7 @@ export const mockUser = (email, password, id = uuid()) => Mock.mock({
     'email': email ?? '@email',
     'password': password ?? '@string("number", 6)',
     'age': '@integer(18, 60)',
-    'gender': '@pick(["Male", "Female"])',
+    'gender': '@pick([0, 1])',
     'phone': /1[3456789]\d{9}/,
     'address': 'China',
     'status': '1',
@@ -23,6 +23,7 @@ export const mockUser = (email, password, id = uuid()) => Mock.mock({
     'created_at': Mock.Random.datetime('yyyy/MM/dd HH:mm:ss'),
     'updated_at': Mock.Random.datetime('yyyy/MM/dd HH:mm:ss'),
     'avatar': require('@/assets/images/' + Mock.Random.integer(0, 9) + '.png'),
+    'background': require('@/assets/bg/' + Mock.Random.integer(0, 8) + '.jpg'),
     'faceScore': '@integer(50, 90)',
     'following': '@integer(1000, 5000)',
     'followers': '@integer(100, 1000)',
@@ -56,7 +57,7 @@ export const generateMockUsers = (n = userCount) => {
 
 export const userList = localStorage.getItem('userList') ? JSON.parse(localStorage.getItem('userList')) : generateMockUsers();
 
-export const mockPost = (uid, text, time, img, id = uuid()) => Mock.mock({
+export const mockPost = (uid, text, time, img, like, comment, share, id = uuid()) => Mock.mock({
     id,
     'text': text ?? '@cparagraph',
     'time': time ?? Mock.Random.datetime('yyyy/MM/dd HH:mm:ss'),
@@ -69,9 +70,9 @@ export const mockPost = (uid, text, time, img, id = uuid()) => Mock.mock({
         }
         return imgUrls;
     }),
-    'like': '@integer(0, 100)',
-    'comment': '@integer(0, 50)',
-    'share': '@integer(0, 30)',
+    'like': like ?? '@integer(0, 100)',
+    'comment': comment ?? '@integer(0, 50)',
+    'share': share ?? '@integer(0, 30)',
     'uid': uid ? uid : userList[Math.floor(Math.random() * userList.length)].id
 })
 export const generateMockPosts = (n = postCount) => {
@@ -148,6 +149,35 @@ export function checkLike() {
     postList.forEach(post => {
         post.like = likeList.filter(like => like.bid === post.id).length;
     })
+}
+
+export function saveData(type) {
+    switch (type) {
+        case 'likeList':
+            checkLike();
+            localStorage.setItem('likeList', JSON.stringify(likeList));
+            localStorage.setItem('postList', JSON.stringify(postList));
+            localStorage.setItem('userList', JSON.stringify(userList));
+            break;
+        case 'commentList':
+            checkComment();
+            localStorage.setItem('commentList', JSON.stringify(commentList));
+            localStorage.setItem('postList', JSON.stringify(postList));
+            localStorage.setItem('userList', JSON.stringify(userList));
+            break;
+        case 'postList':
+            localStorage.setItem('postList', JSON.stringify(postList));
+            localStorage.setItem('userList', JSON.stringify(userList));
+            break;
+        case 'followList':
+            checkFollow();
+            localStorage.setItem('followList', JSON.stringify(followList));
+            localStorage.setItem('userList', JSON.stringify(userList));
+            break;
+        case 'userList':
+            localStorage.setItem('userList', JSON.stringify(userList));
+            break;
+    }
 }
 
 checkFollow();

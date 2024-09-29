@@ -1,22 +1,377 @@
 <template>
-    <div id="root">
-        User {{ uid }}
+    <div id="root" class="container">
+        <header ref="header">
+            <button class="back" @click="goBack">
+                <i class="el-icon-arrow-left"></i>
+                <b>返回</b>
+            </button>
+            <img :src="userInfo.background ?? defaultBg" class="bg" :style="{
+                transform: `scale(${scale})`,
+                transformOrigin: '50% 100%',
+            }" v-if="userInfo?.id" preview="bg">
+            <div class="userInfo">
+                <MyImage preview="avatar" :src="userInfo?.avatar">{{ userInfo?.nickname || '加载中' }}</MyImage>
+                <h1 class="username">{{ userInfo?.nickname || '加载中' }}</h1>
+                <p class="other" v-if="userInfo?.id">
+                    <span class="gender tag">
+                        <GenderIcon :gender="userInfo?.gender"></GenderIcon>
+                        <span>{{ userInfo?.age }}岁</span>
+                    </span>
+                    <span class="score tag">
+                        <i class="el-icon-star-on"></i>
+                        <span>{{ userInfo?.faceScore }}分</span>
+                    </span>
+                    <span class="account tag">
+                        <i class="el-icon-user-solid"></i>
+                        <span>{{ userInfo?.email }}</span>
+                    </span>
+                    <span class="location tag">
+                        <i class="el-icon-location"></i>
+                        <span>{{ userInfo?.address }}</span>
+                    </span>
+                    <span class="time tag">
+                        <i class="el-icon-time"></i>
+                        <span>{{ userInfo?.created_at }}</span>
+                    </span>
+                    <span class="phone tag">
+                        <i class="el-icon-phone"></i>
+                        <span>{{ userInfo?.phone }}</span>
+                    </span>
+                </p>
+                <p class="signature" v-if="userInfo?.id" :title="userInfo?.signature">{{ userInfo?.intro }}</p>
+                <p class="follow">
+                    <span class="following follow-item">
+                        <span class="num">{{ userInfo?.following ?? 0 }}</span>
+                        <b>关注</b>
+                    </span>
+                    <span class="follower follow-item">
+                        <span class="num">{{ userInfo?.followers ?? 0 }}</span>
+                        <b>粉丝</b>
+                    </span>
+                </p>
+            </div>
+        </header>
+        <main>
+            <LoadingIcon v-if="isRequest" class="loading"></LoadingIcon>
+            <el-empty v-else-if="userPostList.length === 0" :image-size="180" description="暂无内容"></el-empty>
+            <template v-else>
+                <BlogItem v-for="item in userPostList" :key="item.id" :item="item"></BlogItem>
+            </template>
+        </main>
     </div>
 </template>
-  
-<script>
-export default {
-    data() {
-        return {
 
+<script>
+import LoadingIcon from '@/icons/LoadingIcon.vue';
+import { reqMockUser } from '@/api';
+import GenderIcon from '@/icons/GenderIcon.vue';
+import { mapGetters } from 'vuex';
+import BlogItem from '@/components/BlogItem.vue';
+import defaultBg from '@/assets/bg/index.jpg';
+import MyImage from '@/components/MyImage.vue';
+
+export default {
+    name: 'UserDetail',
+    components: { LoadingIcon, GenderIcon, BlogItem, MyImage },
+    computed: {
+        uid() {
+            return this.$route.params.uid
+        },
+        ...mapGetters({
+            getUserPostList: 'userPostList'
+        }),
+        userPostList() {
+            return this.getUserPostList(this.uid);
         }
     },
-    computed:{
-        uid(){
-            return  this.$route.params.uid
+    data() {
+        return {
+            userInfo: null,
+            isRequest: true,
+            defaultBg,
+            scale: 1
+        }
+    },
+    mounted() {
+        this.init();
+        window.addEventListener('scroll', this.handleScroll)
+    },
+    beforeDestroy() {
+        window.removeEventListener('scroll', this.handleScroll)
+    },
+    methods: {
+        init() {
+            this.getUserInfo();
+            this.getData();
+        },
+        getData() {
+            this.$store.dispatch("getUserPostList", this.uid);
+        },
+        async getUserInfo() {
+            this.isRequest = true;
+            try {
+                const res = await reqMockUser(this.uid);
+                this.userInfo = res.data;
+                this.isRequest = false;
+            } catch (error) {
+                this.$message.error('获取用户信息失败');
+                this.isRequest = false;
+            }
+        },
+        handleScroll() {
+            const scrollY = window.scrollY;
+            if (scrollY > 0) {
+                this.scale = 1;
+            } else {
+                const { height } = this.$refs.header.getBoundingClientRect();
+                this.scale = 1 + Math.abs(scrollY) / height;
+            }
+            if (scrollY + window.innerHeight >= document.body.scrollHeight) {
+                this.getData();
+            }
+        },
+        goBack() {
+            this.$router.back();
         }
     }
 }
 </script>
-  
-<style></style>
+
+<style lang="less" scoped>
+@import '@/css/user.less';
+
+#root.container {
+    flex-direction: column;
+    margin: 0 auto;
+    position: relative;
+    min-width: 0;
+    width: 100%;
+    padding: 0;
+
+    header {
+        align-items: center;
+        position: relative;
+        min-width: max-content;
+        padding: var(--safe-area-inset-top) 1.2rem 1.2rem;
+        min-width: 0;
+
+        .back {
+            color: @white;
+            font-weight: bold;
+            font-size: 1rem;
+            margin-top: 1.2rem;
+            width: fit-content;
+            display: flex;
+            align-items: center;
+            text-shadow: 0 0 4px @black;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+
+            i {
+                margin-right: 4px;
+                font-size: 1.2rem;
+            }
+        }
+
+        .bg {
+            position: absolute;
+            height: 125%;
+            width: 100%;
+            bottom: 0;
+            left: 0;
+            object-fit: cover;
+            z-index: -2;
+        }
+
+        &:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(transparent 0%, #000000 100%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .userInfo {
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin-right: auto;
+            flex: 1;
+            min-width: 0;
+            padding-top: 1.8rem;
+
+            .my-image {
+                height: 4rem;
+                width: 4rem;
+                border-radius: 50%;
+                border: 2px solid @white;
+            }
+
+            .username {
+                color: @white;
+                font-size: 24px;
+                font-weight: 900;
+                line-height: 28px;
+                max-width: 300px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                margin: 0;
+                margin-bottom: 6px;
+                margin-top: 1rem;
+            }
+
+            .list {
+                display: flex;
+                align-items: center;
+                width: 100%;
+                white-space: nowrap;
+                cursor: pointer;
+
+                span {
+                    font-size: 14px;
+                    line-height: 22px;
+                    margin-right: 6px;
+                }
+
+                i {
+                    font-size: 16px;
+                    line-height: 24px;
+                    color: @white;
+                    font-style: normal;
+                }
+
+                .el-divider {
+                    background-color: @gray-0;
+                    transform: scaleX(.5);
+                    margin: 0 16px;
+                }
+            }
+
+            .other {
+                align-items: center;
+                display: flex;
+                width: 100%;
+                margin-top: 0;
+                height: fit-content;
+                flex-wrap: wrap;
+
+                .account {
+                    font-size: 12px;
+                    line-height: 20px;
+                    margin-right: 20px;
+                }
+
+                .tag {
+                    border-radius: 4px;
+                    color: @white;
+                    background-color: @lightPurpleAlpha;
+                    display: flex;
+                    align-items: center;
+                    font-size: 0.8rem;
+                    color: @white;
+                    height: 1.2rem;
+                    line-height: 1.2rem;
+                    margin-right: 8px;
+                    margin-top: 8px;
+                    padding: 0 8px;
+
+                    span {
+                        margin-left: 2px;
+                    }
+                }
+            }
+
+            .signature {
+                font-size: 12px;
+                color: @white;
+                line-height: 20px;
+                margin-top: 6px;
+                margin-right: 10px;
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+
+            .follow {
+                display: flex;
+                margin-top: 1rem;
+
+                .follow-item {
+                    width: fit-content;
+                    display: flex;
+                    flex-direction: column;
+                    margin-right: 1rem;
+                    color: @white;
+
+                    .num {
+                        font-size: 1.2rem;
+                        font-weight: bold;
+                    }
+
+                    b {
+                        font-weight: normal;
+                        font-size: .8rem;
+                        color: @gray-1;
+                    }
+                }
+            }
+
+            .info {
+                font-size: 16px;
+                line-height: 1.8;
+                color: @gray-0;
+                cursor: pointer;
+            }
+
+        }
+
+        .tool {
+            align-self: flex-end;
+            margin-right: 40px;
+
+            .el-button {
+                background: @gray-3;
+                border: none;
+                color: @white;
+                font-size: 13px;
+                font-weight: 400;
+            }
+
+            .el-button--danger {
+                background: @white;
+                color: @darkPurple;
+                padding: 0 20px;
+            }
+        }
+
+    }
+
+    main {
+        padding: 1.2rem;
+
+        .el-empty {
+
+            :deep(.el-empty__description) {
+                p {
+                    color: @gray-3;
+                    font-size: 14px;
+                    line-height: 20px;
+                    margin: 10px;
+                }
+            }
+        }
+
+        .loading {
+            margin: 16vh auto;
+        }
+    }
+}
+</style>
