@@ -15,21 +15,18 @@
         </div>
         <div class="blog-content">
             <BlogItem v-if="currentPost" :item="currentPost" @click="comment"></BlogItem>
-            <CommentItem v-for="comment in commentList" :key="comment.commentId" :comment="comment"
-                @click="changeTarget" ref="comments" />
+            <CommentItem v-for="cmt in commentList" :key="cmt.id" :comment="cmt" @click="changeTarget" ref="comments" />
         </div>
-        <div class="blog-footer" @click.stop v-if="isComment">
-            <input type="text" class="blog-footer-input" :placeholder="placeholder" autofocus ref="input" v-model="text"
+        <form class="form" @submit.prevent="publish" v-if="isComment">
+            <input type="text" autofocus class="form-input" :placeholder="placeholder" ref="input" v-model="text"
                 @blur="closeComment" />
-            <button class="blog-footer-btn" @touchstart="publish">发布</button>
-        </div>
+        </form>
     </div>
 </template>
 
 <script>
 import BlogItem from "@/components/BlogItem.vue";
 import CommentItem from "./CommentItem";
-import MonitorKeyboard from '@/utils/MonitorKeyboard.js'
 import { reqMockAddPostComment, reqMockPostComment } from "@/api";
 import { mapState } from "vuex";
 export default {
@@ -40,7 +37,6 @@ export default {
     },
     data() {
         return {
-            monitorKeyboard: null,
             isComment: false,
             text: '',
             target: null,
@@ -51,19 +47,22 @@ export default {
         changeTarget(comment) {
             this.comment();
             this.target = comment;
+            console.log(this.$refs.comments.find(comment => comment.comment.id === this.target.id).$el.offsetTop);
+
+            const el = this.$refs.comments.find(comment => comment.comment.id === this.target.id).$el
+            el?.scrollIntoView({ behavior: "smooth", block: "center" });
         },
         async init() {
-            this.isComment = false;
             this.text = '';
             this.target = null;
             await this.$store.dispatch("getPost", this.bid);
             this.getCommentList();
         },
         closeComment() {
-            this.isComment = false;
+            this.setComment(false);
         },
-        toggleComment() {
-            this.isComment = !this.isComment
+        setComment(isComment) {
+            this.isComment = isComment;
         },
         toTop() {
             document.querySelector('.blog-content').scrollTop = 0;
@@ -76,29 +75,14 @@ export default {
             })
         },
         comment() {
-            this.toggleComment();
+            this.setComment(true);
             this.target = null;
-            setTimeout(() => {
+            this.$nextTick(() => {
                 this.$refs.input?.focus();
-            }, 1000)
+            });
         },
         goBack() {
             this.$router.go(-1)
-        },
-        getKeyboardState() {
-            this.monitorKeyboard = new MonitorKeyboard();
-            this.monitorKeyboard.onStart();
-
-            this.monitorKeyboard.onShow(() => {
-                let blogContent = document.querySelector('.blog-content');
-                if (!blogContent) return;
-                blogContent.style.height = `calc(100vh - constant(safe-area-inset-top) - 3rem)`;
-                blogContent.style.height = `calc(100vh - env(safe-area-inset-top) - 3rem)`;
-            })
-
-            this.monitorKeyboard.onHidden(() => {
-                // this.isComment = false;
-            })
         },
         async getCommentList() {
             const res = await reqMockPostComment(this.bid);
@@ -132,7 +116,7 @@ export default {
             currentPost: state => state.post.currentPost
         }),
         placeholder() {
-            return this.target ? `回复 ${this.target.user.nickname} : ${this.target.text}` : "说点什么";
+            return this.target ? `回复 ${this.target.user.nickname} : ${this.target.text}` : "说点什么...";
         },
         bid() {
             return this.$route.params.bid
@@ -140,11 +124,9 @@ export default {
     },
     async mounted() {
         this.init();
-        this.getKeyboardState();
     },
     beforeDestroy() {
         this.$store.commit("RESETCURRENTPOST");
-        this.monitorKeyboard.onEnd();
     }
 }
 </script>
@@ -231,8 +213,8 @@ export default {
         top: calc(env(safe-area-inset-top) + 3rem);
         height: calc(100vh - constant(safe-area-inset-top) - 3rem);
         height: calc(100vh - env(safe-area-inset-top) - 3rem);
-        padding-bottom: constant(safe-area-inset-bottom);
-        padding-bottom: env(safe-area-inset-bottom);
+        padding-bottom: calc(3rem + constant(safe-area-inset-bottom));
+        padding-bottom: calc(3rem + env(safe-area-inset-bottom));
 
         /deep/ .blog-item {
             box-shadow: none;
@@ -270,7 +252,7 @@ export default {
         }
     }
 
-    .blog-footer {
+    .form {
         width: 100vw;
         height: 3rem;
         position: fixed;
@@ -305,23 +287,6 @@ export default {
             background-color: #eee;
             border-radius: .5rem;
 
-        }
-
-        &-btn {
-            height: 2rem;
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: center;
-            outline: none;
-            padding: .5rem;
-            font-size: 1rem;
-            white-space: nowrap;
-            width: max-content;
-            border: none;
-            color: #fff;
-            background-color: @purple;
-            border-radius: .5rem;
         }
     }
 }

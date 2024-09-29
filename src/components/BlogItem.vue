@@ -129,7 +129,7 @@ export default {
             if (this.item.postFrom) {
                 to = this.item.postFrom;
             }
-            this.$bus.$emit('forward', to);
+            this.$bus.$emit('forward', to, this.$el);
         },
         async searchBlog(id) {
             let res = await this.$blogAxios.get(`/post?postId=${id}`)

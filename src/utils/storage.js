@@ -7,7 +7,7 @@ const imageStorage = localforage.createInstance({
 });
 
 export const get = async (key) => {
-    return await imageStorage.getItem(key);
+    return [await imageStorage.getItem(key), key];
 };
 
 export const set = async (key, value) => {
@@ -26,6 +26,11 @@ export const getAllKeys = async () => {
     return await imageStorage.keys();
 };
 
+const urlMap = new Map();
+
 export const getAll = async (keys) => {
-    return Promise.all(keys.map((key) => imageStorage.getItem(key))).then(imgs => imgs.map(img => URL.createObjectURL(img)));
+    return Promise.all(keys.map((key) => get(key))).then(imgs => imgs.map(([img, key]) => {
+        if (urlMap.has(key)) return urlMap.get(key);
+        return urlMap.set(key, URL.createObjectURL(img)).get(key);
+    }));
 }

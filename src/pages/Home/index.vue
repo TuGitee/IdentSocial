@@ -12,7 +12,7 @@
       <div class="home-middle-scroll">
         <ul class="home-middle-list">
           <li class="home-middle-list-item" v-for="(user) in userList" :key="user.id">
-            <router-link :to="{ name: 'UserDetail', params: { uid: user.id} }">
+            <router-link :to="{ name: 'UserDetail', params: { uid: user.id } }">
               <MyImage :src="user.avatar" alt="" />
             </router-link>
           </li>
@@ -30,10 +30,10 @@
       </el-tab-pane>
     </el-tabs>
 
-    <div class="blog-footer" v-if="isComment">
-      <input type="text" class="blog-footer-input" place-holder="说点什么..." autofocus v-model="text" />
-      <button class="blog-footer-btn" @touchstart="publish">转发</button>
-    </div>
+    <form class="form" @submit.prevent="publish" v-if="isComment">
+      <input type="text" autofocus class="form-input" placeholder="说点什么..." ref="input" v-model="text"
+        @blur="closeComment" />
+    </form>
   </div>
 </template>
 
@@ -41,7 +41,6 @@
 import "@/css/user.less";
 import { mapState } from "vuex";
 import homeRoutes from "@/router/homeRoutes";
-import MonitorKeyboard from "@/utils/MonitorKeyboard";
 import MyImage from "@/components/MyImage.vue";
 export default {
   name: "Home",
@@ -53,11 +52,10 @@ export default {
       this.getData();
     }
     this.$store.dispatch("getUserInfo");
-    this.getKeyboardState();
     this.$bus.$on("forward", (data) => {
       this.to = data;
-      this.isComment = true;
       this.$route.meta.footerShow = false;
+      this.isComment = true;
     });
     this.activeName = this.$route.name;
     this.el = window;
@@ -71,7 +69,6 @@ export default {
       isComment: false,
       to: null,
       text: "",
-      monitorKeyboard: null,
       timer: null,
       isScrolling: false,
     };
@@ -95,10 +92,14 @@ export default {
     }
   },
   beforeDestroy() {
-    this.monitorKeyboard.onEnd();
     this.el.removeEventListener("scroll", this.handleScroll);
+    this.$bus.$off("forward");
   },
   methods: {
+    closeComment() {
+      this.isComment = false;
+      this.$route.meta.footerShow = true;
+    },
     getData() {
       switch (this.activeName.toLowerCase()) {
         case 'following':
@@ -155,20 +156,6 @@ export default {
         this.isComment = false;
         this.$route.meta.footerShow = true;
       }
-    },
-    getKeyboardState() {
-      this.monitorKeyboard = new MonitorKeyboard();
-      this.monitorKeyboard.onStart();
-
-      this.monitorKeyboard.onShow(() => {
-        this.isComment = true;
-        this.$route.meta.footerShow = false;
-      });
-
-      this.monitorKeyboard.onHidden(() => {
-        this.isComment = false;
-        this.$route.meta.footerShow = true;
-      })
     }
   },
 };
@@ -184,62 +171,6 @@ export default {
 .home {
   position: relative;
   transition: all 0.5s;
-
-  .blog-footer {
-    width: 100%;
-    height: 3.5rem;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    background-color: #fff;
-    border-top: 1px solid #eee;
-    padding: 0.5rem;
-    padding-bottom: constant(safe-area-inset-bottom);
-    padding-bottom: env(safe-area-inset-bottom);
-    display: flex;
-    gap: .5rem;
-    z-index: 9999999999999;
-
-    &:focus-within {
-      padding-bottom: 0 !important;
-      margin-top: calc(constant(safe-area-inset-bottom) * -1);
-      margin-top: calc(env(safe-area-inset-bottom) * -1);
-    }
-
-    &-input {
-      width: 100%;
-      height: 2.5rem;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: center;
-      outline: none;
-      padding: .5rem;
-      font-size: 1rem;
-      border: none;
-      color: #666;
-      background-color: #eee;
-      border-radius: .5rem;
-
-    }
-
-    &-btn {
-      height: 2.5rem;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: center;
-      outline: none;
-      padding: .5rem .75rem;
-      font-size: 1rem;
-      white-space: nowrap;
-      width: max-content;
-      border: none;
-      color: #fff;
-      background-color: @purple;
-      border-radius: .5rem;
-    }
-  }
 
   &::-webkit-scrollbar {
     display: none;
@@ -369,6 +300,45 @@ export default {
       &.is-active {
         color: @purple;
       }
+    }
+  }
+
+  .form {
+    width: 100vw;
+    height: 3rem;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    background-color: #fff;
+    border-top: 1px solid #eee;
+    padding: 0.5rem;
+    padding-bottom: constant(safe-area-inset-bottom);
+    padding-bottom: env(safe-area-inset-bottom);
+    display: flex;
+    gap: .5rem;
+    z-index: 9999;
+
+    &:focus-within {
+      padding-bottom: 0 !important;
+      margin-top: calc(constant(safe-area-inset-bottom) * -1);
+      margin-top: calc(env(safe-area-inset-bottom) * -1);
+    }
+
+    &-input {
+      width: 100%;
+      height: 2rem;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      outline: none;
+      padding: .5rem;
+      font-size: 1rem;
+      border: none;
+      color: #666;
+      background-color: #eee;
+      border-radius: .5rem;
+
     }
   }
 }
