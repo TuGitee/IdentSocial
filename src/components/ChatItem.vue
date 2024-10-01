@@ -1,0 +1,168 @@
+<template>
+    <div class="chat-item" :class="{ reverse: item.from_id === token }">
+        <div class="chat-item-avatar">
+            <router-link :to="{ name: 'UserDetail', params: { uid: item.from_id } }">
+                <img :src="item.avatar" alt="">
+            </router-link>
+        </div>
+        <div class="chat-item-info">
+            <p class="chat-item-nickname">
+                <span>
+                    {{ item.nickname }}
+                </span>
+                <time>{{ formatTime(item.time) }}</time>
+            </p>
+            <div class="chat-item-box">
+                <i class="el-icon-loading" v-if="!item.isSend"></i>
+                <p class="chat-item-content">
+                    {{ item.message }}
+                </p>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+import formatTime from '@/utils/time';
+import { mapState } from 'vuex';
+
+export default {
+    props: {
+        item: {
+            type: Object,
+            default: () => ({})
+        }
+    },
+    computed: {
+        ...mapState({
+            token: state => state.user.token
+        })
+    },
+    methods: {
+        formatTime
+    }
+}
+</script>
+
+<style scoped lang="less">
+.chat-item {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 0 1rem;
+    margin-top: .5rem;
+
+    &.reverse {
+        flex-direction: row-reverse;
+        text-align: right;
+
+        .chat-item-nickname {
+            margin-left: auto;
+        }
+
+        .chat-item-content {
+            background-color: @purple ;
+            color: #fff;
+            margin-right: 0.5rem;
+
+            &::before {
+                display: none;
+            }
+
+            &::after {
+                position: absolute;
+                right: 0;
+                bottom: 0;
+                content: '';
+                width: 1rem;
+                height: 1rem;
+                background-color: @purple;
+            }
+        }
+
+        .chat-item-box {
+            justify-content: flex-end;
+            flex-direction: row;
+
+            i {
+                order: 0;
+            }
+        }
+    }
+
+    .chat-item-avatar {
+        height: 2.4rem;
+        width: 2.4rem;
+        border-radius: 50%;
+        clip-path: circle(50% at 50% 50%);
+        align-self: flex-end;
+
+        img {
+            height: 100%;
+            width: 100%;
+        }
+    }
+
+    .chat-item-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .chat-item-box {
+        display: flex;
+        align-items: flex-end;
+        margin-right: auto;
+
+        i {
+            order: 1;
+        }
+    }
+
+    .chat-item-nickname {
+        max-width: 70%;
+        white-space: nowrap;
+        margin: 4px 0.5rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: @gray-5;
+        font-size: .8rem;
+        font-weight: bold;
+
+        time {
+            font-size: .6rem;
+            color: @gray-3;
+            font-weight: normal;
+        }
+    }
+
+    .chat-item-content {
+        margin-left: 0.5rem;
+        margin-right: .5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        flex: 0.01 fit-content;
+        padding: 0.5rem 1rem;
+        line-height: 1.5;
+        background-color: @lightPurple;
+        border-radius: 1rem;
+        position: relative;
+        width: fit-content;
+        word-wrap: normal;
+        word-break: break-all;
+        max-width: 70%;
+
+        &::before {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            content: '';
+            width: 1rem;
+            height: 1rem;
+            background-color: @lightPurple;
+        }
+    }
+}
+</style>

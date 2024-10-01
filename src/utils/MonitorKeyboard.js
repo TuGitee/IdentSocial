@@ -29,7 +29,6 @@ class MonitorKeyboard {
 
     // Android系统
     onResize = () => {
-        //键盘弹起与隐藏都会引起窗口的高度发生变化
         const resizeHeight = window.innerHeight;
         this.keyboardHeight = this.originalHeight - resizeHeight;
 
@@ -55,11 +54,9 @@ class MonitorKeyboard {
      */
     onStart = () => {
         if (this.type == 1) {
-            // 获取窗口的高度
             window.addEventListener('resize', this.onResize);
         }
         if (this.type == 2) {
-            // iOS系统
             window.addEventListener('resize', this.onFocusin);
             window.addEventListener('focusout', this.onFocusout);
         }
@@ -70,7 +67,6 @@ class MonitorKeyboard {
      */
     onEnd = () => {
         if (this.type == 1) {
-            //获取窗口的高度
             window.removeEventListener('resize', this.onResize);
         }
         if (this.type == 2) {

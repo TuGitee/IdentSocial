@@ -15,6 +15,11 @@ Vue.use(VueTouch, { name: 'v-touch' })
 Vue.config.productionTip = false
 
 import "@/mock/index"
+import "@/ws/index"
+
+window.onload = function () {
+  screen.orientation.lock("portrait");
+}
 
 let options = {
   fullscreenEl: false, //关闭全屏按钮

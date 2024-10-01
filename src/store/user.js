@@ -1,5 +1,6 @@
 import { getToken, setToken } from "@/utils/token";
 import { reqMockFollow, reqMockFollowerList, reqMockFollowList, reqMockLikeList, reqMockUser } from "@/api";
+import pubsub from "@/utils/pubsub";
 const getters = {
     followCount(state) {
         return state.userInfo.followingList?.filter(item => item.isFollow).length || 0;
@@ -12,6 +13,7 @@ const actions = {
     async getUserInfo(state) {
         let result = await reqMockUser(state.state.token);
         if (result.code == 200) {
+            pubsub.emit('userInfo', result.data);
             const followingList = await reqMockFollowList();
             result.data.followingList = followingList.data || [];
             const followerList = await reqMockFollowerList();

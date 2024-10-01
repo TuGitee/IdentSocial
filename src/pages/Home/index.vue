@@ -51,11 +51,16 @@ export default {
     if (this.postList.length <= this.pageSize) {
       this.getData();
     }
-    this.$store.dispatch("getUserInfo");
-    this.$bus.$on("forward", (data) => {
-      this.to = data;
+    this.$bus.$on("forward", (id, isPostFrom, user, text, el) => {
+      this.to = {
+        id,
+        isPostFrom,
+        user,
+        text
+      };
       this.$route.meta.footerShow = false;
       this.isComment = true;
+      window.scrollTo({ top: el.offsetTop + parseInt(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top")), behavior: "smooth" });
     });
     this.activeName = this.$route.name;
     this.el = window;
@@ -138,24 +143,15 @@ export default {
         this.$refs.mask.style.opacity = (this.el.scrollY - 160) / 100;
     },
     async publish() {
-      let res = await this.$blogAxios.post("/post/forward", {
-        content: this.text,
-        userId: this.$store.state.user.token,
-        postFrom: this.to,
-        postTitle: "转发动态"
-      });
-      console.log(res);
-      if (res.data.code) {
-        location.reload();
-        this.$notify({
-          title: "成功",
-          message: "转发成功",
-          type: "success",
-
-        });
+      if (!this.to?.id) return;
+      const text = this.to.isPostFrom ? `${this.text} // @[${this.to.user.nickname}](${this.to.user.id}): ${this.to.text}` : `${this.text}`;
+      this.$store.dispatch("postBlog", { text, postFrom: this.to.id }).then(() => {
+        this.text = "";
+        this.to = {};
         this.isComment = false;
         this.$route.meta.footerShow = true;
-      }
+        scrollTo(0, 0);
+      });
     }
   },
 };

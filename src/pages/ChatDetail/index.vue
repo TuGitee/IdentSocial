@@ -42,8 +42,7 @@
 </template>
 
 <script>
-import { WebSocketType, WebSocketPort } from "@/ws";
-import io from "../Chat/js/socketio.js"
+import { WebSocketType } from "@/ws";
 export default {
     name: "ChatDetail",
     data() {
@@ -87,11 +86,7 @@ export default {
         },
     },
     mounted() {
-        this.$store.state.user.token??this.$store.dispatch('getUserInfo')
-
-        this.io = io(`${WebSocketPort}?token=${this.$store.state.user.token}`);
-
-
+        this.io = server(this.$store.state.user.token);
         this.io.emit(WebSocketType.PrivateList, this.createMessage(this.$store.state.user.token, this.$route.params.cid))
         this.io.on(WebSocketType.PrivateList, (data) => {
             this.chatList = data.data

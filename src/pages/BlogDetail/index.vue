@@ -13,7 +13,7 @@
                 </span>
             </div>
         </div>
-        <div class="blog-content">
+        <div class="blog-content" ref="content">
             <BlogItem v-if="currentPost" :item="currentPost" @click="comment"></BlogItem>
             <CommentItem v-for="cmt in commentList" :key="cmt.id" :comment="cmt" @click="changeTarget" ref="comments" />
         </div>
@@ -47,10 +47,12 @@ export default {
         changeTarget(comment) {
             this.comment();
             this.target = comment;
-            console.log(this.$refs.comments.find(comment => comment.comment.id === this.target.id).$el.offsetTop);
-
-            const el = this.$refs.comments.find(comment => comment.comment.id === this.target.id).$el
-            el?.scrollIntoView({ behavior: "smooth", block: "center" });
+            const el = this.$refs.comments.find(comment => comment.comment.id === this.target.id).$el;
+            const content = this.$refs.content;
+            content.scrollTo({
+                top: el.offsetTop - content.offsetHeight + el.offsetHeight + parseInt(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top")) + 36,
+                behavior: "smooth"
+            });
         },
         async init() {
             this.text = '';

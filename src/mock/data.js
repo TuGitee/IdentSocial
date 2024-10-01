@@ -57,7 +57,7 @@ export const generateMockUsers = (n = userCount) => {
 
 export const userList = localStorage.getItem('userList') ? JSON.parse(localStorage.getItem('userList')) : generateMockUsers();
 
-export const mockPost = (uid, text, time, img, like, comment, share, id = uuid()) => Mock.mock({
+export const mockPost = (uid, text, time, img, like, comment, share, postFrom, id = uuid()) => Mock.mock({
     id,
     'text': text ?? '@cparagraph',
     'time': time ?? Mock.Random.datetime('yyyy/MM/dd HH:mm:ss'),
@@ -73,6 +73,7 @@ export const mockPost = (uid, text, time, img, like, comment, share, id = uuid()
     'like': like ?? '@integer(0, 100)',
     'comment': comment ?? '@integer(0, 50)',
     'share': share ?? '@integer(0, 30)',
+    'postFrom': postFrom ?? null,
     'uid': uid ? uid : userList[Math.floor(Math.random() * userList.length)].id
 })
 export const generateMockPosts = (n = postCount) => {

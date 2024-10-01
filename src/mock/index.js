@@ -79,8 +79,8 @@ Mock.mock(/\/mock\/post/, 'get', (req) => {
 });
 
 Mock.mock(/\/mock\/post/, 'post', (req) => {
-    const { text, imgs, uid } = JSON.parse(req.body);
-    const post = mockPost(uid, text, getCurrentTime(), imgs, 0, 0, 0);
+    const { text, imgs, uid, postFrom } = JSON.parse(req.body);
+    const post = mockPost(uid, text, getCurrentTime(), imgs, 0, 0, 0, postFrom);
     postList.unshift(post);
     post.user = userList.find(user => user.id === uid);
     saveData('postList');

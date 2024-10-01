@@ -67,10 +67,6 @@ export default {
     },
     async submit() {
       if (this.isActive && this.isExit) {
-        // let res = await this.$userAxios.post("/user/login", {
-        //   email: this.mail,
-        //   password: this.password,
-        // });
         const res = await reqMockUserLogin(this.mail, this.password);
         if (res.code == 400) {
           this.$notify({
@@ -81,6 +77,7 @@ export default {
           });
         } else {
           this.$store.commit("SETTOKEN", res.data.id);
+          this.$store.dispatch("getUserInfo");
           this.$router.replace({ name: "Home" });
         }
       }

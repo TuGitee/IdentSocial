@@ -5,11 +5,10 @@
                 <i class="el-icon-arrow-left"></i>
                 <b>返回</b>
             </button>
-            <img :src="userInfo.background ?? defaultBg" class="bg" :style="{
-                transform: `scale(${scale})`,
-                transformOrigin: '50% 100%',
-            }" v-if="userInfo?.id" preview="bg">
-            <div class="userInfo">
+            <img :src="userInfo.background ?? defaultBg" :style="{
+                transform: `scale(${scale})`
+            }" class="bg" v-if="userInfo?.id" preview="bg">
+            <div class="userInfo" v-if="uid">
                 <MyImage preview="avatar" :src="userInfo?.avatar">{{ userInfo?.nickname || '加载中' }}</MyImage>
                 <h1 class="username">{{ userInfo?.nickname || '加载中' }}</h1>
                 <p class="other" v-if="userInfo?.id">
@@ -39,15 +38,15 @@
                     </span>
                 </p>
                 <p class="signature" v-if="userInfo?.id" :title="userInfo?.signature">{{ userInfo?.intro }}</p>
-                <p class="follow">
-                    <span class="following follow-item">
+                <p class="follow" v-if="userInfo?.id">
+                    <router-link :to="`/follow/${userInfo.id}`" class="following follow-item">
                         <span class="num">{{ userInfo?.following ?? 0 }}</span>
                         <b>关注</b>
-                    </span>
-                    <span class="follower follow-item">
+                    </router-link>
+                    <router-link :to="`/follower/${userInfo.id}`" class="follower follow-item">
                         <span class="num">{{ userInfo?.followers ?? 0 }}</span>
                         <b>粉丝</b>
-                    </span>
+                    </router-link>
                 </p>
             </div>
         </header>
@@ -94,7 +93,8 @@ export default {
     },
     mounted() {
         this.init();
-        window.addEventListener('scroll', this.handleScroll)
+        this.height = this.$refs.header.getBoundingClientRect().height;
+        window.addEventListener('scroll', this.handleScroll, { passive: false })
     },
     beforeDestroy() {
         window.removeEventListener('scroll', this.handleScroll)
@@ -123,8 +123,7 @@ export default {
             if (scrollY > 0) {
                 this.scale = 1;
             } else {
-                const { height } = this.$refs.header.getBoundingClientRect();
-                this.scale = 1 + Math.abs(scrollY) / height;
+                this.scale = 1 + Math.abs(scrollY) / this.height;
             }
             if (scrollY + window.innerHeight >= document.body.scrollHeight) {
                 this.getData();
@@ -154,6 +153,7 @@ export default {
         min-width: max-content;
         padding: var(--safe-area-inset-top) 1.2rem 1.2rem;
         min-width: 0;
+        min-height: 256px;
 
         .back {
             color: @white;
@@ -180,8 +180,10 @@ export default {
             width: 100%;
             bottom: 0;
             left: 0;
+            will-change: transform;
             object-fit: cover;
             z-index: -2;
+            transform-origin: 50% 100%;
         }
 
         &:after {

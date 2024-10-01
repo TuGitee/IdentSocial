@@ -7,20 +7,20 @@
             <div class="analysis-result-panel-item">
                 <span class="analysis-result-panel-item-content">性别</span>
                 <i class="analysis-result-panel-item-icon"
-                    :class="result.gender === 'Male' ? 'el-icon-male' : 'el-icon-female'"></i>
+                    :class="result?.gender ? 'el-icon-male' : 'el-icon-female'"></i>
 
             </div>
             <div class="analysis-result-panel-item">
                 <span class="analysis-result-panel-item-content">年龄</span>
-                <span class="analysis-result-panel-item-icon">{{ formatAge(result.age) }}</span>
+                <span class="analysis-result-panel-item-icon">{{ result?.age ?? 0 }}</span>
 
             </div>
             <div class="analysis-result-panel-item">
                 <span class="analysis-result-panel-item-content">分数</span>
-                <span class="analysis-result-panel-item-icon">{{ result.score.toFixed(1) }}</span>
+                <span class="analysis-result-panel-item-icon">{{ result?.score ?? 0 }}</span>
             </div>
         </div>
-        <div class="analysis-result-faces" v-for="item in result.stars" :key="item.name">
+        <div class="analysis-result-faces" v-for="item in result?.stars" :key="item.name">
             <div class="analysis-result-faces-left">
                 <el-image class="analysis-result-faces-left-img" :src="item.url" alt=""></el-image>
             </div>
@@ -35,8 +35,15 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
+
 export default {
     name: "AnalysisResult",
+    computed: {
+        ...mapState({
+            userInfo: state => state.user.userInfo
+        }),
+    },
     props: {
         title: {
             type: String,
@@ -44,51 +51,17 @@ export default {
         },
         result: {
             type: Object,
-            default: () => {
-                return {
-                    score: 92.513,
-                    age: "(25-32)",
-                    gender: "Male",
-                    stars: [
-                        {
-                            name: "泰勒·斯威夫特",
-                            url: "https://img1.baidu.com/it/u=235666361,2576303619&fm=26&fmt=auto&gp=0.jpg",
-                        },
-                        {
-                            name: '莱昂纳多·迪卡普里奥',
-                            url: 'https://img1.baidu.com/it/u=235666361,2576303619&fm=26&fmt=auto&gp=0.jpg'
-                        }
-                    ]
-                }
-            }
-        }
-    },
-    data() {
-        return {
-            colors: [
-                '#f56c6c', '#e6a23c', '#5cb87a', '#1989fa', '#6f7ad3'
-            ],
-            isMale: true
+            default: () => ({})
         }
     },
     methods: {
-        formatAge(age) {
-            return parseInt(age.replace(/[()]/g, '').split('-').reduce((prev, cur) => {
-                return prev + parseInt(cur);
-            }, 0) / 2);
-        },
         format(value) {
             return value.toFixed(2) + '%';
         },
         random(min, max) {
             return Math.random() * (max - min + 1) + min;
         }
-    },
-    beforeMount() {
-    },
-    mounted() {
-        console.log(this.result);
-    },
+    }
 
 }
 </script>

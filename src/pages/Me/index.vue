@@ -21,11 +21,11 @@
           <span class="me-drawers-header-item-text">人脸分数</span>
           <span class="me-drawers-header-item-number">{{ userInfo.faceScore ?? 0 }}</span>
         </div>
-        <div class="me-drawers-header-item">
+        <div class="me-drawers-header-item" @click="toFollow">
           <span class="me-drawers-header-item-text">关注</span>
           <span class="me-drawers-header-item-number">{{ following ?? 0 }}</span>
         </div>
-        <div class="me-drawers-header-item">
+        <div class="me-drawers-header-item" @click="toFollower">
           <span class="me-drawers-header-item-text">粉丝</span>
           <span class="me-drawers-header-item-number">{{ followers ?? 0 }}</span>
         </div>
@@ -96,9 +96,6 @@ export default {
       ]
     };
   },
-  mounted() {
-    this.$store.dispatch('getUserInfo');
-  },
   computed: {
     ...mapState({ userInfo: state => state.user.userInfo ?? {} }),
     ...mapGetters(['followCount']),
@@ -120,6 +117,12 @@ export default {
   methods: {
     goUserDetail() {
       this.$router.push({ name: 'UserDetail', params: { uid: this.userInfo.id } });
+    },
+    toFollow() {
+      this.$router.push({ name: 'Follow', params: { uid: this.userInfo.id } });
+    },
+    toFollower() {
+      this.$router.push({ name: 'Follower', params: { uid: this.userInfo.id } });
     }
   }
 }

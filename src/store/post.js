@@ -11,8 +11,8 @@ const state = {
     isMoreFollow: true,
 }
 const actions = {
-    async postBlog({ commit }, { text, imgs }) {
-        const res = await reqMockAddPost(text, imgs)
+    async postBlog({ commit }, { text, imgs = [], postFrom = null }) {
+        const res = await reqMockAddPost(text, imgs, postFrom)
         if (res.code == 200) {
             commit("POSTBLOG", res.data);
             return res;
@@ -30,11 +30,11 @@ const actions = {
         state.postListNo++;
     },
     async getUserPostList({ commit, state }, id) {
-        if (!state.userList[id]) { 
+        if (!state.userList[id]) {
             state.userList[id] = {
                 pageNo: 1,
                 isMore: true
-            }; 
+            };
         }
         if (!state.userList[id].isMore) return
         const res = await reqMockUserPostList(id);

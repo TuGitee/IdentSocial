@@ -14,7 +14,8 @@
     </div>
     <div class="chat-body">
       <ul class="chat-body-list">
-        <li class="chat-body-list-item" @click="toChat(item.id, item.username, item.avatar)" v-for="(item) in userLists" :key="item.id">
+        <li class="chat-body-list-item" @click="toChat(item.id, item.username, item.avatar)" v-for="(item) in userLists"
+          :key="item.id">
           <div class="chat-body-list-item-avatar">
             <img :src="require(`@/assets/images/${item.avatar ?? 0}.png`)" alt="" />
           </div>
@@ -23,9 +24,9 @@
               <span class="chat-body-list-item-content-title-name">{{ item.username }}</span>
             </div>
             <div class="chat-body-list-item-content-desc">
-              <span class="chat-body-list-item-content-desc-text">{{ item.last }}</span><span
-                class="chat-body-list-item-content-desc-text divide">·</span><span
-                class="chat-body-list-item-content-desc-text">{{ formatTime(item.time)}}</span>
+              <span class="chat-body-list-item-content-desc-text">{{ last?.message }}</span>
+              <span class="chat-body-list-item-content-desc-text divide">·</span>
+              <span class="chat-body-list-item-content-desc-text">{{ formatTime(last?.time) }}</span>
             </div>
           </div>
         </li>
@@ -36,8 +37,9 @@
 
 <script>
 import "@/css/user.less"
-import { WebSocketType, WebSocketPort } from "@/ws";
-import io from "./js/socketio.js"
+import { WebSocketType, channel, emit } from "@/ws";
+import { mapGetters, mapState } from "vuex";
+import formatTime from "@/utils/time.js";
 export default {
   name: "Chat",
   data() {
@@ -45,6 +47,13 @@ export default {
       userLists: [],
       io: null
     };
+  },
+  computed: {
+    ...mapState({
+      token: state => state.user.token,
+      userInfo: state => state.user.userInfo
+    }),
+    ...mapGetters(['last'])
   },
   methods: {
     createMessage(user, data, avatar, id, time) {
@@ -56,7 +65,7 @@ export default {
         time
       }
     },
-    toChat(id,username,avatar) {
+    toChat(id, username, avatar) {
       if (id == -1) {
         this.$router.push({
           name: "WorldDetail",
@@ -77,29 +86,16 @@ export default {
         })
       }
     },
-    formatTime(time) {
-      const t = new Date(time)
-      return `${t.getFullYear()}-${t.getMonth() + 1}-${t.getDate()} ${t.getHours() < 10 ? '0' + t.getHours() : t.getHours()}:${t.getMinutes() < 10 ? '0' + t.getMinutes() : t.getMinutes()}:${t.getSeconds() < 10 ? '0' + t.getSeconds() : t.getSeconds()}`;
-    }
+    formatTime
   },
   mounted() {
-    if(!this.io)
-    this.io = io(`${WebSocketPort}?token=${this.$store.state.user.token}`);
-
-    this.io.emit(WebSocketType.GroupList, this.createMessage(this.$store.state.user.token, "你好", '', this.$store.state.user.token, new Date().getTime()))
-
-    this.io.on(WebSocketType.GroupList, (data) => {
-      console.log(data)
+    channel.bind(WebSocketType.GroupList, (data) => {
       this.userLists = data.data
     })
-    
-    this.io.on(WebSocketType.System, (data) => {
-      console.log(data)
-    })
+    emit(WebSocketType.GroupList, this.createMessage(this.token, "你好", '', this.$store.state.user.token, new Date().getTime()));
   },
   beforeDestroy() {
-    this.io.off(WebSocketType.GroupList)
-    this.io.off(WebSocketType.System)
+    channel.unbind(WebSocketType.GroupList)
   }
 };
 </script>
@@ -177,8 +173,8 @@ export default {
           width: calc(100% - 7rem);
           height: 100%;
           flex: 1;
+          min-width: 0;
           display: flex;
-          align-items: center;
           justify-content: center;
           flex-direction: column;
           gap: .5rem;
@@ -210,12 +206,21 @@ export default {
             display: flex;
             align-items: center;
             justify-content: flex-start;
+            overflow: hidden;
+            text-overflow: ellipsis;
 
             .chat-body-list-item-content-desc-text {
               font-size: 1rem;
               color: grey;
               white-space: nowrap;
               width: min-content;
+
+              &:first-child {
+                width: fit-content;
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              }
 
               &.divide {
                 margin: 0 .3rem;

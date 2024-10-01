@@ -67,6 +67,8 @@
 </template>
 
 <script>
+import formatTime from '@/utils/time';
+
 export default {
     name: "CommentItem",
     props: {
@@ -108,16 +110,7 @@ export default {
         lessComment() {
             this.sliceNum = 1
         },
-        formatTime(time) {
-            let date = new Date(time);
-            let year = date.getFullYear();
-            let month = date.getMonth() + 1;
-            let day = date.getDate();
-            let hour = date.getHours() < 10 ? '0' + date.getHours() : date.getHours();
-            let minute = date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes();
-            let second = date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds();
-            return `${year}-${month}-${day} ${hour}:${minute}:${second}`
-        }
+        formatTime
     }
 }
 </script>

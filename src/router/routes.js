@@ -47,9 +47,14 @@ export default [
         component: () => import('@/pages/WorldDetail'),
     },
     {
-        path: '/setting',
-        name: 'Setting',
-        component: () => import('@/pages/Setting'),
+        path: '/follow/:uid',
+        name: 'Follow',
+        component: () => import('@/pages/Follow'),
+    },
+    {
+        path: '/follower/:uid',
+        name: 'Follower',
+        component: () => import('@/pages/Follower'),
     },
     {
         path: '/',

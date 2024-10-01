@@ -30,26 +30,25 @@
         </div>
         <div class="blog-item-content" @click="toBlogDetail">
             <div class="blog-item-content-text" v-if="item.text">
-                {{ item.text }}
+                <FormatText :text="item.text"></FormatText>
             </div>
             <ul class="blog-item-content-img" v-if="item.img" @click.stop>
                 <li class="blog-item-content-img-item" v-for="(_, ii) in item.img" :key="ii">
                     <MyImage :src="imgList[ii]" :preview="item.id"></MyImage>
                 </li>
             </ul>
-            <div class="blog-item-content-share" v-if="item.postFrom" @click="toRawBlog(item.postFrom)">
+            <div class="blog-item-content-share" v-if="item?.postFrom" @click.stop="toRawBlog(item.postFrom)">
                 <div class="blog-item-content-share-title">
-                    <span class="blog-item-content-share-title-name" @click.stop="toUserPage(postFrom.userId)">{{
-                        postFrom.name }}:
+                    <span class="blog-item-content-share-title-name" @click.stop="toUserPage(postFrom.uid)">{{
+                        postFrom.user?.nickname ?? '加载中' }}:
                     </span>
-                    <span class="blog-item-content-share-title-text">{{ postFrom.content }}</span>
+                    <span class="blog-item-content-share-title-text">{{ postFrom.text ?? '加载中' }}</span>
                 </div>
-                <!-- <ul class="blog-item-content-share-img blog-item-content-img">
-                    <li class="blog-item-content-img-item" v-for="img in imgList" :key="img.pictureId">
-                        {{ img.path }}
-                        <img :src="img.path" :alt="img.path" :preview="img.belongPost" />
+                <ul class="blog-item-content-share-img blog-item-content-img" v-if="postFrom.imgList?.length">
+                    <li class="blog-item-content-img-item" v-for="img in postFrom.imgList" :key="img" @click.stop>
+                        <MyImage :src="img" :preview="postFrom.id" />
                     </li>
-                </ul> -->
+                </ul>
             </div>
         </div>
         <div class="blog-item-footer">
@@ -73,11 +72,15 @@
 import { getAll } from '@/utils/storage';
 import { mapState } from 'vuex';
 import MyImage from './MyImage.vue';
+import { reqMockPost } from '@/api';
+import FormatText from './FormatText.vue';
+import formatTime from '@/utils/time';
 
 export default {
     name: "BlogItem",
     components: {
-        MyImage
+        MyImage,
+        FormatText
     },
     props: {
         item: {
@@ -99,7 +102,7 @@ export default {
             userInfo: state => state.user.userInfo,
         }),
         isFollow() {
-            return this.userInfo.followingList?.find((item) => item.fid === this.item.uid)?.isFollow ?? false;
+            return this.userInfo.followingList?.filter(follow => follow.isFollow)?.find((item) => item.fid === this.item.uid)?.isFollow ?? false;
         },
         isLike() {
             return this.userInfo.likeList?.some((item) => item.bid === this.item.id) ?? false;
@@ -112,6 +115,11 @@ export default {
         async init() {
             const imgs = await getAll(this.item.img);
             this.imgList = imgs;
+            if (this.item.postFrom) {
+                const postFrom = await reqMockPost(this.item.postFrom);
+                postFrom.data.imgList = await getAll(postFrom.data.img);
+                this.postFrom = postFrom.data;
+            }
         },
         random(min, max) {
             return Math.floor(Math.random() * (max - min + 1) + min);
@@ -129,7 +137,7 @@ export default {
             if (this.item.postFrom) {
                 to = this.item.postFrom;
             }
-            this.$bus.$emit('forward', to, this.$el);
+            this.$bus.$emit('forward', to, !!this.item.postFrom, this.item.user, this.item.text, this.$el);
         },
         async searchBlog(id) {
             let res = await this.$blogAxios.get(`/post?postId=${id}`)
@@ -137,10 +145,7 @@ export default {
             let user = await this.$userAxios.get(`/user?userId=${this.postFrom.userId}`);
             this.$set(this.postFrom, 'name', user.data.data.nickname);
         },
-        formatTime(time) {
-            let t = new Date(time);
-            return `${t.getFullYear()}-${t.getMonth() + 1}-${t.getDate()} ${t.getHours() < 10 ? '0' + t.getHours() : t.getHours()}:${t.getMinutes() < 10 ? '0' + t.getMinutes() : t.getMinutes()}:${t.getSeconds() < 10 ? '0' + t.getSeconds() : t.getSeconds()}`;
-        },
+        formatTime,
         follow(id) {
             this.isFollowLoading = true;
             this.$store.dispatch("followUser", { id, isFollow: !this.isFollow }).finally(() => {
@@ -321,13 +326,26 @@ export default {
         }
 
         &-share {
-            padding: 10px;
-            background-color: #f8f8f8;
-            border-radius: 10px;
+            padding: 8px 10px 10px 14px;
+            background-color: @gray-0;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 4px;
+            position: relative;
+
+            &::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                height: 100%;
+                width: 4px;
+                background-color: @purple;
+            }
 
             &-title {
                 font-size: 0.95rem;
-                color: #999;
+                color: @gray-3;
                 white-space: pre-wrap;
                 word-break: break-all;
 
@@ -340,7 +358,7 @@ export default {
             &-img {
                 width: 100%;
                 height: fit-content;
-                margin-top: 10px;
+                margin-top: 2px;
                 display: flex;
                 justify-content: flex-start;
                 flex-wrap: wrap;

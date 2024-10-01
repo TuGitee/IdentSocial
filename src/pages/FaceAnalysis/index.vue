@@ -37,7 +37,7 @@
       </v-touch>
       <div class="face-analysis-box-analysis">
         <transition name="el-fade-in-linear" :duration="1000">
-          <AnalysisResult v-show="isUnfold" :analysisList="userInfo.analysisList" :title="text" :result="result" />
+          <AnalysisResult v-show="isUnfold" :analysisList="userInfo.analysisList" :title="text" :result="result ?? defaultResult" />
         </transition>
       </div>
 
@@ -62,21 +62,7 @@ export default {
       isLoading: false,
       isUnfold: true,
       text: '最近一次打分结果',
-      result: {
-        score: 92.513,
-        age: "(25-32)",
-        gender: "Male",
-        stars: [
-          {
-            name: "泰勒·斯威夫特",
-            url: "https://focnal-test.oss-cn-chengdu.aliyuncs.com/work/test/xlz.jpg?OSSAccessKeyId=LTAI5tJ6d5ETG985CEeqdXpD&Expires=1688174723&Signature=nEMzfaDtka4ecugQGBD6L0oW61M%3D",
-          },
-          {
-            name: '张婧仪',
-            url: "http://focnal-test.oss-cn-chengdu.aliyuncs.com/work/test/zjy.jpg?Expires=1688401333&OSSAccessKeyId=LTAI5tJ6d5ETG985CEeqdXpD&Signature=Ltuy5YJMmjYZ1two0zUkSkXI6mI%3D"
-          }
-        ]
-      }
+      result: null
     }
   },
   methods: {
@@ -145,13 +131,20 @@ export default {
     }
   },
   mounted() {
-    // this.$store.dispatch('getUserInfo');
     // this.result = JSON.parse(localStorage.getItem('result'));
   },
   computed: {
     ...mapState({
       userInfo: state => state.user.userInfo
     }),
+    defaultResult() {
+      return {
+        score: this.userInfo.faceScore || 0,
+        age: this.userInfo.age || 0,
+        gender: this.userInfo.gender || 0,
+        stars: []
+      }
+    },
     delta() {
       return (window.screen.height - this.imgHeight) / 4;
     },

@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <div class="title-mask" :style="{opacity}"></div>
-    <router-view :key="$store.name"></router-view>
+    <router-view :key="$route.fullPath"></router-view>
     <ChangePage v-if="$route.meta.footerShow" />
   </div>
 </template>
@@ -19,6 +19,7 @@ export default {
     }
   },
   mounted() {
+    this.$store.dispatch('getUserInfo');
     window.addEventListener('scroll', this.handleScroll);
   },
   methods: {

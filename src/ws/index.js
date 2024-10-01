@@ -1,14 +1,41 @@
-export const WebSocketType = {
-    Error: 0,
-    GroupList: 1,
-    GroupChat: 2,
-    PrivateChat: 3,
-    System: 4,
-    PrivateRead: 5,
-    WorldItem: 6,
-    WorldRead: 7,
-    PrivateList: 8,
-    WorldList: 9,
+import pubsub from '@/utils/pubsub';
+import Pusher from 'pusher-js';
+
+const pusher = new Pusher('ed8ac4713ea8545f1fd1', {
+    cluster: 'ap1'
+});
+
+export const channel = pusher.subscribe('all-channel');
+
+export const emit = (eventType, data) => {
+    fetch(requestURL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            eventType,
+            data
+        })
+    })
 }
 
-export const WebSocketPort = 'ws://localhost:8084/'
+const requestURL = 'https://api.face.tuguobin.site/pusher';
+
+pubsub.on('userInfo', (data) => {
+    emit(WebSocketType.UserInfo, data)
+})
+
+export const WebSocketType = {
+    Error: 'ERROR',
+    GroupList: 'GROUP_LIST',
+    GroupChat: 'GROUP_CHAT',
+    PrivateChat: 'PRIVATE_CHAT',
+    System: 'SYSTEM',
+    PrivateRead: 'PRIVATE_READ',
+    WorldItem: 'WORLD_ITEM',
+    WorldRead: 'WORLD_READ',
+    PrivateList: 'PRIVATE_LIST',
+    WorldList: 'WORLD_LIST',
+    UserInfo: 'USER_INFO'
+}
