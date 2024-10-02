@@ -8,6 +8,7 @@ export default [
         meta: {
             footerShow: true,
             icon: "el-icon-s-home",
+            keepAlive: true
         },
         children: [...homeRoutes],
         redirect: { 
@@ -25,23 +26,25 @@ export default [
         }
     },
     {
-        name: 'Chat',
+        name: 'ChatPage',
         path: 'chat',
         component: () => import('@/pages/Chat/index.vue'),
         meta: {
             footerShow: true,
             icon: "el-icon-message-solid",
             isDot: true,
+            keepAlive: true
         },
     },
     {
-        name: 'Me',
+        name: 'MePage',
         path: 'me',
         component:() => import('@/pages/Me/index.vue'),
         meta: {
             footerShow: true,
             icon: "el-icon-user-solid",
             isDot: true,
+            keepAlive: true
         },
     }
 ]

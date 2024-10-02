@@ -37,14 +37,9 @@ export default [
         component: () => import('@/pages/UserDetail'),
     },
     {
-        path: '/chat-detail/:cid',
+        path: '/chat-detail/:id?',
         name: 'ChatDetail',
         component: () => import('@/pages/ChatDetail'),
-    },
-    {
-        path: '/world-detail',
-        name: 'WorldDetail',
-        component: () => import('@/pages/WorldDetail'),
     },
     {
         path: '/follow/:uid',

@@ -14,22 +14,9 @@
     </div>
     <div class="chat-body">
       <ul class="chat-body-list">
-        <li class="chat-body-list-item" @click="toChat(item.id, item.username, item.avatar)" v-for="(item) in userLists"
-          :key="item.id">
-          <div class="chat-body-list-item-avatar">
-            <img :src="require(`@/assets/images/${item.avatar ?? 0}.png`)" alt="" />
-          </div>
-          <div class="chat-body-list-item-content">
-            <div class="chat-body-list-item-content-title">
-              <span class="chat-body-list-item-content-title-name">{{ item.username }}</span>
-            </div>
-            <div class="chat-body-list-item-content-desc">
-              <span class="chat-body-list-item-content-desc-text">{{ last?.message }}</span>
-              <span class="chat-body-list-item-content-desc-text divide">·</span>
-              <span class="chat-body-list-item-content-desc-text">{{ formatTime(last?.time) }}</span>
-            </div>
-          </div>
-        </li>
+        <ChatUserItem @click="user.unread = 0" class="chat-body-list-item" v-for="user in userLists" :item="user"
+          :key="user.id">
+        </ChatUserItem>
       </ul>
     </div>
   </div>
@@ -37,23 +24,24 @@
 
 <script>
 import "@/css/user.less"
-import { WebSocketType, channel, emit } from "@/ws";
-import { mapGetters, mapState } from "vuex";
-import formatTime from "@/utils/time.js";
+import { WebSocketType, channel, emit, privateChannel } from "@/ws";
+import { mapState } from "vuex";
+import ChatUserItem from "./ChatUserItem/index.vue";
+
 export default {
-  name: "Chat",
+  name: "ChatPage",
+  components: { ChatUserItem },
   data() {
     return {
       userLists: [],
-      io: null
+      io: null,
     };
   },
   computed: {
     ...mapState({
       token: state => state.user.token,
       userInfo: state => state.user.userInfo
-    }),
-    ...mapGetters(['last'])
+    })
   },
   methods: {
     createMessage(user, data, avatar, id, time) {
@@ -65,37 +53,83 @@ export default {
         time
       }
     },
-    toChat(id, username, avatar) {
-      if (id == -1) {
-        this.$router.push({
-          name: "WorldDetail",
-          params: {
-            username,
-            avatar
-          }
-        })
-      }
-      else {
-        this.$router.push({
-          name: "ChatDetail",
-          params: {
-            cid: id,
-            username,
-            avatar
-          }
-        })
-      }
+    bindEvent() {
+      this.bindGroupEvent();
+      this.bindPrivateEvent();
     },
-    formatTime
+    bindGroupEvent() {
+      channel.bind(WebSocketType.GroupChat, (data) => {
+        const item = {
+          message: data.data,
+          from_id: data.user.id,
+          avatar: data.user.avatar,
+          nickname: data.user.nickname,
+          to_id: data.to,
+          time: data.time,
+          isSend: true
+        }
+        this.userLists.find((item) => item.id == data.to).unread++;
+        this.addGroupChat(item)
+      })
+    },
+    bindPrivateEvent() {
+      if (!privateChannel) {
+        setTimeout(() => {
+          this.bindPrivateEvent()
+        }, 100);
+        return
+      }
+      privateChannel.bind(WebSocketType.PrivateChat, (data) => {
+        const item = {
+          message: data.data,
+          from_id: data.user.id,
+          avatar: data.user.avatar,
+          nickname: data.user.nickname,
+          to_id: data.to.id,
+          time: data.time,
+          isSend: true
+        }
+        this.userLists.find((item) => item.id == data.user.id).unread++;
+        this.addUserChat(item)
+      })
+    },
+    addGroupChat(data) {
+      this.$store.commit("ADDCHAT", data)
+    },
+    addUserChat(data) {
+      this.$store.commit("ADDUSERCHAT", data)
+    },
+    unbindEvent() {
+      channel.unbind(WebSocketType.GroupChat)
+      privateChannel.unbind(WebSocketType.PrivateChat)
+    },
+    setUserList(data) {
+      const userList = data.data;
+      for (let i = 0; i < this.userLists.length; i++) {
+        const user = this.userLists[i];
+        if (!userList.find(item => item.id == user.id)) {
+          this.userLists.splice(i, 1)
+          i--;
+        }
+      }
+      for (let i = 0; i < userList.length; i++) {
+        const user = userList[i];
+        if (!this.userLists.find(item => item.id == user.id)) {
+          this.userLists.push(user)
+        }
+      }
+    }
   },
   mounted() {
-    channel.bind(WebSocketType.GroupList, (data) => {
-      this.userLists = data.data
-    })
+    channel.bind(WebSocketType.Disconnet, this.setUserList);
+    channel.bind(WebSocketType.GroupList, this.setUserList)
+    this.bindEvent();
     emit(WebSocketType.GroupList, this.createMessage(this.token, "你好", '', this.$store.state.user.token, new Date().getTime()));
   },
   beforeDestroy() {
-    channel.unbind(WebSocketType.GroupList)
+    channel.unbind(WebSocketType.GroupList);
+    channel.unbind(WebSocketType.Disconnet);
+    this.unbindEvent();
   }
 };
 </script>
@@ -144,96 +178,6 @@ export default {
       display: flex;
       flex-direction: column;
       gap: 1rem;
-
-      .chat-body-list-item {
-        width: 100%;
-        height: 3.5rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 1rem;
-
-        .chat-body-list-item-avatar {
-          width: 3.5rem;
-          height: 3.5rem;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 50%;
-          overflow: hidden;
-
-          img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-          }
-        }
-
-        .chat-body-list-item-content {
-          width: calc(100% - 7rem);
-          height: 100%;
-          flex: 1;
-          min-width: 0;
-          display: flex;
-          justify-content: center;
-          flex-direction: column;
-          gap: .5rem;
-
-          .chat-body-list-item-content-title {
-            width: 100%;
-            height: 1.1rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-
-            .chat-body-list-item-content-title-name {
-              font-size: 1.1rem;
-              font-weight: bold;
-              max-width: 12rem;
-              overflow: hidden;
-              text-overflow: ellipsis;
-              white-space: nowrap;
-            }
-
-            .chat-body-list-item-content-title-time {
-              font-size: 1rem;
-            }
-          }
-
-          .chat-body-list-item-content-desc {
-            width: 100%;
-            height: 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            overflow: hidden;
-            text-overflow: ellipsis;
-
-            .chat-body-list-item-content-desc-text {
-              font-size: 1rem;
-              color: grey;
-              white-space: nowrap;
-              width: min-content;
-
-              &:first-child {
-                width: fit-content;
-                min-width: 0;
-                overflow: hidden;
-                text-overflow: ellipsis;
-              }
-
-              &.divide {
-                margin: 0 .3rem;
-              }
-
-              &:last-child {
-                width: fit-content;
-                max-width: max-content;
-              }
-            }
-          }
-        }
-      }
     }
   }
 }

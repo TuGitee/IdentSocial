@@ -53,7 +53,7 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 export default {
-  name: "Me",
+  name: "MePage",
   data() {
     return {
       list: [

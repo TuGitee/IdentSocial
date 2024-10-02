@@ -51,14 +51,14 @@ export default {
 
 .container {
     .back {
-        color: @white;
+        color: @black;
         font-weight: bold;
         font-size: 1rem;
         margin-top: 1.2rem;
         width: fit-content;
         display: flex;
         align-items: center;
-        text-shadow: 0 0 4px @black;
+        text-shadow: 0 0 4px @white;
         background-color: transparent;
         border: none;
         cursor: pointer;

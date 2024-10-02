@@ -4,7 +4,9 @@ import { getCurrentTime } from '@/utils/time';
 
 Mock.mock(/\/mock\/user\/\w+/, 'get', (req) => {
     const id = req.url.split('/').pop();
-    return Mock.mock({ code: 200, data: userList.find(item => item.id === id) });
+    const user = userList.find(u => u.id === id);
+    if (!user) return Mock.mock({ code: 400, msg: '用户不存在' });
+    return Mock.mock({ code: 200, data: user });
 });
 
 Mock.mock(/\/mock\/user\/login/, 'post', (req) => {

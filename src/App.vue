@@ -1,13 +1,18 @@
 <template>
   <div id="app">
-    <div class="title-mask" :style="{opacity}"></div>
-    <router-view :key="$route.fullPath"></router-view>
+    <div class="title-mask" :style="{ opacity }"></div>
+    <keep-alive>
+      <router-view v-if="$route.meta.keepAlive" :key="$route.fullPath"></router-view>
+    </keep-alive>
+    <router-view v-if="!$route.meta.keepAlive" :key="$route.fullPath"></router-view>
     <ChangePage v-if="$route.meta.footerShow" />
   </div>
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import ChangePage from './components/ChangePage.vue';
+import { emit, WebSocketType } from './ws';
 export default {
   name: 'App',
   components: {
@@ -26,6 +31,17 @@ export default {
     handleScroll() {
       this.opacity = Math.min(1, window.scrollY / 300);
     }
+  },
+  computed: {
+    ...mapState({
+      token: state => state.user.token
+    }),
+    keepAliveRoutes() {
+      return this.$router.getRoutes().filter(route => route.meta.keepAlive).map(route => route.name)
+    }
+  },
+  beforeDestroy() {
+    emit(WebSocketType.Disconnet, this.token)
   }
 }
 </script>

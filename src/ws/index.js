@@ -6,6 +6,7 @@ const pusher = new Pusher('ed8ac4713ea8545f1fd1', {
 });
 
 export const channel = pusher.subscribe('all-channel');
+export let privateChannel = null;
 
 export const emit = (eventType, data) => {
     fetch(requestURL, {
@@ -20,10 +21,12 @@ export const emit = (eventType, data) => {
     })
 }
 
-const requestURL = 'https://api.face.tuguobin.site/pusher';
+// const requestURL = 'https://api.face.tuguobin.site/pusher';
+const requestURL = 'http://localhost:8084/pusher';
 
 pubsub.on('userInfo', (data) => {
-    emit(WebSocketType.UserInfo, data)
+    emit(WebSocketType.UserInfo, data);
+    privateChannel = pusher.subscribe(`${data.id}`);
 })
 
 export const WebSocketType = {
@@ -37,5 +40,6 @@ export const WebSocketType = {
     WorldRead: 'WORLD_READ',
     PrivateList: 'PRIVATE_LIST',
     WorldList: 'WORLD_LIST',
-    UserInfo: 'USER_INFO'
+    UserInfo: 'USER_INFO',
+    Disconnet: 'DISCONNECT',
 }
