@@ -57,6 +57,7 @@ export default {
         async init() {
             this.text = '';
             this.target = null;
+            this.setComment(false);
             await this.$store.dispatch("getPost", this.bid);
             this.getCommentList();
         },
@@ -73,7 +74,6 @@ export default {
             if (!this.text.trim()) return;
             reqMockAddPostComment(this.bid, this.target?.id, this.text).then(() => {
                 this.init();
-                this.getCommentList();
             })
         },
         comment() {
