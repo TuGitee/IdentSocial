@@ -1,7 +1,14 @@
 <template>
     <div class="chat-item" :class="{ reverse: item.from_id === token }">
         <div class="chat-item-avatar">
-            <router-link :to="{ name: 'ChatDetail', params: { id: item.from_id } }">
+            <router-link :to="{
+                name: 'ChatDetail',
+                params: {
+                    id: item.from_id,
+                    username: item.nickname,
+                    avatar: item.avatar
+                }
+            }">
                 <img :src="item.avatar" alt="">
             </router-link>
         </div>
