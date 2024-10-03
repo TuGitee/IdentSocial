@@ -13,7 +13,7 @@
         <ul class="home-middle-list">
           <li class="home-middle-list-item" v-for="(user) in userList" :key="user.id">
             <router-link :to="{ name: 'UserDetail', params: { uid: user.id } }">
-              <MyImage :src="user.avatar" alt="" />
+              <MyImage border-type="round" :src="user.avatar" alt="" />
             </router-link>
           </li>
         </ul>
@@ -47,7 +47,7 @@ export default {
   components: {
     MyImage,
   },
-  mounted() {
+  activated() {
     if (this.postList.length <= this.pageSize) {
       this.getData();
     }
@@ -96,7 +96,7 @@ export default {
       return arr;
     }
   },
-  beforeDestroy() {
+  deactivated() {
     this.el.removeEventListener("scroll", this.handleScroll);
     this.$bus.$off("forward");
   },
@@ -245,7 +245,6 @@ export default {
           position: absolute;
           top: 5%;
           left: 5%;
-          border-radius: 50%;
         }
       }
     }

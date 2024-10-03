@@ -17,7 +17,7 @@
             </div>
         </div>
         <div class="user-chat-item-count" v-if="item.unread">
-            <b>{{ formatNum(item.unread) }}</b>
+            <b>{{ formatNum(item?.unread) }}</b>
         </div>
     </div>
 </template>
@@ -84,10 +84,11 @@ export default {
     align-items: center;
     justify-content: center;
     gap: 1rem;
+    padding-left: .5rem;
 
     .user-chat-item-avatar {
-        width: 3.5rem;
-        height: 3.5rem;
+        width: 3rem;
+        height: 3rem;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -109,32 +110,26 @@ export default {
         display: flex;
         justify-content: center;
         flex-direction: column;
-        gap: .5rem;
+        gap: 4px;
 
         .user-chat-item-content-title {
             width: 100%;
-            height: 1.1rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
 
             .user-chat-item-content-title-name {
-                font-size: 1.1rem;
+                font-size: 1.08rem;
                 font-weight: bold;
                 max-width: 12rem;
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
             }
-
-            .user-chat-item-content-title-time {
-                font-size: 1rem;
-            }
         }
 
         .user-chat-item-content-desc {
             width: 100%;
-            height: 1.5rem;
             display: flex;
             align-items: center;
             justify-content: flex-start;
@@ -143,7 +138,7 @@ export default {
 
             .user-chat-item-content-desc-text {
                 font-size: 1rem;
-                color: grey;
+                color: @gray-4;
                 white-space: nowrap;
                 width: min-content;
 

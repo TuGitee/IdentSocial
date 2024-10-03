@@ -1,7 +1,7 @@
 <template>
     <p class="text">
-        <template v-for="(item) in textList">
-            <router-link v-if="determineComponent(item) === 'router-link'" :to="determineLink(item)" :key="item"
+        <template v-for="(item, index) in textList">
+            <router-link v-if="determineComponent(item) === 'router-link'" :to="determineLink(item)" :key="index"
                 @click.stop>
                 {{ determineText(item) }}
             </router-link>

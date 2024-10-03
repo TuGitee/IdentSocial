@@ -1,22 +1,22 @@
 <template>
   <div id="root" class="chat">
     <div class="chat-header">
-      <div class="chat-header-icon">
-        <i class="el-icon-user-solid"></i>
-        <i class="el-icon-user-solid after"></i>
-        <span class="chat-header-icon-title">联系人</span>
-      </div>
-      <div class="chat-header-icon">
-        <i class="el-icon-s-grid"></i>
-        <i class="el-icon-s-grid after"></i>
-        <span class="chat-header-icon-title">应用</span>
-      </div>
+      <h1 class="title">
+        <i class="el-icon-chat-round"></i>在线聊天
+      </h1>
+      <button class="refresh" @click="getUserList">
+        <i class="el-icon-refresh" :class="{ active: isSend }"></i>
+      </button>
     </div>
     <div class="chat-body">
       <ul class="chat-body-list">
-        <ChatUserItem @click="user.unread = 0" class="chat-body-list-item" v-for="user in userLists" :item="user"
-          :key="user.id">
-        </ChatUserItem>
+        <template v-if="userLists.length">
+          <ChatUserItem @click="user.unread = 0" class="chat-body-list-item" v-for="user in userLists" :item="user"
+            :key="user.id">
+          </ChatUserItem>
+        </template>
+        <LoadingIcon v-else-if="isSend" class="loading"></LoadingIcon>
+        <el-empty v-else description="暂无联系人"></el-empty>
       </ul>
     </div>
   </div>
@@ -27,14 +27,16 @@ import "@/css/user.less"
 import { WebSocketType, channel, emit, privateChannel } from "@/ws";
 import { mapState } from "vuex";
 import ChatUserItem from "./ChatUserItem/index.vue";
+import LoadingIcon from "@/icons/LoadingIcon.vue";
 
 export default {
   name: "ChatPage",
-  components: { ChatUserItem },
+  components: { ChatUserItem, LoadingIcon },
   data() {
     return {
       userLists: [],
       io: null,
+      isSend: false
     };
   },
   computed: {
@@ -90,7 +92,7 @@ export default {
           isSend: true
         }
         this.userLists.find((item) => item.id == data.user.id).unread++;
-        this.addUserChat(item)
+        this.addUserChat(item);
       })
     },
     addGroupChat(data) {
@@ -105,6 +107,7 @@ export default {
     },
     setUserList(data) {
       const userList = data.data;
+      this.isSend = false;
       for (let i = 0; i < this.userLists.length; i++) {
         const user = this.userLists[i];
         if (!userList.find(item => item.id == user.id)) {
@@ -118,15 +121,27 @@ export default {
           this.userLists.push(user)
         }
       }
+    },
+    getUserList(e) {
+      if (this.isSend) return;
+      if (!e || window.scrollY <= 0) {
+        clearTimeout(this.timer);
+        this.timer = null;
+        this.isSend = true;
+        emit(WebSocketType.GroupList, this.createMessage(this.token, "你好", '', this.$store.state.user.token, new Date().getTime()));
+        this.timer = setTimeout(() => {
+          this.isSend = false;
+        }, 5000);
+      }
     }
   },
-  mounted() {
+  activated() {
     channel.bind(WebSocketType.Disconnet, this.setUserList);
-    channel.bind(WebSocketType.GroupList, this.setUserList)
+    channel.bind(WebSocketType.GroupList, this.setUserList);
     this.bindEvent();
-    emit(WebSocketType.GroupList, this.createMessage(this.token, "你好", '', this.$store.state.user.token, new Date().getTime()));
+    this.getUserList();
   },
-  beforeDestroy() {
+  deactivated() {
     channel.unbind(WebSocketType.GroupList);
     channel.unbind(WebSocketType.Disconnet);
     this.unbindEvent();
@@ -140,35 +155,44 @@ export default {
     width: 100%;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 5rem;
-    padding: 2rem;
+    justify-content: space-between;
+    padding: 1rem;
 
-    .chat-header-icon {
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      flex-direction: column;
-      cursor: pointer;
-      gap: .5rem;
+    .title {
+      color: transparent;
+      width: fit-content;
+      background: linear-gradient(45deg, @purple, @pink);
+      -webkit-background-clip: text;
 
       i {
-        font-size: 3rem;
-
-        color: aliceblue;
-      }
-
-      .after {
-        position: absolute;
-        font-size: 3rem;
-        top: -2px;
-        left: -2px;
-        color: @lightPurple;
+        margin-right: 0.5rem;
+        background: linear-gradient(45deg, @purple, @pink);
+        -webkit-background-clip: text;
       }
     }
 
+    .refresh {
+      font-size: 1.5rem;
+      border: none;
+      background-color: transparent;
+      color: @purple;
+
+      i {
+        &.active {
+          animation: rotate 3s linear infinite;
+
+          @keyframes rotate {
+            from {
+              transform: rotate(0deg);
+            }
+
+            to {
+              transform: rotate(360deg);
+            }
+          }
+        }
+      }
+    }
   }
 
   .chat-body {
@@ -178,6 +202,10 @@ export default {
       display: flex;
       flex-direction: column;
       gap: 1rem;
+
+      .loading {
+        margin: 7.5rem auto;
+      }
     }
   }
 }

@@ -15,6 +15,7 @@
         </div>
         <div class="blog-content" ref="content">
             <BlogItem v-if="currentPost" :item="currentPost" @click="comment"></BlogItem>
+            <el-empty v-else description="该动态不存在或被删除"></el-empty>
             <CommentItem v-for="cmt in commentList" :key="cmt.id" :comment="cmt" @click="changeTarget" ref="comments" />
         </div>
         <form class="form" @submit.prevent="publish" v-if="isComment">

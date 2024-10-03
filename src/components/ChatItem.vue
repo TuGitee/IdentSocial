@@ -63,7 +63,7 @@ export default {
 
         .chat-item-content {
             background-color: @purple ;
-            color: #fff;
+            color: @white;
             margin-right: 0.5rem;
 
             &::before {
@@ -113,6 +113,7 @@ export default {
         display: flex;
         align-items: flex-end;
         margin-right: auto;
+        user-select: none;
 
         i {
             order: 1;
@@ -121,6 +122,7 @@ export default {
 
     .chat-item-nickname {
         max-width: 70%;
+        user-select: none;
         white-space: nowrap;
         margin: 4px 0.5rem;
         overflow: hidden;
@@ -139,6 +141,7 @@ export default {
     .chat-item-content {
         margin-left: 0.5rem;
         margin-right: .5rem;
+        user-select: text;
         display: flex;
         flex-direction: column;
         justify-content: center;

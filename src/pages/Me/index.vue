@@ -171,6 +171,7 @@ export default {
         border-radius: 50%;
         height: 4rem;
         width: 4rem;
+        border: 2px solid @white;
       }
 
       &-arrow {

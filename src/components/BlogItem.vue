@@ -34,19 +34,20 @@
             </div>
             <ul class="blog-item-content-img" v-if="item.img" @click.stop>
                 <li class="blog-item-content-img-item" v-for="(_, ii) in item.img" :key="ii">
-                    <MyImage :src="imgList[ii]" :preview="item.id"></MyImage>
+                    <MyImage :src="imgList[ii]" border-type="smooth" :preview="item.id"></MyImage>
                 </li>
             </ul>
-            <div class="blog-item-content-share" v-if="item?.postFrom" @click.stop="toRawBlog(item.postFrom)">
+            <div class="blog-item-content-share" v-if="item?.postFrom"
+                @click.stop="postFrom.id && toRawBlog(item.postFrom)">
                 <div class="blog-item-content-share-title">
-                    <span class="blog-item-content-share-title-name" @click.stop="toUserPage(postFrom.uid)">{{
-                        postFrom.user?.nickname ?? '加载中' }}:
+                    <span class="blog-item-content-share-title-name"
+                        @click.stop="postFrom.user && toUserPage(postFrom.uid)">{{ postFromLoding ? "加载中" : postFrom.user?.nickname ?? '加载失败' }}:
                     </span>
-                    <span class="blog-item-content-share-title-text">{{ postFrom.text ?? '加载中' }}</span>
+                    <span class="blog-item-content-share-title-text">{{ postFromLoding ? "加载中..." : postFrom.text ?? '该内容不存在或已被删除' }}</span>
                 </div>
                 <ul class="blog-item-content-share-img blog-item-content-img" v-if="postFrom.imgList?.length">
                     <li class="blog-item-content-img-item" v-for="img in postFrom.imgList" :key="img" @click.stop>
-                        <MyImage :src="img" :preview="postFrom.id" />
+                        <MyImage :src="img" border-type="smooth" :preview="postFrom.id" />
                     </li>
                 </ul>
             </div>
@@ -94,6 +95,7 @@ export default {
             isLikeLoading: false,
             isRemoving: false,
             postFrom: {},
+            postFromLoding: false,
             imgList: [],
         }
     },
@@ -116,9 +118,11 @@ export default {
             const imgs = await getAll(this.item.img);
             this.imgList = imgs;
             if (this.item.postFrom) {
+                this.postFromLoding = true;
                 const postFrom = await reqMockPost(this.item.postFrom);
                 postFrom.data.imgList = await getAll(postFrom.data.img);
                 this.postFrom = postFrom.data;
+                this.postFromLoding = false;
             }
         },
         random(min, max) {

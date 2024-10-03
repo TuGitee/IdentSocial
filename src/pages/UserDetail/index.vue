@@ -211,7 +211,6 @@ export default {
             .my-image {
                 height: 4rem;
                 width: 4rem;
-                border-radius: 50%;
                 border: 2px solid @white;
             }
 
@@ -372,7 +371,7 @@ export default {
         }
 
         .loading {
-            margin: 16vh auto;
+            margin: 7.5rem auto;
         }
     }
 }

@@ -132,6 +132,9 @@ const mutations = {
         const index = state.postList.findIndex(item => item.id === id);
         if (index !== -1) {
             state.postList.splice(index, 1);
+            if (state.currentPost?.id === id) {
+                state.currentPost = null;
+            }
         }
     }
 }

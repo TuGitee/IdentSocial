@@ -1,7 +1,11 @@
 <template>
     <div class="loading">
         <div class="loading-img"></div>
-        <p class="loading-text">加载中...</p>
+        <p class="loading-text">
+            <slot>
+                加载中...
+            </slot>
+        </p>
     </div>
 </template>
 
@@ -32,7 +36,9 @@
     }
 
     .loading-text {
-        margin-top: 10px;
+        margin-top: 1rem;
+        font-size: .8rem;
+        color: @gray-3;
     }
 }
 </style>

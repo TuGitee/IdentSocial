@@ -51,6 +51,10 @@ export default {
   animation-duration: .3s;
 }
 
+.pswp__top-bar {
+  display: none !important;
+}
+
 :root {
   --safe-area-inset-top: constant(safe-area-inset-top);
   --safe-area-inset-top: env(safe-area-inset-top);

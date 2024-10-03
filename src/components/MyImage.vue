@@ -1,5 +1,7 @@
 <template>
-    <div class="my-image">
+    <div class="my-image" :style="{
+        borderRadius: borderType === 'round' ? '50%' : borderType === 'smooth' ? '4px' : null
+    }">
         <div class="container" :style="{
             paddingTop: ratio * 100 + '%'
         }">
@@ -7,7 +9,7 @@
                 :class="{ loaded: isLoaded, error: isError }" v-if="src && !isError">
             <div class="my-image-loading" v-else-if="!isLoaded">
                 <slot name="loading">
-                    <span>加载中...</span>
+                    <span>加载中</span>
                 </slot>
             </div>
             <div class="my-image-error" v-else>
@@ -32,7 +34,11 @@ export default {
         ratio: {
             type: Number,
             default: 1
-        }
+        },
+        borderType: {
+            type: String,
+            default: 'round'
+        },
     },
     data() {
         return {
@@ -56,7 +62,6 @@ export default {
     height: 100%;
     position: relative;
     overflow: hidden;
-    border-radius: 4px;
 
     .container {
         width: 100%;
@@ -86,8 +91,8 @@ export default {
             width: 100%;
             height: 100%;
             font-size: .8rem;
-            background-color: #f2f2f2;
-            color: #aaa;
+            background: linear-gradient(135deg, @gray-0, @gray-2);
+            color: @white;
             display: flex;
             border-radius: inherit;
             align-items: center;

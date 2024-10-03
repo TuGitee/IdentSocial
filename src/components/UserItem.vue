@@ -1,7 +1,7 @@
 <template>
     <div class="user-item">
         <router-link :to="{ name: 'UserDetail', params: { uid: id } }">
-            <MyImage :src="currentInfo?.avatar"></MyImage>
+            <MyImage :src="currentInfo?.avatar" border-type="round"></MyImage>
         </router-link>
         <div class="info">
             <router-link :to="{ name: 'UserDetail', params: { uid: id } }">
@@ -71,7 +71,6 @@ export default {
     .my-image {
         height: 3rem;
         width: 3rem;
-        border-radius: 50%;
     }
 
     .info {
