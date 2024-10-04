@@ -93,29 +93,31 @@ export default {
     publish() {
       this.$router.push('/upload');
     },
-    async submit() {
+    submit() {
       this.isLoading = true;
-      faceAnalysis(this.imgSrc).then((detaction) => {
-        if (!this.isLoading) return;
-        if (!detaction) {
-          this.$notify({
-            title: '未检测到人脸',
-            message: '请重新上传',
-            type: 'error'
-          })
-          return;
-        }
-        this.result = detaction;
-        localStorage.setItem("image", JSON.stringify({
-          src: this.imgSrc,
-          width: this.imgWidth,
-          height: this.imgHeight
-        }));
-        localStorage.setItem('result', JSON.stringify(detaction));
-        this.isUnfold = true;
-      }).finally(() => {
-        this.isLoading = false;
-      })
+      this.$nextTick(() => {
+        faceAnalysis(this.imgSrc).then((detaction) => {
+          if (!this.isLoading) return;
+          if (!detaction) {
+            this.$notify({
+              title: '未检测到人脸',
+              message: '请重新上传',
+              type: 'error'
+            })
+            return;
+          }
+          this.result = detaction;
+          localStorage.setItem("image", JSON.stringify({
+            src: this.imgSrc,
+            width: this.imgWidth,
+            height: this.imgHeight
+          }));
+          localStorage.setItem('result', JSON.stringify(detaction));
+          this.isUnfold = true;
+        }).finally(() => {
+          this.isLoading = false;
+        })
+      });
     },
     cancel() {
       this.isLoading = false;
