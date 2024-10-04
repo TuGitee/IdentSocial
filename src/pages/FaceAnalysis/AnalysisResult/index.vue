@@ -7,30 +7,38 @@
             <div class="analysis-result-panel-item">
                 <span class="analysis-result-panel-item-content">性别</span>
                 <i class="analysis-result-panel-item-icon"
-                    :class="result?.gender ? 'el-icon-male' : 'el-icon-female'"></i>
+                    :class="result?.gender === 'male' ? 'el-icon-male' : 'el-icon-female'"></i>
 
             </div>
             <div class="analysis-result-panel-item">
                 <span class="analysis-result-panel-item-content">年龄</span>
-                <span class="analysis-result-panel-item-icon">{{ result?.age ?? 0 }}</span>
+                <span class="analysis-result-panel-item-icon">{{ parseInt(result?.age ?? 0) }}</span>
 
             </div>
             <div class="analysis-result-panel-item">
                 <span class="analysis-result-panel-item-content">分数</span>
-                <span class="analysis-result-panel-item-icon">{{ result?.score ?? 0 }}</span>
+                <span class="analysis-result-panel-item-icon">{{ parseInt((result?.detection?.score ?? 0) * 100)
+                    }}</span>
             </div>
         </div>
-        <div class="analysis-result-faces" v-for="item in result?.stars" :key="item.name">
-            <div class="analysis-result-faces-left">
-                <el-image class="analysis-result-faces-left-img" :src="item.url" alt=""></el-image>
+        <template v-for="(value, key) in result?.expressions">
+            <div class="analysis-result-faces" v-if="value > 0.001" :key="key">
+                <template>
+                    <div class="analysis-result-faces-left">
+                        <el-image class="analysis-result-faces-left-img" :src="expressionsMap[key].icon"
+                            alt=""></el-image>
+                    </div>
+                    <div class="analysis-result-faces-right">
+                        <span class="analysis-result-faces-right-name">{{ expressionsMap[key].icon }}{{
+                            expressionsMap[key].zh
+                        }}</span>
+                        <span class="analysis-result-faces-right-ratio">比重：{{ (value * 100).toFixed(2) }}%</span>
+                        <el-progress :text-inside="true" :stroke-width="26" :percentage="value * 100" :format="format"
+                            class="analysis-result-faces-right-progress"></el-progress>
+                    </div>
+                </template>
             </div>
-            <div class="analysis-result-faces-right">
-                <span class="analysis-result-faces-right-name">{{ item.name }}</span>
-                <span class="analysis-result-faces-right-ratio">相似比例</span>
-                <el-progress :text-inside="true" :stroke-width="26" :percentage="random(80, 95)" :format="format"
-                    class="analysis-result-faces-right-progress"></el-progress>
-            </div>
-        </div>
+        </template>
     </div>
 </template>
 
@@ -39,6 +47,40 @@ import { mapState } from 'vuex';
 
 export default {
     name: "AnalysisResult",
+    data() {
+        return {
+            expressionsMap: {
+                'neutral': {
+                    zh: '中立',
+                    icon: '😑'
+                },
+                'happy': {
+                    zh: '开心',
+                    icon: '😄'
+                },
+                'sad': {
+                    zh: '伤心',
+                    icon: '😢'
+                },
+                'angry': {
+                    zh: '愤怒',
+                    icon: '😡'
+                },
+                'surprised': {
+                    zh: '惊讶',
+                    icon: '😮'
+                },
+                'disgusted': {
+                    zh: '厌恶',
+                    icon: '🤢'
+                },
+                'fear': {
+                    zh: '恐惧',
+                    icon: '😱'
+                }
+            },
+        }
+    },
     computed: {
         ...mapState({
             userInfo: state => state.user.userInfo

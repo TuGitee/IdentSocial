@@ -4,8 +4,8 @@
       :style="imgSrc === '' ? 'background: linear-gradient(#A493FF 0%,#FFF 40%);' : `background: url(${imgSrc}) no-repeat center center; filter: blur(10px);`">
     </div>
     <div class="face-analysis-picture" v-if="imgSrc"
-      :style="`background: url(${imgSrc}) no-repeat center center ; height: ${imgHeight}px; width:${imgWidth}px; transform: translateY(-${delta}px); `"
-      v-loading="isLoading" element-loading-text="Loading..." element-loading-spinner="el-icon-loading"
+      :style="`background: url(${imgSrc}) no-repeat center center ; height: ${imgHeight}px; width:${imgWidth}px; transform: translateY(${delta}px); top: 0;`"
+      v-loading="isLoading" element-loading-spinner="el-icon-loading"
       element-loading-background="rgba(0,0,0,.5)">
     </div>
 
@@ -37,7 +37,8 @@
       </v-touch>
       <div class="face-analysis-box-analysis">
         <transition name="el-fade-in-linear" :duration="1000">
-          <AnalysisResult v-show="isUnfold" :analysisList="userInfo.analysisList" :title="text" :result="result ?? defaultResult" />
+          <AnalysisResult v-show="isUnfold" :analysisList="userInfo.analysisList" :title="text"
+            :result="result ?? defaultResult" />
         </transition>
       </div>
 
@@ -47,6 +48,7 @@
 
 <script>
 import AnalysisResult from './AnalysisResult';
+import { faceAnalysis, loadModels } from '@/utils/face';
 import { mapState } from 'vuex';
 export default {
   name: "FaceAnalysis",
@@ -62,20 +64,15 @@ export default {
       isLoading: false,
       isUnfold: true,
       text: '最近一次打分结果',
-      result: null
+      result: localStorage.getItem('result') ? JSON.parse(localStorage.getItem('result')) : null,
     }
   },
   methods: {
     changePicture() {
       let file = this.$refs.file.files[0];
+      if (!file) return;
       this.file = file;
-      if (window.createObjectURL != undefined) {
-        this.imgSrc = window.createObjectURL(file);
-      } else if (window.URL != undefined) {
-        this.imgSrc = window.URL.createObjectURL(file);
-      } else if (window.webkitURL != undefined) {
-        this.imgSrc = window.webkitURL.createObjectURL(file);
-      }
+      this.imgSrc = URL.createObjectURL(file);
       let img = new Image();
       img.src = this.imgSrc;
       img.onload = () => {
@@ -98,23 +95,22 @@ export default {
     },
     async submit() {
       this.isLoading = true;
-      try {
-        const fd = new FormData();
-        fd.append('picture', this.file);
-        let res = await this.$api.post('/recognition/request', fd, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        })
-        this.result = res.data.data
-        localStorage.setItem('result', JSON.stringify(this.result));
-        this.isLoading = false;
+      faceAnalysis(this.file).then((detaction) => {
+        if (!detaction) {
+          this.$notify({
+            title: '未检测到人脸',
+            message: '请重新上传',
+            type: 'error'
+          })
+          return;
+        }
+        console.log(detaction);
+        this.result = detaction;
+        localStorage.setItem('result', JSON.stringify(detaction));
         this.isUnfold = true;
-        this.text = '本次打分结果';
-      } catch (e) {
+      }).finally(() => {
         this.isLoading = false;
-        alert("Unexpeted Error! Submit Failed!");
-      }
+      })
     },
     cancel() {
       this.isLoading = false;
@@ -131,7 +127,7 @@ export default {
     }
   },
   mounted() {
-    // this.result = JSON.parse(localStorage.getItem('result'));
+    loadModels();
   },
   computed: {
     ...mapState({
@@ -146,7 +142,7 @@ export default {
       }
     },
     delta() {
-      return (window.screen.height - this.imgHeight) / 4;
+      return (window.screen.height * 3 / 4 - this.imgHeight) / 2 + parseInt(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top"));
     },
     isResult() {
       return this.result && Object.keys(this.result).length > 0;
