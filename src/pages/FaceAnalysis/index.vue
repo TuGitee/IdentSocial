@@ -71,7 +71,6 @@ export default {
     changePicture() {
       let file = this.$refs.file.files[0];
       if (!file) return;
-      this.file = file;
       let img = new Image();
       img.src = URL.createObjectURL(file);
       img.onload = () => {
@@ -85,6 +84,7 @@ export default {
         canvas.height = height * filter;
         context.drawImage(img, 0, 0, width * filter, height * filter);
         this.imgSrc = canvas.toDataURL();
+        this.file = file;
         this.imgHeight = height;
         this.imgWidth = width;
         this.isUnfold = false;
