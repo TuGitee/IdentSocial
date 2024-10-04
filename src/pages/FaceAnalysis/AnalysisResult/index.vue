@@ -17,7 +17,7 @@
             </div>
             <div class="analysis-result-panel-item">
                 <span class="analysis-result-panel-item-content">分数</span>
-                <span class="analysis-result-panel-item-icon">{{ parseInt((result?.detection?._score ?? 0) * 100)
+                <span class="analysis-result-panel-item-icon">{{ parseInt((result?.score ?? 0) * 100)
                     }}</span>
             </div>
         </div>

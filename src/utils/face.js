@@ -8,26 +8,39 @@ export const loadModels = async () => {
     await faceapi.loadFaceExpressionModel(MODEL_URL)
 }
 
-export const faceAnalysis = (image) => {
-    return new Promise((resolve, reject) => {
-        if (typeof image === 'string' && image.includes('http')) {
-            faceapi.fetchImage(image).then(img => {
-                return faceapi.detectSingleFace(img).withAgeAndGender().withFaceExpressions();
-            }).then(resolve).catch(reject)
-        } else if (typeof image === 'string' && image.includes('base64')) {
-            const img = new Image();
-            img.src = image;
-            img.onload = () => {
-                faceapi.detectSingleFace(img).withAgeAndGender().withFaceExpressions().then(resolve).catch(reject)
-            }
-        } else {
-            const img = new Image();
-            img.src = URL.createObjectURL(image);
-            img.onload = () => {
-                faceapi.detectSingleFace(img).withAgeAndGender().withFaceExpressions().then(resolve).catch(reject)
-            }
-        }
-    });
+const expressionScoreMap = {
+    happy: 1,
+    neutral: 0.5,
+    sad: -0.5,
+    angry: -1,
+    fearful: -1,
+    disgusted: -1,
+    surprised: 0.5
 }
+
+export const getExpressionScore = (expressions) => {
+    const expressionScore = Object.entries(expressions).reduce((acc, cur) => acc + expressionScoreMap[cur[0]] * cur[1], 0);
+    return expressionScore;
+};
+
+export const faceAnalysis = async (image) => {
+    let img;
+    if (typeof image === 'string' && image.includes('http')) {
+        img = await faceapi.fetchImage(image);
+    } else if (typeof image === 'string' && image.includes('base64')) {
+        img = new Image();
+        img.src = image;
+        await new Promise((resolve) => img.onload = resolve);
+    } else {
+        img = new Image();
+        img.src = URL.createObjectURL(image);
+        await new Promise((resolve) => img.onload = resolve);
+    }
+    const result = await faceapi.detectSingleFace(img).withAgeAndGender().withFaceExpressions();
+    if (!result) return null;
+    const lamda = 0.7;
+    result.score = result.detection.score * lamda + getExpressionScore(result.expressions) * (1 - lamda);
+    return result;
+};
 
 export default faceapi;

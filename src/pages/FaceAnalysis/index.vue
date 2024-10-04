@@ -30,7 +30,7 @@
               ref="file" :disabled="isLoading" />
             <button class="face-analysis-box-choice-camera-button" :disabled="isLoading">上传</button>
           </div>
-          <button class="face-analysis-box-choice-submit" :disabled="!imgSrc" @click="submit"
+          <button class="face-analysis-box-choice-submit" :disabled="!file" @click="submit"
             v-show="!isLoading">提交</button>
           <button class="face-analysis-box-choice-cancel" @click="cancel" v-show="isLoading">取消</button>
         </div>
@@ -85,11 +85,6 @@ export default {
         canvas.height = height * filter;
         context.drawImage(img, 0, 0, width * filter, height * filter);
         this.imgSrc = canvas.toDataURL();
-        localStorage.setItem("image", JSON.stringify({
-          src: this.imgSrc,
-          width: width,
-          height: height
-        }));
         this.imgHeight = height;
         this.imgWidth = width;
         this.isUnfold = false;
@@ -111,6 +106,11 @@ export default {
           return;
         }
         this.result = detaction;
+        localStorage.setItem("image", JSON.stringify({
+          src: this.imgSrc,
+          width: this.imgWidth,
+          height: this.imgHeight
+        }));
         localStorage.setItem('result', JSON.stringify(detaction));
         this.isUnfold = true;
       }).finally(() => {
@@ -267,6 +267,7 @@ export default {
     border-radius: @borderRadius;
     touch-action: none;
     position: fixed;
+    box-shadow: 0 0 10px -5px #000;
 
     /deep/ .el-loading-mask {
       border-radius: @borderRadius;
