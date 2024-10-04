@@ -119,6 +119,9 @@ export default {
                 canvas.height = _height;
                 context.drawImage(image, _x, _y, _width, _height, 0, 0, _width, _height);
                 this.imageUrl = canvas.toDataURL();
+                this.$nextTick(() => {
+                    this.$previewRefresh();
+                });
             }
         }
     },

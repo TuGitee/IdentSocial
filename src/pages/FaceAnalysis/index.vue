@@ -121,12 +121,12 @@ export default {
       this.isLoading = false;
     },
     listenMoveUp() {
-      if (this.imgSrc) {
+      if (this.file) {
         this.isUnfold = true;
       }
     },
     listenMoveDown() {
-      if (this.imgSrc) {
+      if (this.file) {
         this.isUnfold = false;
       }
     }
@@ -267,7 +267,7 @@ export default {
     border-radius: @borderRadius;
     touch-action: none;
     position: fixed;
-    box-shadow: 0 0 10px -5px #000;
+    box-shadow: 0 0 20px -10px #0003;
 
     /deep/ .el-loading-mask {
       border-radius: @borderRadius;
