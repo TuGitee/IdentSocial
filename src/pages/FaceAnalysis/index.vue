@@ -1,11 +1,11 @@
 <template>
   <div class="face-analysis">
     <div class="face-analysis-background"
-      :style="imgSrc === '' ? 'background: linear-gradient(#A493FF 0%,#FFF 40%);' : `background: url(${imgSrc}) no-repeat center center; filter: blur(10px);`">
+      :style="!file ? 'background: linear-gradient(#A493FF 0%,#FFF 40%);' : `background: url(${imgSrc}) no-repeat center center; filter: blur(10px);`">
     </div>
-    <div class="face-analysis-picture" v-if="imgSrc"
-      :style="`background: url(${imgSrc}) no-repeat center center ; height: ${imgHeight}px; width:${imgWidth}px; transform: translateY(${delta}px); top: 0;`"
-      v-loading="isLoading" element-loading-spinner="el-icon-loading"
+    <div class="face-analysis-picture" v-if="file"
+      :style="`background: url(${imgSrc}) no-repeat center center; height: ${imgHeight}px; width:${imgWidth}px; transform: translateY(${delta}px); top: 0;`"
+      v-loading="isLoading" element-loading-text="" element-loading-spinner="el-icon-loading"
       element-loading-background="rgba(0,0,0,.5)">
     </div>
 
@@ -37,7 +37,7 @@
       </v-touch>
       <div class="face-analysis-box-analysis">
         <transition name="el-fade-in-linear" :duration="1000">
-          <AnalysisResult v-show="isUnfold" :analysisList="userInfo.analysisList" :title="text"
+          <AnalysisResult v-show="isUnfold" :analysisList="userInfo.analysisList" :title="text" :image="imgSrc"
             :result="result ?? defaultResult" />
         </transition>
       </div>
@@ -57,14 +57,14 @@ export default {
   },
   data() {
     return {
-      file: '',
+      file: null,
       imgSrc: '',
       imgHeight: 0,
       imgWidth: 0,
       isLoading: false,
       isUnfold: true,
       text: '最近一次打分结果',
-      result: localStorage.getItem('result') ? JSON.parse(localStorage.getItem('result')) : null,
+      result: null,
     }
   },
   methods: {
@@ -72,9 +72,8 @@ export default {
       let file = this.$refs.file.files[0];
       if (!file) return;
       this.file = file;
-      this.imgSrc = URL.createObjectURL(file);
       let img = new Image();
-      img.src = this.imgSrc;
+      img.src = URL.createObjectURL(file);
       img.onload = () => {
         let canvas = document.createElement('canvas');
         let context = canvas.getContext('2d');
@@ -85,6 +84,12 @@ export default {
         canvas.width = width * filter;
         canvas.height = height * filter;
         context.drawImage(img, 0, 0, width * filter, height * filter);
+        this.imgSrc = canvas.toDataURL();
+        localStorage.setItem("image", JSON.stringify({
+          src: this.imgSrc,
+          width: width,
+          height: height
+        }));
         this.imgHeight = height;
         this.imgWidth = width;
         this.isUnfold = false;
@@ -95,7 +100,8 @@ export default {
     },
     async submit() {
       this.isLoading = true;
-      faceAnalysis(this.file).then((detaction) => {
+      faceAnalysis(this.imgSrc).then((detaction) => {
+        if (!this.isLoading) return;
         if (!detaction) {
           this.$notify({
             title: '未检测到人脸',
@@ -104,7 +110,6 @@ export default {
           })
           return;
         }
-        console.log(detaction);
         this.result = detaction;
         localStorage.setItem('result', JSON.stringify(detaction));
         this.isUnfold = true;
@@ -128,6 +133,14 @@ export default {
   },
   mounted() {
     loadModels();
+    const lastImage = JSON.parse(localStorage.getItem('image'));
+    if (lastImage) {
+      this.imgSrc = lastImage.src;
+      this.imgHeight = lastImage.height;
+      this.imgWidth = lastImage.width;
+    }
+    const result = localStorage.getItem('result') ? JSON.parse(localStorage.getItem('result')) : null;
+    this.result = result;
   },
   computed: {
     ...mapState({
@@ -138,7 +151,6 @@ export default {
         score: this.userInfo.faceScore || 0,
         age: this.userInfo.age || 0,
         gender: this.userInfo.gender || 0,
-        stars: []
       }
     },
     delta() {

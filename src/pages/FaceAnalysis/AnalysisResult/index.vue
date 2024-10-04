@@ -17,7 +17,7 @@
             </div>
             <div class="analysis-result-panel-item">
                 <span class="analysis-result-panel-item-content">分数</span>
-                <span class="analysis-result-panel-item-icon">{{ parseInt((result?.detection?.score ?? 0) * 100)
+                <span class="analysis-result-panel-item-icon">{{ parseInt((result?.detection?._score ?? 0) * 100)
                     }}</span>
             </div>
         </div>
@@ -25,8 +25,8 @@
             <div class="analysis-result-faces" v-if="value > 0.001" :key="key">
                 <template>
                     <div class="analysis-result-faces-left">
-                        <el-image class="analysis-result-faces-left-img" :src="expressionsMap[key].icon"
-                            alt=""></el-image>
+                        <el-image class="analysis-result-faces-left-img" :src="imageUrl" fit="cover" alt=""
+                            preview="cutImage"></el-image>
                     </div>
                     <div class="analysis-result-faces-right">
                         <span class="analysis-result-faces-right-name">{{ expressionsMap[key].icon }}{{
@@ -49,6 +49,7 @@ export default {
     name: "AnalysisResult",
     data() {
         return {
+            imageUrl: '',
             expressionsMap: {
                 'neutral': {
                     zh: '中立',
@@ -93,7 +94,10 @@ export default {
         },
         result: {
             type: Object,
-            default: () => ({})
+            default: null
+        },
+        image: {
+            type: String
         }
     },
     methods: {
@@ -102,9 +106,30 @@ export default {
         },
         random(min, max) {
             return Math.random() * (max - min + 1) + min;
+        },
+        cutImage(img, detection) {
+            if (!img || !detection) return;
+            const image = new Image();
+            image.src = img;
+            image.onload = () => {
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                const { _width, _height, _x, _y } = detection._box;
+                canvas.width = _width;
+                canvas.height = _height;
+                context.drawImage(image, _x, _y, _width, _height, 0, 0, _width, _height);
+                this.imageUrl = canvas.toDataURL();
+            }
+        }
+    },
+    watch: {
+        result: {
+            handler(val) {
+                this.cutImage(this.image, val?.detection)
+            },
+            immediate: true
         }
     }
-
 }
 </script>
 
@@ -205,14 +230,13 @@ export default {
         align-items: center;
         flex-direction: row;
         margin-top: 1rem;
+        padding: 0 8px;
         border-radius: 10px;
         height: 5rem;
         gap: 1rem;
 
-
-
         &-left {
-            width: 30%;
+            width: 4rem;
             display: flex;
             justify-content: center;
             align-items: center;
