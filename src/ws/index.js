@@ -1,12 +1,17 @@
 import pubsub from '@/utils/pubsub';
+import { getToken } from '@/utils/token';
 import Pusher from 'pusher-js';
 
-const pusher = new Pusher('ed8ac4713ea8545f1fd1', {
-    cluster: 'ap1'
-});
+function init() {
+    const pusher = new Pusher('ed8ac4713ea8545f1fd1', {
+        cluster: 'ap1'
+    });
+    const channel = pusher.subscribe('all-channel');
+    const privateChannel = pusher.subscribe(getToken());
+    return [pusher, channel, privateChannel];
+}
 
-export const channel = pusher.subscribe('all-channel');
-export let privateChannel = null;
+export let [pusher, channel, privateChannel] = init();
 
 export const emit = (eventType, data) => {
     fetch(requestURL, {
@@ -21,11 +26,17 @@ export const emit = (eventType, data) => {
     })
 }
 
-const requestURL = 'https://api.face.tuguobin.site/pusher';
+const requestURL = process.env.VUE_APP_PUSHER_URL;
 
 pubsub.on('userInfo', (data) => {
     emit(WebSocketType.UserInfo, data);
-    privateChannel = pusher.subscribe(`${data.id}`);
+})
+
+pubsub.on('chatDetail', ()=>{
+    const [pusher2, channel2, privateChannel2] = init();
+    pusher = pusher2;
+    channel = channel2;
+    privateChannel = privateChannel2;
 })
 
 export const WebSocketType = {

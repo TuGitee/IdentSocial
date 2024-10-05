@@ -42,6 +42,7 @@ import { channel, emit, privateChannel, WebSocketType } from "@/ws";
 import { mapGetters, mapState } from "vuex";
 import defaultAvatar from "@/assets/images/0.png";
 import MyImage from "@/components/MyImage.vue";
+import pubsub from "@/utils/pubsub";
 export default {
     name: "ChatDetail",
     components: {
@@ -138,7 +139,7 @@ export default {
                 const index = this.chatList.findIndex(item => item.message === data.data && Math.abs(item.time - data.time) < 10);
                 let item = null;
                 if (data.user.id === this.token && index !== -1) {
-                    item = this.chatList.splice(index, 1).pop();
+                    item = this.chatList[index];
                     item.isSend = true;
                 } else {
                     item = {
@@ -151,10 +152,11 @@ export default {
                         isSend: true
                     }
                 }
+                console.log(item);
+                
                 this.addGroupChat(item);
                 this.$nextTick(() => {
-                    this.goPageEnd()
-                    this.$forceUpdate();
+                    this.goPageEnd();
                 })
             })
         },
@@ -167,7 +169,7 @@ export default {
                 const index = this.chatList.findIndex(item => item.message === data.data && Math.abs(item.time - data.time) < 10);
                 let item = null;
                 if (data.user.id === this.token && index !== -1) {
-                    item = this.chatList.splice(index, 1).pop();
+                    item = this.chatList[index];
                     item.isSend = true;
                 } else {
                     item = {
@@ -180,6 +182,8 @@ export default {
                         isSend: true
                     }
                 }
+                console.log(item);
+                
                 this.addUserChat(item);
                 this.$nextTick(() => {
                     this.goPageEnd()
@@ -194,7 +198,10 @@ export default {
         window.addEventListener("touchmove", this.prevent, { passive: false });
         window.visualViewport.addEventListener("resize", this.getVisualHeight);
         this.goPageEnd();
-        this.bindEvent();
+        setTimeout(() => {
+            pubsub.emit('chatDetail');
+            this.bindEvent();
+        })
     },
     beforeDestroy() {
         this.unbindEvent();

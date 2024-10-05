@@ -70,9 +70,11 @@ export default {
           time: data.time,
           isSend: true
         }
+        this.addGroupChat(item);
+        if (this.token === data.user.id) return;
+        if (this.$route.name === 'ChatDetail' && !this.$route.params.id) return;
         const user = this.userLists.find((item) => item.id == data.to);
         user && user.unread++;
-        this.addGroupChat(item)
       })
     },
     bindPrivateEvent() {
@@ -92,9 +94,12 @@ export default {
           time: data.time,
           isSend: true
         }
-        const user = this.userLists.find((item) => item.id == data.user.id);
-        user && user.unread++;
         this.addUserChat(item);
+        if (this.token === data.user.id) return;
+        if (this.$route.params.id !== data.user.id) {
+          const user = this.userLists.find((item) => item.id == data.user.id);
+          user && user.unread++;
+        }
       })
     },
     addGroupChat(data) {
@@ -137,16 +142,17 @@ export default {
       }
     }
   },
+  mounted() {
+    this.bindEvent();
+  },
   activated() {
     channel.bind(WebSocketType.Disconnet, this.setUserList);
     channel.bind(WebSocketType.GroupList, this.setUserList);
-    this.bindEvent();
     this.getUserList();
   },
   deactivated() {
     channel.unbind(WebSocketType.GroupList);
     channel.unbind(WebSocketType.Disconnet);
-    this.unbindEvent();
   }
 };
 </script>
