@@ -5,6 +5,7 @@ import mockRequest from './mockRequest';
 export const reqMockUser = (id) => mockRequest.get(`/user/${id}`);
 export const reqMockUserLogin = (email, password) => mockRequest.post(`/user/login`, { email, password });
 export const reqMockUserRegister = (email, password) => mockRequest.post(`/user`, { email, password })
+export const reqMockUpdateUser = (userInfo) => mockRequest.put(`/user`, userInfo);
 export const reqMockVerify = (email, code) => mockRequest.post(`/verify`, { email, code });
 export const reqMockVerifyCode = (email) => mockRequest.get(`/verify?email=${email}`);
 export const reqMockPostList = (page = 1, limit = 10) => mockRequest.get(`/post?page=${page}&limit=${limit}`);

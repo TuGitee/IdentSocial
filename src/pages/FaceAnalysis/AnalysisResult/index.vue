@@ -17,8 +17,7 @@
             </div>
             <div class="analysis-result-panel-item">
                 <span class="analysis-result-panel-item-content">分数</span>
-                <span class="analysis-result-panel-item-icon">{{ parseInt((result?.score ?? 0) * 100)
-                    }}</span>
+                <span class="analysis-result-panel-item-icon">{{ result?.score ?? 0 }}</span>
             </div>
         </div>
         <template v-for="(value, key) in result?.expressions">

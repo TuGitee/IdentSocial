@@ -1,6 +1,6 @@
 import Mock from 'mockjs';
 import { v4 as uuid } from 'uuid';
-import { getAllKeys } from '@/utils/storage';
+import { getAllKeys, getUrl } from '@/utils/storage';
 
 const images = await getAllKeys();
 
@@ -19,33 +19,17 @@ export const mockUser = (email, password, id = uuid()) => Mock.mock({
     'phone': /1[3456789]\d{9}/,
     'address': 'China',
     'status': '1',
-    'nickname': '@cname',
+    'username': '@cname',
     'created_at': Mock.Random.datetime('yyyy/MM/dd HH:mm:ss'),
     'updated_at': Mock.Random.datetime('yyyy/MM/dd HH:mm:ss'),
-    'avatar': require('@/assets/images/' + Mock.Random.integer(0, 9) + '.png'),
-    'background': require('@/assets/bg/' + Mock.Random.integer(0, 8) + '.jpg'),
-    'faceScore': '@integer(50, 90)',
+    'avatar': null,
+    'avatarUrl': require('@/assets/images/' + Mock.Random.integer(0, 9) + '.png'),
+    'background': null,
+    'backgroundUrl': require('@/assets/bg/' + Mock.Random.integer(0, 8) + '.jpg'),
+    'score': '@integer(50, 90)',
     'following': '@integer(1000, 5000)',
     'followers': '@integer(100, 1000)',
     'intro': '@cparagraph',
-    'analysisList': [
-        {
-            'name': '总分',
-            'value': '@integer(50, 90)'
-        },
-        {
-            'name': '颜值',
-            'value': '@integer(60, 100)'
-        },
-        {
-            'name': '皮肤',
-            'value': '@integer(50, 85)'
-        },
-        {
-            'name': '五官',
-            'value': '@integer(40, 80)'
-        }
-    ]
 })
 export const generateMockUsers = (n = userCount) => {
     const users = [];
@@ -56,6 +40,23 @@ export const generateMockUsers = (n = userCount) => {
 };
 
 export const userList = localStorage.getItem('userList') ? JSON.parse(localStorage.getItem('userList')) : generateMockUsers();
+
+async function getAvatarUrl() {
+    for (let i = 0; i < userList.length; i++) {
+        if (!userList[i].avatar) continue;
+        userList[i].avatarUrl = await getUrl(userList[i].avatar);
+    }
+}
+
+async function getBackgroundUrl() {
+    for (let i = 0; i < userList.length; i++) {
+        if (!userList[i].background) continue;
+        userList[i].backgroundUrl = await getUrl(userList[i].background);
+    }
+}
+
+await getAvatarUrl();
+await getBackgroundUrl();
 
 export const mockPost = (uid, text, time, img, like, comment, share, postFrom, id = uuid()) => Mock.mock({
     id,
@@ -76,6 +77,7 @@ export const mockPost = (uid, text, time, img, like, comment, share, postFrom, i
     'postFrom': postFrom ?? null,
     'uid': uid ? uid : userList[Math.floor(Math.random() * userList.length)].id
 })
+
 export const generateMockPosts = (n = postCount) => {
     const posts = [];
     for (let i = 0; i < n; i++) {

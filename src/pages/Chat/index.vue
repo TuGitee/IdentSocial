@@ -1,13 +1,13 @@
 <template>
   <div id="root" class="chat">
-    <div class="chat-header">
+    <header class="chat-header">
       <h1 class="title">
         <i class="el-icon-chat-round"></i>在线聊天
       </h1>
       <button class="refresh" @click="getUserList">
         <i class="el-icon-refresh" :class="{ active: isSend }"></i>
       </button>
-    </div>
+    </header>
     <div class="chat-body">
       <ul class="chat-body-list">
         <template v-if="userLists.length">
@@ -46,11 +46,11 @@ export default {
     })
   },
   methods: {
-    createMessage(user, data, avatar, id, time) {
+    createMessage(user, data, avatarUrl, id, time) {
       return {
         user,
         data,
-        avatar,
+        avatarUrl,
         id,
         time
       }
@@ -64,13 +64,14 @@ export default {
         const item = {
           message: data.data,
           from_id: data.user.id,
-          avatar: data.user.avatar,
-          nickname: data.user.nickname,
+          avatarUrl: data.user.avatarUrl,
+          username: data.user.username,
           to_id: data.to,
           time: data.time,
           isSend: true
         }
-        this.userLists.find((item) => item.id == data.to).unread++;
+        const user = this.userLists.find((item) => item.id == data.to);
+        user && user.unread++;
         this.addGroupChat(item)
       })
     },
@@ -85,13 +86,14 @@ export default {
         const item = {
           message: data.data,
           from_id: data.user.id,
-          avatar: data.user.avatar,
-          nickname: data.user.nickname,
+          avatarUrl: data.user.avatarUrl,
+          username: data.user.username,
           to_id: data.to.id,
           time: data.time,
           isSend: true
         }
-        this.userLists.find((item) => item.id == data.user.id).unread++;
+        const user = this.userLists.find((item) => item.id == data.user.id);
+        user && user.unread++;
         this.addUserChat(item);
       })
     },
@@ -128,7 +130,7 @@ export default {
         clearTimeout(this.timer);
         this.timer = null;
         this.isSend = true;
-        emit(WebSocketType.GroupList, this.createMessage(this.token, "你好", '', this.$store.state.user.token, new Date().getTime()));
+        emit(WebSocketType.GroupList, this.createMessage(this.token, "你好", '', this.token, new Date().getTime()));
         this.timer = setTimeout(() => {
           this.isSend = false;
         }, 5000);
@@ -178,6 +180,8 @@ export default {
       color: @purple;
 
       i {
+        transition: .1s;
+
         &.active {
           animation: rotate 3s linear infinite;
 
@@ -187,7 +191,7 @@ export default {
             }
 
             to {
-              transform: rotate(360deg);
+              transform: rotate(-360deg);
             }
           }
         }

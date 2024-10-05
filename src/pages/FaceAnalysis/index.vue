@@ -107,6 +107,7 @@ export default {
             return;
           }
           this.result = detaction;
+          this.userInfo.score = detaction.score;
           localStorage.setItem("image", JSON.stringify({
             src: this.imgSrc,
             width: this.imgWidth,
@@ -150,7 +151,7 @@ export default {
     }),
     defaultResult() {
       return {
-        score: this.userInfo.faceScore || 0,
+        score: this.userInfo.score || 0,
         age: this.userInfo.age || 0,
         gender: this.userInfo.gender || 0,
       }

@@ -4,15 +4,12 @@ module.exports = defineConfig({
   transpileDependencies: true,
   productionSourceMap: false,
   lintOnSave: false,
-  publicPath: './',
+  publicPath: '/',
   outputDir: 'dist',
   assetsDir: 'static',
   devServer: {
     port: 8080,
-    hot: true,
-    // host: '113.54.227.97',
-    proxy: {
-    }
+    hot: true
   },
   pluginOptions: {
     'style-resources-loader': {

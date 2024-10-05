@@ -5,17 +5,19 @@
                 name: 'ChatDetail',
                 params: {
                     id: item.from_id,
-                    username: item.nickname,
-                    avatar: item.avatar
+                    username: item.username,
+                    avatarUrl: item.avatarUrl
                 }
             }">
-                <img :src="item.avatar" alt="">
+                <MyImage :src="item.avatarUrl" alt="">
+                    {{ item.username?.slice(0, 1) }}
+                </MyImage>
             </router-link>
         </div>
         <div class="chat-item-info">
-            <p class="chat-item-nickname">
+            <p class="chat-item-username">
                 <span>
-                    {{ item.nickname }}
+                    {{ item.username }}
                 </span>
                 <time>{{ formatTime(item.time) }}</time>
             </p>
@@ -32,8 +34,13 @@
 <script>
 import formatTime from '@/utils/time';
 import { mapState } from 'vuex';
+import MyImage from './MyImage.vue';
 
 export default {
+    name: 'ChatItem',
+    components: {
+        MyImage
+    },
     props: {
         item: {
             type: Object,
@@ -64,7 +71,7 @@ export default {
         flex-direction: row-reverse;
         text-align: right;
 
-        .chat-item-nickname {
+        .chat-item-username {
             margin-left: auto;
         }
 
@@ -127,7 +134,7 @@ export default {
         }
     }
 
-    .chat-item-nickname {
+    .chat-item-username {
         max-width: 70%;
         user-select: none;
         white-space: nowrap;

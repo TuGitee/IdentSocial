@@ -22,7 +22,6 @@ export const emit = (eventType, data) => {
 }
 
 const requestURL = 'https://api.face.tuguobin.site/pusher';
-// const requestURL = 'http://localhost:8084/pusher';
 
 pubsub.on('userInfo', (data) => {
     emit(WebSocketType.UserInfo, data);

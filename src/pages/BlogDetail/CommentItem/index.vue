@@ -2,13 +2,13 @@
     <div class="comment-item">
         <div class="comment-item-left">
             <router-link :to="`/user-detail/${comment.uid}`">
-                <img :src="comment.user.avatar" alt="">
+                <img :src="comment.user.avatarUrl" alt="">
             </router-link>
         </div>
         <div class="comment-item-right">
             <div class="comment-item-right-top">
                 <router-link :to="`/user-detail/${comment.uid}`">
-                    <span class="comment-item-right-top-name">{{ comment.user.nickname }}</span>
+                    <span class="comment-item-right-top-name">{{ comment.user.username }}</span>
                 </router-link>
             </div>
             <div class="comment-item-right-bottom">
@@ -21,7 +21,7 @@
                         :key="c.id">
                         <div class="comment-item-right-bottom-list-item-left">
                             <router-link :to="`/user-detail/${c.uid}`">
-                                <img :src="c.user.avatar" alt="">
+                                <img :src="c.user.avatarUrl" alt="">
                             </router-link>
                         </div>
                         <div class="comment-item-right-bottom-list-item-right">
@@ -30,7 +30,7 @@
                                     <router-link :to="`/user-detail/${c.uid}`">
                                         <span class="comment-item-right-bottom-list-item-right-top-name">
                                             {{
-                                                c.user.nickname
+                                                c.user.username
                                             }}
                                         </span>
                                     </router-link>
@@ -39,7 +39,7 @@
                                         v-if="c.cid !== comment.id">
                                         <span class="comment-item-right-bottom-list-item-right-top-name">
                                             {{
-                                                c.puser.nickname
+                                                c.puser.username
                                             }}
                                         </span>
                                     </router-link>

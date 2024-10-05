@@ -2,7 +2,7 @@
   <div id="root" class="home" ref="root">
     <header class="home-header">
       <h2 class="home-header-hello">你好，</h2>
-      <h1 class="home-header-name">{{ userInfo.nickname ?? '加载中...' }}</h1>
+      <h1 class="home-header-name">{{ userInfo.username ?? '加载中...' }}</h1>
       <router-link to="/upload">
         <i class="el-icon-plus home-header-plus"></i>
       </router-link>
@@ -13,7 +13,7 @@
         <ul class="home-middle-list">
           <li class="home-middle-list-item" v-for="(user) in userList" :key="user.id">
             <router-link :to="{ name: 'UserDetail', params: { uid: user.id } }">
-              <MyImage border-type="round" :src="user.avatar" alt="" />
+              <MyImage border-type="round" :src="user.avatarUrl" alt="" />
             </router-link>
           </li>
         </ul>
@@ -144,7 +144,7 @@ export default {
     },
     async publish() {
       if (!this.to?.id) return;
-      const text = this.to.isPostFrom ? `${this.text} // @[${this.to.user.nickname}](${this.to.user.id}): ${this.to.text}` : `${this.text}`;
+      const text = this.to.isPostFrom ? `${this.text} // @[${this.to.user.username}](${this.to.user.id}): ${this.to.text}` : `${this.text}`;
       this.$store.dispatch("postBlog", { text, postFrom: this.to.id }).then(() => {
         this.text = "";
         this.to = {};
@@ -274,27 +274,11 @@ export default {
     height: @nav-height;
     margin: 0;
 
-    .el-tabs__active-bar {
-      background-color: @purple;
-    }
-
     .el-tabs__item {
       height: @nav-height;
       line-height: @nav-height;
       font-size: 1.2rem;
       user-select: none;
-
-      &:active {
-        color: @purple;
-      }
-
-      &:hover {
-        color: @purple;
-      }
-
-      &.is-active {
-        color: @purple;
-      }
     }
   }
 

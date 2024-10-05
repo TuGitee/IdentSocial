@@ -1,5 +1,5 @@
 import { getToken, setToken } from "@/utils/token";
-import { reqMockFollow, reqMockFollowerList, reqMockFollowList, reqMockLikeList, reqMockUser } from "@/api";
+import { reqMockFollow, reqMockFollowerList, reqMockFollowList, reqMockLikeList, reqMockUpdateUser, reqMockUser } from "@/api";
 import pubsub from "@/utils/pubsub";
 const getters = {
     followCount(state) {
@@ -25,6 +25,16 @@ const actions = {
             return Promise.reject(new Error("Request Fail!"));
         }
     },
+    async updateUserInfo(state, userInfo) {
+        userInfo.id = state.state.token;
+        const res = await reqMockUpdateUser(userInfo);
+        if (res.code === 200) {
+            state.commit("UPDATEUSERINFO", res.data);
+            return res;
+        } else {
+            return Promise.reject(new Error("Request Fail!"));
+        }
+    },
     async followUser(state, { id, isFollow }) {
         const res = await reqMockFollow(id, isFollow);
         if (res.code === 200) {
@@ -46,6 +56,9 @@ const mutations = {
     },
     GETUSERINFO(state, userInfo) {
         state.userInfo = userInfo;
+    },
+    UPDATEUSERINFO(state, userInfo) {
+        Object.assign(state.userInfo, userInfo);
     },
     SETTOKEN(state, token) {
         state.token = token;

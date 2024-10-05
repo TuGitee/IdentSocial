@@ -39,7 +39,7 @@ export const faceAnalysis = async (image) => {
     const result = await faceapi.detectSingleFace(img).withAgeAndGender().withFaceExpressions();
     if (!result) return null;
     const lamda = 0.7;
-    result.score = result.detection.score * lamda + getExpressionScore(result.expressions) * (1 - lamda);
+    result.score = parseInt((result.detection.score * lamda + getExpressionScore(result.expressions) * (1 - lamda)) * 100);
     return result;
 };
 

@@ -1,7 +1,7 @@
 <template>
   <div class="sign-up">
     <nav class="sign-up-nav">
-      <router-link replace to="Login">
+      <router-link replace to="/">
         <i class="el-icon-arrow-left"></i><span>首页</span>
       </router-link>
     </nav>
@@ -270,11 +270,6 @@ export default {
   width: 100vw;
   position: fixed;
   transition: all 1s;
-
-  /deep/ .is-finish {
-    color: @purple;
-    border-color: @purple;
-  }
 
   /deep/ .el-tabs__content {
     overflow: inherit;

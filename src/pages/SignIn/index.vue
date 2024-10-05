@@ -1,7 +1,7 @@
 <template>
   <div class="sign-in">
     <nav class="sign-in-nav">
-      <router-link replace to="Login">
+      <router-link replace to="/">
         <i class="el-icon-arrow-left"></i><span>首页</span>
       </router-link>
     </nav>

@@ -1,15 +1,15 @@
 <template>
-  <div class="login">
-    <header class="login-header">
+  <div class="start">
+    <header class="start-header">
       <i class="el-icon-camera-solid"></i>
       <b>一款人脸打分的社交APP</b>
     </header>
-    <footer class="login-footer">
+    <footer class="start-footer">
       <router-link to="/signin">
-        <el-button type="primary" class="login-sign-in">登录</el-button>
+        <el-button type="primary" class="start-sign-in">登录</el-button>
       </router-link>
 
-      <nav class="login-footer-nav">
+      <nav class="start-footer-nav">
         <b>其他方式</b>
         <i class="el-icon-s-promotion" @click="otherMode"></i>
         <i class="el-icon-s-platform" @click="otherMode"></i>
@@ -17,7 +17,7 @@
       </nav>
 
       <router-link to="/signup">
-        <p class="login-sign-up">注册</p>
+        <p class="start-sign-up">注册</p>
       </router-link>
     </footer>
   </div>
@@ -25,14 +25,14 @@
 
 <script>
 export default {
-  name: "Login",
+  name: "StartPage",
   data() {
     return {
       userName: "",
       password: "",
     };
   },
-  mounted() {},
+  mounted() { },
   methods: {
     otherMode() {
       alert(
@@ -50,7 +50,8 @@ export default {
   font-family: Helvetica, Tahoma, Arial, "PingFang SC", "Hiragino Sans GB",
     "Heiti SC", "Microsoft YaHei", "WenQuanYi Micro Hei";
   user-select: none;
-  .login {
+
+  .start {
     transition: all 0.5 linear;
     display: flex;
     flex-direction: column;

@@ -2,13 +2,14 @@
   <div class="me">
     <header class="me-header">
       <div class="me-header-avatar">
-        <el-image class="me-header-avatar-img" :src="userInfo.avatar" alt="" @click="goUserDetail">{{
-          userInfo.nickname }}</el-image>
+        <MyImage class="me-header-avatar-img" :src="userInfo.avatarUrl" alt="" @click="goUserDetail">
+          {{ userInfo.username }}
+        </MyImage>
         <i class="el-icon-arrow-right me-header-avatar-arrow" @click="goUserDetail"></i>
       </div>
       <div class="me-header-info">
         <div class="me-header-info-name">
-          <span class="me-header-info-name-input">{{ userInfo.nickname }}</span>
+          <span class="me-header-info-name-input">{{ userInfo.username }}</span>
         </div>
         <div class="me-header-info-intro">
           简介：{{ userInfo.intro ?? '这个人很懒，什么也没有留下...' }}
@@ -19,7 +20,7 @@
       <div class="me-drawers-header">
         <div class="me-drawers-header-item">
           <span class="me-drawers-header-item-text">人脸分数</span>
-          <span class="me-drawers-header-item-number">{{ userInfo.faceScore ?? 0 }}</span>
+          <span class="me-drawers-header-item-number">{{ userInfo.score ?? 0 }}</span>
         </div>
         <div class="me-drawers-header-item" @click="toFollow">
           <span class="me-drawers-header-item-text">关注</span>
@@ -31,7 +32,8 @@
         </div>
       </div>
       <ul class="me-drawers-list">
-        <li class="me-drawers-list-item" v-for="(item, index) in list" :key="index">
+        <component :is="item.to ? 'router-link' : 'li'" :to="item.to ? item.to : ''" class="me-drawers-list-item"
+          v-for="(item, index) in list" :key="index">
           <div class="me-drawers-list-item-left">
             <div class="me-drawers-list-item-left-icon">
               <i :class="item.icon"></i>
@@ -40,20 +42,21 @@
               {{ item.text }}
             </div>
           </div>
-
           <div class="me-drawers-list-item-arrow">
             <i class="el-icon-arrow-right"></i>
           </div>
-        </li>
+        </component>
       </ul>
     </div>
   </div>
 </template>
 
 <script>
+import MyImage from '@/components/MyImage.vue';
 import { mapGetters, mapState } from 'vuex';
 export default {
   name: "MePage",
+  components: { MyImage },
   data() {
     return {
       list: [
@@ -75,7 +78,8 @@ export default {
         },
         {
           icon: "el-icon-s-tools",
-          text: "设置"
+          text: "设置",
+          to: '/setting'
         },
         {
           icon: "el-icon-s-help",
@@ -332,8 +336,8 @@ export default {
         &-arrow {
           margin-right: .5rem;
           font-size: 1.3rem;
-          text-shadow: 1px 1px 0px #8C8C8C, 1px 0px 0px #8C8C8C, 0px 1px 0px #8C8C8C;
-          color: #8C8C8C;
+          text-shadow: 1px 1px 0px @purple, 1px 0px 0px @purple, 0px 1px 0px @purple;
+          color: @purple;
         }
       }
     }

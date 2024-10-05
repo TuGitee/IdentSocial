@@ -8,7 +8,9 @@
             </div>
             <div class="chat-detail-header-icon">
                 <div class="chat-detail-header-icon-img">
-                    <img :src="avatar ?? defaultAvatar" alt="">
+                    <MyImage :src="avatarUrl ?? defaultAvatar" alt="">
+                        {{ username?.slice(0, 1) }}
+                    </MyImage>
                 </div>
                 <div class="chat-detail-header-icon-name">
                     <span>{{ username }}</span>
@@ -39,10 +41,12 @@ import ChatItem from "@/components/ChatItem.vue";
 import { channel, emit, privateChannel, WebSocketType } from "@/ws";
 import { mapGetters, mapState } from "vuex";
 import defaultAvatar from "@/assets/images/0.png";
+import MyImage from "@/components/MyImage.vue";
 export default {
     name: "ChatDetail",
     components: {
-        ChatItem
+        ChatItem,
+        MyImage
     },
     data() {
         return {
@@ -94,9 +98,9 @@ export default {
                 message: this.input,
                 to_id: this.id,
                 from_id: this.token,
-                avatar: this.userInfo.avatar,
+                avatarUrl: this.userInfo.avatarUrl,
                 time: new Date().getTime(),
-                nickname: this.userInfo.nickname,
+                username: this.userInfo.username,
                 isSend: false
             };
             if (!this.id) {
@@ -140,8 +144,8 @@ export default {
                     item = {
                         message: data.data,
                         from_id: data.user.id,
-                        avatar: data.user.avatar,
-                        nickname: data.user.nickname,
+                        avatarUrl: data.user.avatarUrl,
+                        username: data.user.username,
                         to_id: data.to,
                         time: data.time,
                         isSend: true
@@ -169,8 +173,8 @@ export default {
                     item = {
                         message: data.data,
                         from_id: data.user.id,
-                        avatar: data.user.avatar,
-                        nickname: data.user.nickname,
+                        avatarUrl: data.user.avatarUrl,
+                        username: data.user.username,
                         to_id: data.to.id,
                         time: data.time,
                         isSend: true
@@ -201,8 +205,8 @@ export default {
         username() {
             return this.$route.params.username
         },
-        avatar() {
-            return this.$route.params.avatar
+        avatarUrl() {
+            return this.$route.params.avatarUrl
         },
         ...mapState({
             userInfo: state => state.user.userInfo,

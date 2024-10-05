@@ -38,6 +38,15 @@ Mock.mock(/\/mock\/user/, 'post', (req) => {
     return Mock.mock({ code: 200 });
 });
 
+Mock.mock(/\/mock\/user/, 'put', (req) => {
+    const { username, avatar, id, nickname, background, gender, email, phone, age, intro, avatarUrl, backgroundUrl } = JSON.parse(req.body);
+    const user = userList.find(item => item.id === id);
+    if (!user) return Mock.mock({ code: 400 });
+    Object.assign(user, { username, avatar, nickname, background, gender, email, phone, age, intro, avatarUrl, backgroundUrl });
+    saveData('userList');
+    return Mock.mock({ code: 200, data: user });
+})
+
 Mock.mock(/\/mock\/post\/follow\?/, 'get', (req) => {
     const { page, limit, uid } = req.url.split('?')[1].split('&').reduce((acc, cur) => {
         const [key, value] = cur.split('=');

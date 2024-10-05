@@ -5,34 +5,30 @@
                 <i class="el-icon-arrow-left"></i>
                 <b>返回</b>
             </button>
-            <img :src="userInfo.background ?? defaultBg" :style="{
+            <img :src="userInfo.backgroundUrl ?? defaultBg" :style="{
                 transform: `scale(${scale})`
             }" class="bg" v-if="userInfo?.id" preview="bg">
             <div class="userInfo" v-if="uid">
-                <MyImage preview="avatar" :src="userInfo?.avatar">{{ userInfo?.nickname || '加载中' }}</MyImage>
-                <h1 class="username">{{ userInfo?.nickname || '加载中' }}</h1>
+                <MyImage preview="avatar" :src="userInfo?.avatarUrl">{{ userInfo?.username || '加载中' }}</MyImage>
+                <h1 class="username">{{ userInfo?.username || '加载中' }}</h1>
                 <p class="other" v-if="userInfo?.id">
                     <span class="gender tag">
                         <GenderIcon :gender="userInfo?.gender"></GenderIcon>
-                        <span>{{ userInfo?.age }}岁</span>
+                        <span>{{ userInfo?.age || 0 }}岁</span>
                     </span>
-                    <span class="score tag">
+                    <span class="score tag" v-if="userInfo?.score">
                         <i class="el-icon-star-on"></i>
-                        <span>{{ userInfo?.faceScore }}分</span>
+                        <span>{{ userInfo?.score }}分</span>
                     </span>
-                    <span class="account tag">
+                    <span class="account tag" v-if="userInfo?.email">
                         <i class="el-icon-user-solid"></i>
                         <span>{{ userInfo?.email }}</span>
                     </span>
-                    <span class="location tag">
+                    <span class="location tag" v-if="userInfo?.address">
                         <i class="el-icon-location"></i>
                         <span>{{ userInfo?.address }}</span>
                     </span>
-                    <span class="time tag">
-                        <i class="el-icon-time"></i>
-                        <span>{{ userInfo?.created_at }}</span>
-                    </span>
-                    <span class="phone tag">
+                    <span class="phone tag" v-if="userInfo?.phone">
                         <i class="el-icon-phone"></i>
                         <span>{{ userInfo?.phone }}</span>
                     </span>
@@ -157,21 +153,7 @@ export default {
 
         .back {
             color: @white;
-            font-weight: bold;
-            font-size: 1rem;
-            margin-top: 1.2rem;
-            width: fit-content;
-            display: flex;
-            align-items: center;
             text-shadow: 0 0 4px @black;
-            background-color: transparent;
-            border: none;
-            cursor: pointer;
-
-            i {
-                margin-right: 4px;
-                font-size: 1.2rem;
-            }
         }
 
         .bg {
@@ -290,10 +272,10 @@ export default {
             }
 
             .signature {
-                font-size: 12px;
+                font-size: .8rem;
                 color: @white;
-                line-height: 20px;
-                margin-top: 6px;
+                line-height: 1.5;
+                margin-top: 1rem;
                 margin-right: 10px;
                 display: -webkit-box;
                 -webkit-line-clamp: 3;

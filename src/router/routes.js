@@ -1,9 +1,9 @@
 import userRoutes from './userRoutes';
 export default [
     {
-        name: 'Login',
-        path: '/login',
-        component: () => import('@/pages/Login'),
+        name: 'Start',
+        path: '/',
+        component: () => import('@/pages/StartPage'),
     },
     {
         name: 'SignIn',
@@ -52,8 +52,9 @@ export default [
         component: () => import('@/pages/Follower'),
     },
     {
-        path: '/',
-        redirect: '/login',
+        path: '/setting',
+        name: 'Setting',
+        component: () => import('@/pages/Setting'),
     },
     {
         path: '*',

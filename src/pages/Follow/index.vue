@@ -1,10 +1,12 @@
 <template>
     <div class="container" id="root">
-        <button class="back" @click="goBack">
-            <i class="el-icon-arrow-left"></i>
-            <b>返回</b>
-        </button>
-        <h1 class="title"># {{ userInfo.nickname }}关注列表</h1>
+        <header>
+            <button class="back" @click="goBack">
+                <i class="el-icon-arrow-left"></i>
+                <b>返回</b>
+            </button>
+            <h1 class="title"># {{ userInfo.username }}关注列表</h1>
+        </header>
         <UserItem v-for="item in followList" :key="item.id" :id="item.fid" />
     </div>
 </template>
@@ -48,34 +50,4 @@ export default {
 
 <style scoped lang="less">
 @import "@/css/user.less";
-
-.container {
-    .back {
-        color: @black;
-        font-weight: bold;
-        font-size: 1rem;
-        margin-top: 1.2rem;
-        width: fit-content;
-        display: flex;
-        align-items: center;
-        text-shadow: 0 0 4px @white;
-        background-color: transparent;
-        border: none;
-        cursor: pointer;
-
-        i {
-            margin-right: 4px;
-            font-size: 1.2rem;
-        }
-    }
-
-    .title {
-        margin-top: 12px;
-        margin-bottom: 12px;
-        color: transparent;
-        width: fit-content;
-        background: linear-gradient(45deg, @purple, @pink);
-        -webkit-background-clip: text;
-    }
-}
 </style>

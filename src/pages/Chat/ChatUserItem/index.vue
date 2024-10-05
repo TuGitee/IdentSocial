@@ -1,7 +1,7 @@
 <template>
-    <div class="user-chat-item" @click="toChat(item.id, item.username, item.avatar)">
+    <div class="user-chat-item" @click="toChat(item.id, item.username, item.avatarUrl)">
         <div class="user-chat-item-avatar">
-            <MyImage :src="item.avatar ?? defaultAvatar" alt="" />
+            <MyImage :src="item.avatarUrl ?? defaultAvatar" alt="">{{ item.username?.slice(0, 1) }}</MyImage>
         </div>
         <div class="user-chat-item-content">
             <div class="user-chat-item-content-title">
@@ -9,7 +9,7 @@
             </div>
             <div class="user-chat-item-content-desc">
                 <span class="user-chat-item-content-desc-text">
-                    <b v-if="!item.to">{{ lastMessage?.nickname }}</b>
+                    <b v-if="!item.to">{{ lastMessage?.username }}</b>
                     {{ lastMessage?.message || "快来开始聊天吧！" }}
                 </span>
                 <span class="user-chat-item-content-desc-text divide">·</span>
@@ -41,7 +41,7 @@ export default {
             type: Object,
             default: () => ({})
         },
-        avatar: {
+        avatarUrl: {
             type: String,
             default: ""
         }
@@ -57,14 +57,14 @@ export default {
     },
     methods: {
         formatTime,
-        toChat(id, username, avatar) {
+        toChat(id, username, avatarUrl) {
             this.$emit('click', id);
             this.$router.push({
                 name: "ChatDetail",
                 params: {
                     id,
                     username,
-                    avatar
+                    avatarUrl
                 }
             })
         },

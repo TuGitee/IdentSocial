@@ -2,11 +2,11 @@
     <div class="blog-item">
         <div class="blog-item-header">
             <div class="blog-item-header-avatar" @click="toUserDetail">
-                <img :src="item.user.avatar" alt="">
+                <MyImage :src="item.user.avatarUrl" alt=""></MyImage>
             </div>
             <div class="blog-item-header-info">
                 <div class="blog-item-header-info-name">
-                    {{ item.user?.nickname }}
+                    {{ item.user?.username }}
                 </div>
                 <div class="blog-item-header-info-time">
                     {{ formatTime(item.time) }}
@@ -41,7 +41,7 @@
                 @click.stop="postFrom.id && toRawBlog(item.postFrom)">
                 <div class="blog-item-content-share-title">
                     <span class="blog-item-content-share-title-name"
-                        @click.stop="postFrom.user && toUserPage(postFrom.uid)">{{ postFromLoding ? "加载中" : postFrom.user?.nickname ?? '加载失败' }}:
+                        @click.stop="postFrom.user && toUserPage(postFrom.uid)">{{ postFromLoding ? "加载中" : postFrom.user?.username ?? '加载失败' }}:
                     </span>
                     <span class="blog-item-content-share-title-text">{{ postFromLoding ? "加载中..." : postFrom.text ?? '该内容不存在或已被删除' }}</span>
                 </div>
@@ -147,7 +147,7 @@ export default {
             let res = await this.$blogAxios.get(`/post?postId=${id}`)
             this.postFrom = res.data.data;
             let user = await this.$userAxios.get(`/user?userId=${this.postFrom.userId}`);
-            this.$set(this.postFrom, 'name', user.data.data.nickname);
+            this.$set(this.postFrom, 'name', user.data.data.username);
         },
         formatTime,
         follow(id) {

@@ -1,22 +1,22 @@
 <template>
     <div class="my-image" :style="{
-        borderRadius: borderType === 'round' ? '50%' : borderType === 'smooth' ? '4px' : null
-    }">
+        borderRadius: borderType === 'round' ? '50%' : borderType === 'smooth' ? '4px' : null,
+    }" @click="$emit('click')">
         <div class="container" :style="{
             paddingTop: ratio * 100 + '%'
         }">
             <img :src="src" v-bind="$attrs" @load="isLoaded = true" @error="isError = true" alt=""
                 :class="{ loaded: isLoaded, error: isError }" v-if="src && !isError">
-            <div class="my-image-loading" v-else-if="!isLoaded">
-                <slot name="loading">
-                    <span>加载中</span>
-                </slot>
-            </div>
-            <div class="my-image-error" v-else>
+            <div class="my-image-error" v-else-if="isError">
                 <slot name="error">
                     <slot>
                         <span>加载失败</span>
                     </slot>
+                </slot>
+            </div>
+            <div class="my-image-loading" v-else>
+                <slot name="loading">
+                    <span>加载中</span>
                 </slot>
             </div>
         </div>
@@ -38,7 +38,7 @@ export default {
         borderType: {
             type: String,
             default: 'round'
-        },
+        }
     },
     data() {
         return {
@@ -98,6 +98,9 @@ export default {
             align-items: center;
             justify-content: center;
             z-index: 1;
+            padding: 0 15%;
+            text-align: center;
+            font-weight: bold;
         }
     }
 }

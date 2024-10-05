@@ -23,6 +23,7 @@ VueRouter.prototype.replace = function (location, resolve, reject) {
 }
 
 let router = new VueRouter({
+    mode: "history",
     routes,
     linkActiveClass: "active",
     scrollBehavior(to, from, savedPosition) {

@@ -48,11 +48,3 @@ export default {
     },
 };
 </script>
-
-<style scoped lang="less">
-.text {
-    a {
-        color: @purple;
-    }
-}
-</style>

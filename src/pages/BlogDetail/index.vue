@@ -119,7 +119,7 @@ export default {
             currentPost: state => state.post.currentPost
         }),
         placeholder() {
-            return this.target ? `回复 ${this.target.user.nickname} : ${this.target.text}` : "说点什么...";
+            return this.target ? `回复 ${this.target.user.username} : ${this.target.text}` : "说点什么...";
         },
         bid() {
             return this.$route.params.bid

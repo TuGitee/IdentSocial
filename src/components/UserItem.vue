@@ -1,11 +1,11 @@
 <template>
     <div class="user-item">
         <router-link :to="{ name: 'UserDetail', params: { uid: id } }">
-            <MyImage :src="currentInfo?.avatar" border-type="round"></MyImage>
+            <MyImage :src="currentInfo?.avatarUrl" border-type="round"></MyImage>
         </router-link>
         <div class="info">
             <router-link :to="{ name: 'UserDetail', params: { uid: id } }">
-                <div class="name">{{ currentInfo?.nickname }}</div>
+                <div class="name">{{ currentInfo?.username }}</div>
             </router-link>
             <div class="desc">{{ currentInfo?.intro }}</div>
         </div>

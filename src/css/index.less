@@ -1,0 +1,41 @@
+:root {
+    --safe-area-inset-top: constant(safe-area-inset-top);
+    --safe-area-inset-top: env(safe-area-inset-top);
+}
+
+.pswp__top-bar {
+    display: none !important;
+}
+
+#app {
+    height: 100vh;
+}
+
+ul {
+    li {
+        list-style: none;
+    }
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    font-family: Helvetica, Tahoma, Arial, "PingFang SC", "Hiragino Sans GB", "Heiti SC", "Microsoft YaHei", "WenQuanYi Micro Hei";
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    text-size-adjust: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+a {
+    text-decoration: none;
+    color: @purple;
+
+    &:active {
+        color: @darkPurple;
+    }
+}
