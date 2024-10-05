@@ -173,8 +173,8 @@ export default {
       &-img {
         user-select: none;
         border-radius: 50%;
-        height: 4rem;
-        width: 4rem;
+        height: 4rem !important;
+        width: 4rem !important;
         border: 2px solid @white;
       }
 
