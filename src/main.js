@@ -55,6 +55,8 @@ Vue.prototype.$notify = (options) => {
 import longpress from './directives/longpress';
 Vue.directive('longpress', longpress);
 
+import "./utils/checkUpdate";
+
 new Vue({
   render: h => h(App),
   router,
