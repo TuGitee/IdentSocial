@@ -7,6 +7,7 @@
             </button>
             <h1 class="title"># {{ userInfo.username }}粉丝列表</h1>
         </header>
+        <el-empty v-if="!followerList.length"></el-empty>
         <UserItem v-for="item in followerList" :key="item.id" :id="item.uid" />
     </div>
 </template>

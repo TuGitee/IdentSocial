@@ -102,12 +102,12 @@ export default {
   },
   computed: {
     ...mapState({ userInfo: state => state.user.userInfo ?? {} }),
-    ...mapGetters(['followCount']),
+    ...mapGetters(['followCount','followerCount']),
     followers() {
-      if (this.userInfo.followers > 1000) {
-        return (this.userInfo.followers / 1000).toFixed(1) + 'K';
+      if (this.followerCount > 1000) {
+        return (this.followerCount / 1000).toFixed(1) + 'K';
       } else {
-        return this.userInfo.followers;
+        return this.followerCount;
       }
     },
     following() {

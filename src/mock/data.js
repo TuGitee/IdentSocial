@@ -178,6 +178,7 @@ export function saveData(type) {
             localStorage.setItem('userList', JSON.stringify(userList));
             break;
         case 'userList':
+            checkFollow();
             localStorage.setItem('userList', JSON.stringify(userList));
             break;
     }
