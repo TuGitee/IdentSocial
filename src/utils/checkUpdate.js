@@ -8,18 +8,19 @@ function getVersion() {
 
 function clearStorage() {
     localStorage.clear();
-    sessionStorage.clear();
 }
 
 async function checkUpdate() {
     const currentVersion = await getVersion();
 
-    setInterval(async () => {
+    const timer = setInterval(async () => {
         if (currentVersion !== await getVersion()) {
+            clearInterval(timer);
             clearStorage();
-            alert("检测到版本更新，请刷新页面");
+            confirm("检测到版本更新，即将重新刷新页面！");
+            window.location.reload();
         }
-    }, 5000);
+    }, 10000);
 }
 
 checkUpdate();
