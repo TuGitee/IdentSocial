@@ -7,11 +7,11 @@ function init() {
         cluster: 'ap1'
     });
     const channel = pusher.subscribe('all-channel');
-    const privateChannel = pusher.subscribe(getToken());
+    const privateChannel = getToken() ? pusher.subscribe(getToken()) : null;
     return [pusher, channel, privateChannel];
 }
 
-export let [pusher, channel, privateChannel] = init();
+export let pusher, channel, privateChannel;
 
 export const emit = (eventType, data) => {
     fetch(requestURL, {
@@ -30,14 +30,17 @@ const requestURL = process.env.VUE_APP_PUSHER_URL;
 
 pubsub.on('userInfo', (data) => {
     emit(WebSocketType.UserInfo, data);
+    initPusher();
 })
 
-pubsub.on('chatDetail', ()=>{
+function initPusher() {
     const [pusher2, channel2, privateChannel2] = init();
     pusher = pusher2;
     channel = channel2;
     privateChannel = privateChannel2;
-})
+}
+
+pubsub.on('chatDetail', initPusher);
 
 export const WebSocketType = {
     Error: 'ERROR',

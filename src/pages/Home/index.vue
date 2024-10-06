@@ -64,7 +64,7 @@ export default {
     });
     this.activeName = this.$route.name;
     this.el = window;
-
+    this.handleScroll();
     this.el.addEventListener("scroll", this.handleScroll);
   },
   data() {

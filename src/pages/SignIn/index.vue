@@ -78,7 +78,7 @@ export default {
         } else {
           this.$store.commit("SETTOKEN", res.data.id);
           this.$store.dispatch("getUserInfo");
-          this.$router.replace({ name: "Home" });
+          this.$router.replace(this.$route.query.redirect ?? "/user");
         }
       }
     },

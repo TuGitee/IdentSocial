@@ -33,7 +33,24 @@ let router = new VueRouter({
                 resolve({ top })
             }, 0)
         });
-    },
+    }
+})
+
+router.beforeEach((to, from, next) => {
+    if (to.matched.some(res => res.meta.requireAuth)) {
+        if (localStorage.getItem("token")) {
+            next();
+        } else {
+            next({
+                path: '/signin',
+                query: {
+                    redirect: to.fullPath
+                }
+            })
+        }
+    } else {
+        next();
+    }
 })
 
 export default router;
