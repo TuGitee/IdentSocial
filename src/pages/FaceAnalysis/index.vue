@@ -95,7 +95,7 @@ export default {
     },
     submit() {
       this.isLoading = true;
-      this.$nextTick(() => {
+      setTimeout(() => {
         faceAnalysis(this.imgSrc).then((detaction) => {
           if (!this.isLoading) return;
           if (!detaction) {

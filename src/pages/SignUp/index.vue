@@ -56,12 +56,9 @@
           </el-tab-pane>
           <el-tab-pane disabled name="1">
             <form>
-              <p class="sign-up-box-title">已经将验证码发送到您的邮箱
-                <button class="sign-up-box-resend" :disabled="time > 0" @click="sendCaptcha">重新发送{{ time > 0 ?
-                  `(${time})`
-                  : '' }}</button>
+              <p class="sign-up-box-title">
+                已经将验证码发送到您的邮箱
               </p>
-              <p class="sign-up-box-subtitle">请注意查收 <i class="el-icon-message"></i></p>
               <div class="sign-up-box-check">
                 <input type="number" class="sign-up-box-check-input" v-model="Captcha" autocomplete="true"
                   placeholder="输入您的验证码" />
@@ -69,8 +66,14 @@
                   <div class="captcha-item" v-for="i, index in computedCaptcha" :key="index">{{ i }}</div>
                 </div>
               </div>
-              <button type="submit" :class="{ active: isActive }" :disabled="!isActive" class="sign-up-box-submit" @click="nextStep"
-                @keydown.enter="nextStep">
+              <p class="sign-up-box-subtitle">
+                <el-button class="sign-up-box-resend" :disabled="time > 0" @click="sendCaptcha" type="text">重新发送{{
+                  time > 0 ?
+                    `(${time})`
+                  : '' }}</el-button>
+              </p>
+              <button type="submit" :class="{ active: isActive }" :disabled="!isActive" class="sign-up-box-submit"
+                @click="nextStep" @keydown.enter="nextStep">
                 <i class="el-icon-right"></i>
               </button>
             </form>
@@ -140,6 +143,7 @@ export default {
           type: "info",
           duration: 10000,
         })
+        this.Captcha = res.data;
         return res;
       })
       // return this.$api.post(`/verification/sendcode?email=${this.mail}`);
@@ -335,34 +339,17 @@ export default {
     box-sizing: border-box;
     padding: 2rem;
 
-
-
     &-title {
       color: black;
       margin-bottom: 1rem;
       font-size: 2rem;
       line-height: 1.5;
       position: relative;
-
-      .sign-up-box-resend {
-        font-size: 1rem;
-        color: white;
-        background-color: @purple;
-        border-radius: .5rem;
-        line-height: 1;
-        padding: 0.5rem;
-        border: none;
-        vertical-align: text-top;
-
-        &:disabled {
-          filter: brightness(0.8);
-        }
-      }
     }
 
     &-subtitle {
       color: black;
-      margin-bottom: 1rem;
+      margin: .5rem 0;
       font-size: 1.5rem;
       font-weight: 700;
 
@@ -467,11 +454,6 @@ export default {
       width: 100%;
     }
 
-    &-title {
-      color: black;
-      margin-bottom: 1rem;
-    }
-
     &-message {
       color: black;
       margin-bottom: 1rem;
@@ -528,7 +510,7 @@ export default {
       display: block;
       border: none;
       color: white;
-      margin-top: 4rem;
+      margin-top: 3rem;
       text-align: center;
       line-height: 4rem;
       font-size: 2rem;

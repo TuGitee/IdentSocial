@@ -23,4 +23,6 @@ async function checkUpdate() {
     }, 10000);
 }
 
-checkUpdate();
+if (process.env.NODE_ENV === "production") {
+    checkUpdate();
+}

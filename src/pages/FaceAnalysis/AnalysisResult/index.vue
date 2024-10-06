@@ -74,7 +74,7 @@ export default {
                     zh: '厌恶',
                     icon: '🤢'
                 },
-                'fear': {
+                'fearful': {
                     zh: '恐惧',
                     icon: '😱'
                 }
