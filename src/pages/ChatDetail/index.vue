@@ -190,59 +190,36 @@ export default {
                 setTimeout(this.bindWorldEvent, 100);
                 return;
             }
-            channel.bind(WebSocketType.GroupChat, (data) => {
-                const index = this.chatList.findIndex(item => item.message === data.data && Math.abs(item.time - data.time) < 1000);
-                let item = null;
-                if (data.user.id === this.token && index !== -1) {
-                    item = this.chatList[index];
-                    item.isSend = true;
-                } else {
-                    item = {
-                        type: data.type,
-                        message: data.data,
-                        from_id: data.user.id,
-                        avatarUrl: data.user.avatarUrl,
-                        username: data.user.username,
-                        to_id: data.to,
-                        time: data.time,
-                        isSend: true
-                    }
-                }
-                this.addGroupChat(item);
-                this.$nextTick(() => {
-                    this.toContentEnd();
-                })
-            })
+            channel.bind(WebSocketType.GroupChat, this.handleReceiveMessage);
         },
         bindPrivateEvent() {
             if (!privateChannel) {
                 setTimeout(this.bindPrivateEvent, 100);
                 return;
             }
-            privateChannel.bind(WebSocketType.PrivateChat, data => {
-                const index = this.chatList.findIndex(item => item.message === data.data && Math.abs(item.time - data.time) < 10);
-                let item = null;
-                if (data.user.id === this.token && index !== -1) {
-                    item = this.chatList[index];
-                    item.isSend = true;
-                } else {
-                    item = {
-                        type: data.type,
-                        message: data.data,
-                        from_id: data.user.id,
-                        avatarUrl: data.user.avatarUrl,
-                        username: data.user.username,
-                        to_id: data.to,
-                        time: data.time,
-                        isSend: true
-                    }
+            privateChannel.bind(WebSocketType.PrivateChat, this.handleReceiveMessage);
+        },
+        handleReceiveMessage(data) {
+            const index = this.chatList.findIndex(item => item.message === data.data && Math.abs(item.time - data.time) < 1000);
+            let item = null;
+            if (data.user.id === this.token && index !== -1) {
+                item = this.chatList[index];
+                item.isSend = true;
+            } else {
+                item = {
+                    type: data.type,
+                    message: data.data,
+                    from_id: data.user.id,
+                    avatarUrl: data.user.avatarUrl,
+                    username: data.user.username,
+                    to_id: data.to,
+                    time: data.time,
+                    isSend: true
                 }
-                console.log(item);
-
-                this.addUserChat(item);
-                this.$nextTick(() => {
-                    this.toContentEnd()
-                })
+            }
+            this.addGroupChat(item);
+            this.$nextTick(() => {
+                this.toContentEnd();
             })
         },
         unbindEvent() {

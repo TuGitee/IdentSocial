@@ -67,17 +67,7 @@ export default {
         return
       }
       channel.bind(WebSocketType.GroupChat, (data) => {
-        const item = {
-          type: data.type,
-          message: data.data,
-          from_id: data.user.id,
-          avatarUrl: data.user.avatarUrl,
-          username: data.user.username,
-          to_id: data.to,
-          time: data.time,
-          isSend: true
-        }
-        this.addGroupChat(item);
+        this.handleReceiveMessage(data);
         if (this.token === data.user.id) return;
         if (this.$route.name === 'ChatDetail' && !this.$route.params.id) return;
         const user = this.userLists.find((item) => item.id == data.to);
@@ -92,23 +82,30 @@ export default {
         return
       }
       privateChannel.bind(WebSocketType.PrivateChat, (data) => {
-        const item = {
-          type: data.type,
-          message: data.data,
-          from_id: data.user.id,
-          avatarUrl: data.user.avatarUrl,
-          username: data.user.username,
-          to_id: data.to,
-          time: data.time,
-          isSend: true
-        }
-        this.addUserChat(item);
+        this.handleReceiveMessage(data, 'private');
         if (this.token === data.user.id) return;
         if (this.$route.params.id !== data.user.id) {
           const user = this.userLists.find((item) => item.id == data.user.id);
           user && user.unread++;
         }
       })
+    },
+    handleReceiveMessage(data, type = 'group') {
+      const item = {
+        type: data.type,
+        message: data.data,
+        from_id: data.user.id,
+        avatarUrl: data.user.avatarUrl,
+        username: data.user.username,
+        to_id: data.to,
+        time: data.time,
+        isSend: true
+      }
+      if (type === 'group') {
+        this.addGroupChat(item);
+      } else {
+        this.addUserChat(item);
+      }
     },
     addGroupChat(data) {
       this.$store.commit("ADDCHAT", data)
