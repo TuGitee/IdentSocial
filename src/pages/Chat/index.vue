@@ -68,6 +68,7 @@ export default {
       }
       channel.bind(WebSocketType.GroupChat, (data) => {
         const item = {
+          type: data.type,
           message: data.data,
           from_id: data.user.id,
           avatarUrl: data.user.avatarUrl,
@@ -92,11 +93,12 @@ export default {
       }
       privateChannel.bind(WebSocketType.PrivateChat, (data) => {
         const item = {
+          type: data.type,
           message: data.data,
           from_id: data.user.id,
           avatarUrl: data.user.avatarUrl,
           username: data.user.username,
-          to_id: data.to.id,
+          to_id: data.to,
           time: data.time,
           isSend: true
         }

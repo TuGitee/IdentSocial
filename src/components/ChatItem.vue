@@ -23,7 +23,9 @@
             </p>
             <div class="chat-item-box">
                 <i class="el-icon-loading" v-if="!item.isSend"></i>
-                <p class="chat-item-content">
+                <img class="chat-item-content image" v-if="item.type === 'image'" :src="item.message"
+                    :preview="item.to_id ?? 'world'">
+                <p class="chat-item-content" v-else>
                     {{ item.message }}
                 </p>
             </div>
@@ -54,6 +56,11 @@ export default {
     },
     methods: {
         formatTime
+    },
+    mounted() {
+        this.$nextTick(() => {
+            this.$previewRefresh();
+        })
     }
 }
 </script>
@@ -170,6 +177,13 @@ export default {
         word-wrap: normal;
         word-break: break-all;
         max-width: 70%;
+
+        &.image {
+            background-color: transparent;
+            padding: 0;
+            border-radius: 8px;
+            margin-top: 4px;
+        }
 
         &::before {
             position: absolute;

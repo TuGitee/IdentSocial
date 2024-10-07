@@ -302,7 +302,7 @@ export default {
                     b {
                         font-weight: normal;
                         font-size: .8rem;
-                        color: @gray-1;
+                        color: @gray-2;
                     }
                 }
             }

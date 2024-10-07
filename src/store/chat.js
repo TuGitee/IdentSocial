@@ -9,7 +9,7 @@ const actions = {
 const mutations = {
     ADDCHAT(state, ...chat) {
         chat.forEach(item => {
-            const index = state.chatList.findIndex(chat => chat.message === item.message && Math.abs(chat.time - item.time) < 10 && chat.from_id === item.from_id && chat.to_id === item.to_id);
+            const index = state.chatList.findIndex(chat => chat.message === item.message && Math.abs(chat.time - item.time) < 1000 && chat.from_id === item.from_id && chat.to_id === item.to_id);
             if (index === -1) return;
             state.chatList.splice(index, 1);
         })

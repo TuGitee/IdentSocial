@@ -24,9 +24,10 @@ export default {
     }
   },
   mounted() {
-    if(this.token) {
+    if (this.token) {
       this.$store.dispatch('getUserInfo');
-      this.$router.replace({ name: 'Home' });
+      if (this.$route.matched.some(item => item.meta.requireAuth))
+        this.$router.replace({ name: 'Home' });
     }
     window.addEventListener('scroll', this.handleScroll);
   },
