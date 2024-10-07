@@ -37,6 +37,7 @@ let router = new VueRouter({
 })
 
 router.beforeEach((to, from, next) => {
+    if (process.env.NODE_ENV === 'development') return next();
     if (to.matched.some(res => res.meta.requireAuth)) {
         if (localStorage.getItem("token")) {
             next();

@@ -270,12 +270,14 @@ export default {
         isDrawer(val) {
             const rem = parseInt(getComputedStyle(document.documentElement).fontSize);
             const height = (window.innerWidth - 2.5 * rem) / 2 + rem;
-            if (val) {
-                this.visualHeight -= height;
-            } else {
-                this.visualHeight += height;
-            }
-            setTimeout(this.toContentEnd, 150);
+            setTimeout(() => {
+                if (val) {
+                    this.visualHeight -= height;
+                } else {
+                    this.visualHeight += height;
+                }
+            }, 100);
+            setTimeout(this.toContentEnd, 200);
         }
     }
 }
