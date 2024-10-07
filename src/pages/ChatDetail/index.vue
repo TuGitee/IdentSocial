@@ -9,7 +9,7 @@
             <div class="chat-detail-header-icon">
                 <div class="chat-detail-header-icon-img">
                     <MyImage :src="avatarUrl ?? defaultAvatar" alt="">
-                        {{ username?.slice(0, 1) || '?' }}
+                        {{ username?.slice(0, 1) || '未' }}
                     </MyImage>
                 </div>
                 <div class="chat-detail-header-icon-name">

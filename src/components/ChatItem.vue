@@ -10,14 +10,14 @@
                 }
             }">
                 <MyImage :src="item.avatarUrl" alt="">
-                    {{ item.username?.slice(0, 1) || '?' }}
+                    {{ item.username?.slice(0, 1) || '未' }}
                 </MyImage>
             </router-link>
         </div>
         <div class="chat-item-info">
             <p class="chat-item-username">
                 <span>
-                    {{ item.username }}
+                    {{ item.username || '未知用户' }}
                 </span>
                 <time>{{ formatTime(item.time) }}</time>
             </p>

@@ -1,7 +1,7 @@
 <template>
     <div class="user-chat-item" @click="toChat(item.id, item.username, item.avatarUrl)">
         <div class="user-chat-item-avatar">
-            <MyImage :src="item.avatarUrl ?? defaultAvatar" alt="">{{ item.username?.slice(0, 1) || '?' }}</MyImage>
+            <MyImage :src="item.avatarUrl ?? defaultAvatar" alt="">{{ item.username?.slice(0, 1) || '未' }}</MyImage>
         </div>
         <div class="user-chat-item-content">
             <div class="user-chat-item-content-title">

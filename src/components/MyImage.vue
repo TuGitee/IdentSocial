@@ -7,7 +7,7 @@
         }">
             <img :src="src" v-bind="$attrs" @load="isLoaded = true" @error="isError = true" alt=""
                 :class="{ loaded: isLoaded, error: isError }" v-if="src && !isError">
-            <div class="my-image-error" v-else-if="isError">
+            <div class="my-image-error" v-else-if="isError || !src">
                 <slot name="error">
                     <slot>
                         <span>加载失败</span>

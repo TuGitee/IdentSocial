@@ -68,7 +68,7 @@ export default {
       }
       channel.bind(WebSocketType.GroupChat, (data) => {
         this.handleReceiveMessage(data);
-        if (this.token === data.user.id) return;
+        if (this.token === data.user?.id) return;
         if (this.$route.name === 'ChatDetail' && !this.$route.params.id) return;
         const user = this.userLists.find((item) => item.id == data.to);
         user && user.unread++;
@@ -83,9 +83,9 @@ export default {
       }
       privateChannel.bind(WebSocketType.PrivateChat, (data) => {
         this.handleReceiveMessage(data, 'private');
-        if (this.token === data.user.id) return;
-        if (this.$route.params.id !== data.user.id) {
-          const user = this.userLists.find((item) => item.id == data.user.id);
+        if (this.token === data.user?.id) return;
+        if (this.$route.params.id !== data.user?.id) {
+          const user = this.userLists.find((item) => item.id == data.user?.id);
           user && user.unread++;
         }
       })
