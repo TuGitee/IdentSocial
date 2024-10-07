@@ -138,26 +138,45 @@ export default {
             input.accept = 'image/*';
             input.onchange = () => {
                 const file = input.files[0];
+                if (file.size > 100 * 1024) return alert('图片大小不能超过 100KB');
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
                 reader.onload = () => {
                     const image = reader.result;
-                    const info = {
-                        type: 'image',
-                        message: image,
-                        to_id: this.id,
-                        from_id: this.token,
-                        avatarUrl: this.userInfo.avatarUrl,
-                        time: new Date().getTime(),
-                        username: this.userInfo.username,
-                        isSend: false
-                    };
-                    emit(this.id ? WebSocketType.PrivateChat : WebSocketType.GroupChat, this.createMessage(this.token, this.id, image, 'image'));
-                    this.toContentEnd();
-                    if (!this.id) {
-                        this.addGroupChat(info);
-                    } else {
-                        this.addUserChat(info)
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const img = new Image();
+                    img.src = image;
+                    img.onload = () => {
+                        const width = img.width;
+                        const height = img.height;
+                        const scale = width / height;
+                        const maxWidth = 400;
+                        const maxHeight = 400;
+                        const newWidth = scale > 1 ? maxWidth : maxHeight * scale;
+                        const newHeight = scale > 1 ? maxHeight / scale : maxHeight;
+                        canvas.width = newWidth;
+                        canvas.height = newHeight;
+
+                        ctx.drawImage(img, 0, 0, newWidth, newHeight);
+                        const newImage = canvas.toDataURL('image/webp');
+                        const info = {
+                            type: 'image',
+                            message: newImage,
+                            to_id: this.id,
+                            from_id: this.token,
+                            avatarUrl: this.userInfo.avatarUrl,
+                            time: new Date().getTime(),
+                            username: this.userInfo.username,
+                            isSend: false
+                        };
+                        emit(this.id ? WebSocketType.PrivateChat : WebSocketType.GroupChat, this.createMessage(this.token, this.id, newImage, 'image'));
+                        this.toContentEnd();
+                        if (!this.id) {
+                            this.addGroupChat(info);
+                        } else {
+                            this.addUserChat(info)
+                        }
                     }
                 }
             }
