@@ -1,4 +1,4 @@
-import { getToken, setToken } from "@/utils/token";
+import { getToken, removeToken, setToken } from "@/utils/token";
 import { reqMockFollow, reqMockFollowerList, reqMockFollowList, reqMockLikeList, reqMockUpdateUser, reqMockUser } from "@/api";
 import pubsub from "@/utils/pubsub";
 const getters = {
@@ -20,7 +20,7 @@ const actions = {
             result.data.followerList = followerList.data || [];
             const likeList = await reqMockLikeList();
             result.data.likeList = likeList.data || [];
-            state.commit("GETUSERINFO", result.data);
+            state.commit("USERINFO", result.data);
         } else {
             return Promise.reject(new Error("Request Fail!"));
         }
@@ -44,6 +44,12 @@ const actions = {
         } else {
             return Promise.reject(new Error("Request Fail!"));
         }
+    },
+    async logout(state) {
+        removeToken();
+        state.commit("SETTOKEN", "");
+        state.commit("USERINFO", {});
+        return Promise.resolve();
     }
 }
 const mutations = {
@@ -55,7 +61,7 @@ const mutations = {
             state.userInfo.followingList.splice(index, 1, data);
         }
     },
-    GETUSERINFO(state, userInfo) {
+    USERINFO(state, userInfo) {
         state.userInfo = userInfo;
     },
     UPDATEUSERINFO(state, userInfo) {

@@ -15,8 +15,7 @@
                 <el-form-item label="头像">
                     <el-upload accept="image/*" :show-file-list="false" action="#" :limit="1"
                         :on-change="(file) => handleUpload(file, 'avatar')">
-                        <el-image v-if="currentInfo.avatarUrl" :src="currentInfo.avatarUrl"
-                            class="avatar"></el-image>
+                        <el-image v-if="currentInfo.avatarUrl" :src="currentInfo.avatarUrl" class="avatar"></el-image>
                         <i v-else class="el-icon-plus avatar-uploader-icon"></i>
                     </el-upload>
                 </el-form-item>
@@ -43,8 +42,8 @@
                 <el-form-item label="背景">
                     <el-upload accept="image/*" :show-file-list="false" action="#" :limit="1"
                         :on-change="(file) => handleUpload(file, 'background')">
-                        <el-image v-if="currentInfo.backgroundUrl"
-                            :src="currentInfo.backgroundUrl" class="background"></el-image>
+                        <el-image v-if="currentInfo.backgroundUrl" :src="currentInfo.backgroundUrl"
+                            class="background"></el-image>
                         <i v-else class="el-icon-plus background-uploader-icon"></i>
                     </el-upload>
                 </el-form-item>
@@ -114,7 +113,7 @@ export default {
             const { username, avatar, gender, intro, age, email, background, phone, avatarUrl, backgroundUrl } = this.userInfo;
             this.currentInfo = { username, avatar, gender, intro, age, email, background, phone, avatarUrl, backgroundUrl };
             console.log(this.currentInfo);
-            
+
         });
     }
 }
@@ -135,6 +134,13 @@ export default {
 
         .el-button {
             width: 100%;
+        }
+
+        .el-textarea {
+            /deep/ .el-textarea__inner {
+                padding-top: 8.5px;
+                padding-bottom: 8.5px;
+            }
         }
     }
 }

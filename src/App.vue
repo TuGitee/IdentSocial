@@ -24,7 +24,10 @@ export default {
     }
   },
   mounted() {
-    this.$store.dispatch('getUserInfo');
+    if(this.token) {
+      this.$store.dispatch('getUserInfo');
+      this.$router.replace({ name: 'Home' });
+    }
     window.addEventListener('scroll', this.handleScroll);
   },
   methods: {
@@ -35,10 +38,7 @@ export default {
   computed: {
     ...mapState({
       token: state => state.user.token
-    }),
-    keepAliveRoutes() {
-      return this.$router.getRoutes().filter(route => route.meta.keepAlive).map(route => route.name)
-    }
+    })
   },
   beforeDestroy() {
     emit(WebSocketType.Disconnet, this.token)

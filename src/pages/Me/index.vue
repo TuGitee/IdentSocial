@@ -33,7 +33,7 @@
       </div>
       <ul class="me-drawers-list">
         <component :is="item.to ? 'router-link' : 'li'" :to="item.to ? item.to : ''" class="me-drawers-list-item"
-          v-for="(item, index) in list" :key="index">
+          v-for="(item, index) in list" :key="index" @click="item.onClick && item.onClick.call(this)">
           <div class="me-drawers-list-item-left">
             <div class="me-drawers-list-item-left-icon">
               <i :class="item.icon"></i>
@@ -96,13 +96,21 @@ export default {
         {
           icon: "el-icon-s-ticket",
           text: "优惠券"
+        },
+        {
+          icon: "el-icon-s-home",
+          text: "退出登录",
+          onClick: () => {
+            this.$store.dispatch('logout');
+            this.$router.replace("/");
+          }
         }
       ]
     };
   },
   computed: {
     ...mapState({ userInfo: state => state.user.userInfo ?? {} }),
-    ...mapGetters(['followCount','followerCount']),
+    ...mapGetters(['followCount', 'followerCount']),
     followers() {
       if (this.followerCount > 1000) {
         return (this.followerCount / 1000).toFixed(1) + 'K';
