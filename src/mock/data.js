@@ -125,6 +125,18 @@ export function checkFollow() {
 }
 
 export function checkComment() {
+    const checkParent = (cid) => {
+        if (!cid) return true;
+        const parent = commentList.find(comment => comment.id === cid);
+        return parent ? checkParent(parent.cid) : false;
+    };
+    for (let i = 0; i < commentList.length; i++) {
+        if (!commentList[i].cid) continue;
+        if (!checkParent(commentList[i].cid)) {
+            commentList.splice(i, 1);
+            i--;
+        }
+    }
     postList.forEach(post => {
         post.comment = commentList.filter(comment => comment.bid === post.id).length;
     })

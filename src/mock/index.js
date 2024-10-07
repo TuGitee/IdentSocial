@@ -125,6 +125,18 @@ Mock.mock(/\/mock\/comment/, 'post', (req) => {
     return Mock.mock({ code: 200, data: comment });
 })
 
+Mock.mock(/\/mock\/comment/, 'delete', (req) => {
+    const id = req.url.split('/').pop();
+    const index = commentList.findIndex(comment => comment.id === id);
+    if (index !== -1) {
+        const data = commentList.splice(index, 1);
+        saveData('commentList');
+        return Mock.mock({ code: 200, data });
+    } else {
+        return Mock.mock({ code: 500 });
+    }
+})
+
 Mock.mock(/\/mock\/follow/, 'post', (req) => {
     const { uid, fid, isFollow } = JSON.parse(req.body);
     const item = followList.find(item => item.uid === uid && item.fid === fid);

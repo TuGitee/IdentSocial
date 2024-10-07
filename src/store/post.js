@@ -1,4 +1,4 @@
-import { reqMockPostList, reqMockAddPost, reqMockPost, reqMockFollowPostList, reqMockLike, reqMockDeletePost, reqMockUserPostList } from "@/api"
+import { reqMockPostList, reqMockAddPost, reqMockPost, reqMockFollowPostList, reqMockLike, reqMockDeletePost, reqMockUserPostList, reqMockDeletePostComment } from "@/api"
 import user from "./user"
 const state = {
     postList: [],
@@ -75,6 +75,14 @@ const actions = {
         const res = await reqMockDeletePost(id);
         if (res.code === 200) {
             commit("DELETEPOST", id);
+            return res;
+        } else {
+            return Promise.reject(new Error("Request Fail!"));
+        }
+    },
+    async deleteComment(state, id) {
+        const res = await reqMockDeletePostComment(id);
+        if (res.code === 200) {
             return res;
         } else {
             return Promise.reject(new Error("Request Fail!"));

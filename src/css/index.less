@@ -1,6 +1,8 @@
 :root {
     --safe-area-inset-top: constant(safe-area-inset-top);
     --safe-area-inset-top: env(safe-area-inset-top);
+    --safe-area-inset-bottom: constant(safe-area-inset-bottom);
+    --safe-area-inset-bottom: env(safe-area-inset-bottom);
 }
 
 .pswp__top-bar {
@@ -38,9 +40,4 @@ a {
     &:active {
         color: @darkPurple;
     }
-}
-
-.pswp__item {
-    margin-top: var(--safe-area-inset-top);
-    margin-bottom: var(--safe-area-inset-bottom);
 }

@@ -112,7 +112,9 @@ export default {
         formatTime,
         deleteComment(id) {
             this.$confirm('确定删除该评论?', '提示').then(() => {
-                // this.$store.dispatch("deleteComment", id);
+                return this.$store.dispatch("deleteComment", id);
+            }).then(()=>{
+                this.$emit("refreshComment");
             }).catch(() => { })
         }
     },

@@ -16,6 +16,7 @@ export const reqMockAddPost = (text, imgs, postFrom) => mockRequest.post(`/post`
 export const reqMockDeletePost = (id) => mockRequest.delete(`/post/${id}`);
 export const reqMockPostComment = (id) => mockRequest.get(`/comment/${id}`);
 export const reqMockAddPostComment = (bid, cid, text) => mockRequest.post(`/comment`, { cid, text, bid, uid: getToken() });
+export const reqMockDeletePostComment = (id) => mockRequest.delete(`/comment/${id}`);
 export const reqMockFollow = (fid, isFollow) => mockRequest.post(`/follow`, { fid, isFollow, uid: getToken() });
 export const reqMockFollowList = (uid = getToken()) => mockRequest.get(`/follow/${uid}`);
 export const reqMockFollowerList = (uid = getToken()) => mockRequest.get(`/follower/${uid}`);
