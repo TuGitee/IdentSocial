@@ -2,14 +2,6 @@ import Mock from 'mockjs';
 import { v4 as uuid } from 'uuid';
 import { getAllKeys, getUrl } from '@/utils/storage';
 
-const images = await getAllKeys();
-
-const userCount = 100;
-const postCount = 100;
-const commentCount = 1000;
-const followCount = userCount * userCount / 5;
-const likeCount = commentCount * userCount / 5;
-
 export const mockUser = (email, password, id = uuid()) => Mock.mock({
     id,
     'email': email ?? '@email',
@@ -39,24 +31,19 @@ export const generateMockUsers = (n = userCount) => {
     return users;
 };
 
-export const userList = localStorage.getItem('userList') ? JSON.parse(localStorage.getItem('userList')) : generateMockUsers();
-
-async function getAvatarUrl() {
+async function getAvatarUrl(userList) {
     for (let i = 0; i < userList.length; i++) {
         if (!userList[i].avatar) continue;
         userList[i].avatarUrl = await getUrl(userList[i].avatar);
     }
 }
 
-async function getBackgroundUrl() {
+async function getBackgroundUrl(userList) {
     for (let i = 0; i < userList.length; i++) {
         if (!userList[i].background) continue;
         userList[i].backgroundUrl = await getUrl(userList[i].background);
     }
 }
-
-await getAvatarUrl();
-await getBackgroundUrl();
 
 export const mockPost = (uid, text, time, img, like, comment, share, postFrom, id = uuid()) => Mock.mock({
     id,
@@ -87,8 +74,6 @@ export const generateMockPosts = (n = postCount) => {
     return posts;
 };
 
-export const postList = localStorage.getItem('postList') ? JSON.parse(localStorage.getItem('postList')) : generateMockPosts();
-
 export const mockComment = (uid, bid, cid, text, time, id = uuid()) => Mock.mock({
     id,
     uid,
@@ -103,7 +88,6 @@ export const generateMockComments = (n = commentCount) => {
     return commentList;
 }
 
-export const commentList = localStorage.getItem('commentList') ? JSON.parse(localStorage.getItem('commentList')) : generateMockComments();
 
 export const mockFollow = (fid, uid, time, isFollow = true, id = uuid()) => Mock.mock({ id, fid, uid, isFollow, time: time ?? Mock.Random.datetime('yyyy/MM/dd HH:mm:ss') });
 
@@ -118,7 +102,6 @@ export const generateMockFollow = (n = followCount) => {
     return followList;
 }
 
-export const followList = localStorage.getItem('followList') ? JSON.parse(localStorage.getItem('followList')) : generateMockFollow();
 
 export const mockLike = (bid, uid, isLike, time, id = uuid()) => Mock.mock({ id, bid, uid, isLike, time: time ?? Mock.Random.datetime('yyyy/MM/dd HH:mm:ss') })
 
@@ -133,7 +116,6 @@ export const generateMockLike = (n = likeCount) => {
     return likeList;
 }
 
-export const likeList = localStorage.getItem('likeList') ? JSON.parse(localStorage.getItem('likeList')) : generateMockLike();
 
 export function checkFollow() {
     userList.forEach(user => {
@@ -184,6 +166,19 @@ export function saveData(type) {
     }
 }
 
+const images = await getAllKeys();
+const userCount = 100;
+const postCount = 100;
+const commentCount = 1000;
+const followCount = userCount * userCount / 5;
+const likeCount = commentCount * userCount / 5;
+export const userList = localStorage.getItem('userList') ? JSON.parse(localStorage.getItem('userList')) : generateMockUsers();
+await getAvatarUrl(userList);
+await getBackgroundUrl(userList);
+export const postList = localStorage.getItem('postList') ? JSON.parse(localStorage.getItem('postList')) : generateMockPosts();
+export const commentList = localStorage.getItem('commentList') ? JSON.parse(localStorage.getItem('commentList')) : generateMockComments();
+export const followList = localStorage.getItem('followList') ? JSON.parse(localStorage.getItem('followList')) : generateMockFollow();
+export const likeList = localStorage.getItem('likeList') ? JSON.parse(localStorage.getItem('likeList')) : generateMockLike();
 checkFollow();
 checkComment();
 checkLike();

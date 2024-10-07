@@ -135,6 +135,10 @@ export default {
             this.id ? this.bindPrivateEvent() : this.bindWorldEvent();
         },
         bindWorldEvent() {
+            if (!channel) {
+                setTimeout(this.bindWorldEvent, 100);
+                return;
+            }
             channel.bind(WebSocketType.GroupChat, (data) => {
                 const index = this.chatList.findIndex(item => item.message === data.data && Math.abs(item.time - data.time) < 10);
                 let item = null;

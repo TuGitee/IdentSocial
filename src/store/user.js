@@ -29,6 +29,7 @@ const actions = {
         userInfo.id = state.state.token;
         const res = await reqMockUpdateUser(userInfo);
         if (res.code === 200) {
+            pubsub.emit('userInfo', res.data);
             state.commit("UPDATEUSERINFO", res.data);
             return res;
         } else {

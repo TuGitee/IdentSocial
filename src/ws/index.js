@@ -11,7 +11,7 @@ function init() {
     return [pusher, channel, privateChannel];
 }
 
-export let pusher, channel, privateChannel;
+export let [pusher, channel, privateChannel] = init();
 
 export const emit = (eventType, data) => {
     fetch(requestURL, {

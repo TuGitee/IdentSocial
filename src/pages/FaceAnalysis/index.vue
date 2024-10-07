@@ -37,8 +37,7 @@
       </v-touch>
       <div class="face-analysis-box-analysis">
         <transition name="el-fade-in-linear" :duration="1000">
-          <AnalysisResult v-show="isUnfold" :analysisList="userInfo.analysisList" :title="text" :image="imgSrc"
-            :result="result ?? defaultResult" />
+          <AnalysisResult v-show="isUnfold" :result="result ?? defaultResult" />
         </transition>
       </div>
 
@@ -96,9 +95,9 @@ export default {
     submit() {
       this.isLoading = true;
       setTimeout(() => {
-        faceAnalysis(this.imgSrc).then((detaction) => {
+        faceAnalysis(this.imgSrc).then(async (res) => {
           if (!this.isLoading) return;
-          if (!detaction) {
+          if (!res) {
             this.$notify({
               title: '未检测到人脸',
               message: '请重新上传',
@@ -106,14 +105,23 @@ export default {
             })
             return;
           }
-          this.result = detaction;
-          this.userInfo.score = detaction.score;
-          localStorage.setItem("image", JSON.stringify({
-            src: this.imgSrc,
-            width: this.imgWidth,
-            height: this.imgHeight
-          }));
-          localStorage.setItem('result', JSON.stringify(detaction));
+          const image = new Image();
+          image.src = this.imgSrc;
+          const img = await new Promise(resolve => {
+            image.onload = () => {
+              const canvas = document.createElement('canvas');
+              const context = canvas.getContext('2d');
+              const { width, height, x, y } = res.detection.box;
+              canvas.width = width;
+              canvas.height = height;
+              context.drawImage(image, x, y, width, height, 0, 0, width, height);
+              resolve(canvas.toDataURL());
+            }
+          });
+          res.image = img;
+          this.result = res;
+          this.userInfo.score = res.score;
+          localStorage.setItem('result', JSON.stringify(res));
           this.isUnfold = true;
         }).finally(() => {
           this.isLoading = false;
@@ -136,12 +144,6 @@ export default {
   },
   mounted() {
     loadModels();
-    const lastImage = JSON.parse(localStorage.getItem('image'));
-    if (lastImage) {
-      this.imgSrc = lastImage.src;
-      this.imgHeight = lastImage.height;
-      this.imgWidth = lastImage.width;
-    }
     const result = localStorage.getItem('result') ? JSON.parse(localStorage.getItem('result')) : null;
     this.result = result;
   },

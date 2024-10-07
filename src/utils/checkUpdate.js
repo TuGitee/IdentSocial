@@ -16,8 +16,8 @@ async function checkUpdate() {
     const timer = setInterval(async () => {
         if (currentVersion !== await getVersion()) {
             clearInterval(timer);
-            clearStorage();
             confirm("检测到版本更新，即将重新刷新页面！");
+            clearStorage();
             window.location.reload();
         }
     }, 10000);

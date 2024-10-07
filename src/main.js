@@ -1,27 +1,21 @@
 import Vue from 'vue'
 import App from './App.vue'
-
 import store from './store'
-
 import router from "./router"
-
 import ElementUI from 'element-ui';
 import './css/element/index.css';
+import longpress from './directives/longpress';
+import VueTouch from 'vue-touch';
+import preview from 'vue-photo-preview';
+import 'vue-photo-preview/dist/skin.css';
+import "./utils/checkUpdate";
+import "@/mock/index";
+import "@/ws/index";
 Vue.use(ElementUI);
+Vue.use(VueTouch, { name: 'v-touch' });
+Vue.directive('longpress', longpress);
 
-import VueTouch from 'vue-touch'
-Vue.use(VueTouch, { name: 'v-touch' })
-
-Vue.config.productionTip = false
-
-import "@/mock/index"
-import "@/ws/index"
-
-window.onload = function () {
-  screen.orientation.lock("portrait");
-}
-
-let options = {
+const options = {
   fullscreenEl: false, //关闭全屏按钮
   shareEl: false, //关闭分享按钮
   zoomEl: false, //关闭缩放按钮
@@ -32,18 +26,7 @@ let options = {
   showAnimationDuration: 0, //显示动画时间
   hideAnimationDuration: 500, //隐藏动画时间
 }
-import preview from 'vue-photo-preview'
-import 'vue-photo-preview/dist/skin.css'
 Vue.use(preview, options)
-
-import axios from 'axios';
-import { userRequest, blogRequest } from './api/request';
-Vue.prototype.$userAxios = userRequest
-Vue.prototype.$blogAxios = blogRequest
-Vue.prototype.$api = axios.create({
-  baseURL: 'https://focnal.xyz/api',
-  timeout: 5000
-})
 const originalNotify = Vue.prototype.$notify;
 Vue.prototype.$notify = (options) => {
   originalNotify({
@@ -51,11 +34,6 @@ Vue.prototype.$notify = (options) => {
     offset: parseInt(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top"))
   })
 }
-
-import longpress from './directives/longpress';
-Vue.directive('longpress', longpress);
-
-import "./utils/checkUpdate";
 
 new Vue({
   render: h => h(App),

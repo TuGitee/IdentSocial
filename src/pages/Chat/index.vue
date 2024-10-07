@@ -60,6 +60,12 @@ export default {
       this.bindPrivateEvent();
     },
     bindGroupEvent() {
+      if (!channel) {
+        setTimeout(() => {
+          this.bindGroupEvent()
+        }, 100);
+        return
+      }
       channel.bind(WebSocketType.GroupChat, (data) => {
         const item = {
           message: data.data,
@@ -124,8 +130,11 @@ export default {
       }
       for (let i = 0; i < userList.length; i++) {
         const user = userList[i];
-        if (!this.userLists.find(item => item.id == user.id)) {
+        const index = this.userLists.findIndex(item => item.id == user.id);
+        if (index === -1) {
           this.userLists.push(user)
+        }else {
+          this.userLists.splice(index, 1, user)
         }
       }
     },
