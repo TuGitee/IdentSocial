@@ -12,10 +12,14 @@
                 </router-link>
             </div>
             <div class="comment-item-right-bottom">
-                <p class="comment-item-right-bottom-text" @click="emitTarget(comment)">
+                <p class="comment-item-right-bottom-text" @click="emitTarget(comment, $event.target)" ref="text">
                     {{ comment.text }}
                 </p>
-                <p class="comment-item-right-bottom-time">{{ formatTime(comment.time) }}</p>
+                <p class="comment-item-right-bottom-time">
+                    <b @click="emitTarget(comment, $refs.text)">回复</b>
+                    <time>{{ formatTime(comment.time) }}</time>
+                    <i class="el-icon-delete" @click="deleteComment(comment.id)"></i>
+                </p>
                 <ul class="comment-item-right-bottom-list">
                     <li class="comment-item-right-bottom-list-item" v-for="c in comment.children?.slice(0, sliceNum)"
                         :key="c.id">
@@ -45,11 +49,15 @@
                                     </router-link>
                                 </p>
                             </div>
-                            <div class="comment-item-right-bottom-list-item-right-bottom" @click.stop="emitTarget(c)">
+                            <div class="comment-item-right-bottom-list-item-right-bottom"
+                                @click.stop="emitTarget(c, $event.target)">
                                 <p class="comment-item-right-bottom-list-item-right-bottom-text">{{ c.text
                                     }}</p>
-                                <p class="comment-item-right-bottom-list-item-right-bottom-time">{{ c.time
-                                    }}</p>
+                                <p class="comment-item-right-bottom-list-item-right-bottom-time">
+                                    <b>回复</b>
+                                    <time @click.stop>{{ c.time }}</time>
+                                    <i class="el-icon-delete" @click.stop="deleteComment(c.id)"></i>
+                                </p>
                             </div>
                         </div>
                     </li>
@@ -67,6 +75,7 @@
 </template>
 
 <script>
+import pubsub from '@/utils/pubsub';
 import formatTime from '@/utils/time';
 
 export default {
@@ -90,27 +99,30 @@ export default {
             sliceNum: 1
         }
     },
-    mounted() {
-        // this.getUserList();
-    },
     methods: {
-        emitTarget(comment) {
-            this.$emit('click', comment)
+        emitTarget(comment, el) {
+            this.$emit('click', comment, this.comment.id, el);
         },
-        // getUserList() {
-        //     this.userList.forEach(item => {
-        //         this.$userAxios.get(`/user?userId=${item}`).then(res => {
-        //             this.userInfo.push(res.data.data)
-        //         })
-        //     })
-        // },
         moreComment() {
             this.sliceNum = this.sliceNum + 3
         },
         lessComment() {
             this.sliceNum = 1
         },
-        formatTime
+        formatTime,
+        deleteComment(id) {
+            this.$confirm('确定删除该评论?', '提示').then(() => {
+                // this.$store.dispatch("deleteComment", id);
+            }).catch(() => { })
+        }
+    },
+    mounted() {
+        pubsub.on(`comment:${this.comment.id}`, () => {
+            this.sliceNum += 1;
+        })
+    },
+    beforeDestroy() {
+        pubsub.off(`comment:${this.comment.id}`)
     }
 }
 </script>
@@ -138,7 +150,7 @@ export default {
 
     .comment-item-right {
         flex: 1;
-        padding-left: 10px;
+        padding-left: .8rem;
         min-width: 0;
 
         &-more {
@@ -191,6 +203,10 @@ export default {
                 margin-top: 5px;
                 font-size: 0.8rem;
                 color: #999;
+
+                * {
+                    margin-right: .5rem;
+                }
             }
 
             .comment-item-right-bottom-list {
@@ -215,7 +231,7 @@ export default {
                     .comment-item-right-bottom-list-item-right {
                         flex: 1;
                         min-width: 0;
-                        padding-left: 10px;
+                        padding-left: .8rem;
 
                         .comment-item-right-bottom-list-item-right-top {
                             display: flex;
@@ -251,6 +267,10 @@ export default {
                                 font-size: .8rem;
                                 color: #999;
                                 margin-top: 2px;
+
+                                * {
+                                    margin-right: .5rem;
+                                }
                             }
                         }
                     }

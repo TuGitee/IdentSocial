@@ -30,6 +30,7 @@ import BlogItem from "@/components/BlogItem.vue";
 import CommentItem from "./CommentItem";
 import { reqMockAddPostComment, reqMockPostComment } from "@/api";
 import { mapState } from "vuex";
+import pubsub from "@/utils/pubsub";
 export default {
     name: "BlogDetail",
     components: {
@@ -45,13 +46,13 @@ export default {
         }
     },
     methods: {
-        changeTarget(comment) {
+        changeTarget(comment, id, el) {
             this.comment();
+            comment.rootId = id;
             this.target = comment;
-            const el = this.$refs.comments.find(comment => comment.comment.id === this.target.id).$el;
             const content = this.$refs.content;
             content.scrollTo({
-                top: el.offsetTop - content.offsetHeight + el.offsetHeight + parseInt(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top")) + 36,
+                top: el.offsetTop - content.offsetHeight + el.offsetHeight + parseInt(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top")) + 80,
                 behavior: "smooth"
             });
         },
@@ -74,6 +75,7 @@ export default {
         publish() {
             if (!this.text.trim()) return;
             reqMockAddPostComment(this.bid, this.target?.id, this.text).then(() => {
+                pubsub.emit(`comment:${this.target?.rootId}`);
                 this.init();
             })
         },
