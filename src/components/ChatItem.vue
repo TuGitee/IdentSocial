@@ -10,7 +10,7 @@
                 }
             }">
                 <MyImage :src="item.avatarUrl" alt="">
-                    {{ item.username?.slice(0, 1) }}
+                    {{ item.username?.slice(0, 1) || '?' }}
                 </MyImage>
             </router-link>
         </div>

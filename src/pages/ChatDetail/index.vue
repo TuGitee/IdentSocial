@@ -9,7 +9,7 @@
             <div class="chat-detail-header-icon">
                 <div class="chat-detail-header-icon-img">
                     <MyImage :src="avatarUrl ?? defaultAvatar" alt="">
-                        {{ username?.slice(0, 1) }}
+                        {{ username?.slice(0, 1) || '?' }}
                     </MyImage>
                 </div>
                 <div class="chat-detail-header-icon-name">
@@ -92,7 +92,7 @@ export default {
                 this.visualHeight = window.visualViewport.height;
                 this.toTop();
                 this.toContentEnd();
-            }, 100)
+            }, 50);
         },
         handleFocus() {
             this.isFocus = true;
@@ -202,16 +202,16 @@ export default {
         handleReceiveMessage(data, type = 'group') {
             const index = this.chatList.findIndex(item => item.message === data.data && Math.abs(item.time - data.time) < 1000);
             let item = null;
-            if (data.user.id === this.token && index !== -1) {
+            if (data.user?.id === this.token && index !== -1) {
                 item = this.chatList[index];
                 item.isSend = true;
             } else {
                 item = {
                     type: data.type,
                     message: data.data,
-                    from_id: data.user.id,
-                    avatarUrl: data.user.avatarUrl,
-                    username: data.user.username,
+                    from_id: data.user?.id,
+                    avatarUrl: data.user?.avatarUrl,
+                    username: data.user?.username,
                     to_id: data.to,
                     time: data.time,
                     isSend: true
