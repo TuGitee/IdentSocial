@@ -190,16 +190,16 @@ export default {
                 setTimeout(this.bindWorldEvent, 100);
                 return;
             }
-            channel.bind(WebSocketType.GroupChat, this.handleReceiveMessage);
+            channel.bind(WebSocketType.GroupChat, (data) => this.handleReceiveMessage(data, 'group'));
         },
         bindPrivateEvent() {
             if (!privateChannel) {
                 setTimeout(this.bindPrivateEvent, 100);
                 return;
             }
-            privateChannel.bind(WebSocketType.PrivateChat, this.handleReceiveMessage);
+            privateChannel.bind(WebSocketType.PrivateChat, (data) => this.handleReceiveMessage(data, 'private'));
         },
-        handleReceiveMessage(data) {
+        handleReceiveMessage(data, type = 'group') {
             const index = this.chatList.findIndex(item => item.message === data.data && Math.abs(item.time - data.time) < 1000);
             let item = null;
             if (data.user.id === this.token && index !== -1) {
@@ -217,7 +217,11 @@ export default {
                     isSend: true
                 }
             }
-            this.addGroupChat(item);
+            if (type === 'group') {
+                this.addGroupChat(item);
+            } else {
+                this.addUserChat(item);
+            }
             this.$nextTick(() => {
                 this.toContentEnd();
             })
