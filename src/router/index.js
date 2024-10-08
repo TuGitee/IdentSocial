@@ -22,18 +22,19 @@ VueRouter.prototype.replace = function (location, resolve, reject) {
     }
 }
 
-let router = new VueRouter({
+const positionMap = {};
+
+const router = new VueRouter({
     mode: "hash",
     routes,
     linkActiveClass: "active",
-    scrollBehavior(to, from, savedPosition) {
-        const { top } = savedPosition || { top: 0 };
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve({ top })
-            }, 0)
-        });
+    scrollBehavior(to) {
+        return { y: positionMap[to.fullPath] || 0 };
     }
+})
+
+router.afterEach((to, from) => {
+    positionMap[from.fullPath] = document.documentElement.scrollTop || document.body.scrollTop;
 })
 
 router.beforeEach((to, from, next) => {
