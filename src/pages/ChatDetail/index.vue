@@ -119,7 +119,9 @@ export default {
             setTimeout(() => {
                 this.visualHeight = window.visualViewport.height;
                 this.toTop();
-                this.toContentEnd();
+                setTimeout(() => {
+                    this.toContentEnd();
+                }, 50);
             }, 50);
         },
         handleFocus() {
@@ -168,6 +170,8 @@ export default {
             const input = document.createElement('input');
             input.type = 'file';
             input.accept = 'image/*';
+            document.body.appendChild(input);
+            input.style.display = 'none';
             input.addEventListener('change', () => {
                 const file = input.files[0];
                 if (!file) {
@@ -197,13 +201,9 @@ export default {
                         this.send(newImage, 'image');
                     }
                 }
-            })
-            const clickEvent = new MouseEvent('click', {
-                view: window,
-                bubbles: true,
-                cancelable: true
-            });
-            input.dispatchEvent(clickEvent);
+                input.remove();
+            })            
+            input.click();
         },
         handleVoice() {
             this.isCancel = false;
