@@ -36,8 +36,8 @@
                     <KeyboardIcon v-else></KeyboardIcon>
                 </button>
                 <el-button v-if="isVoice" @touchstart.native.prevent="handleVoice"
-                    @touchend.native.prevent="handleVoiceEnd" @touchmove.native.prevent="activeVoice" class="chat-footer-input voice"
-                    :class="{ active: isRecording, disabled: isRecording && isCancel }">
+                    @touchend.native.prevent="handleVoiceEnd" @touchmove.native.prevent="activeVoice"
+                    class="chat-footer-input voice" :class="{ active: isRecording, disabled: isRecording && isCancel }">
                     {{ isRecording ? isCancel ? "松开取消" : "录音中..." : "按住说话" }}
                 </el-button>
                 <input v-else type="text" @focus="handleFocus" @blur="handleBlur" class="chat-footer-input"
@@ -48,10 +48,9 @@
             </div>
             <Transition name="el-fade-in-linear" :duration="100">
                 <div class="drawer" v-show="isDrawer">
-                    <el-upload class="drawer-item" action="#" :show-file-list="false" :limit="1" :on-change="sendImage"
-                        :auto-upload="false" accept="image/*">
+                    <button class="drawer-item" type="button" @click="sendImage">
                         <i class="el-icon-picture"></i>
-                    </el-upload>
+                    </button>
                 </div>
             </Transition>
         </form>
@@ -153,33 +152,39 @@ export default {
             this.send(this.input);
             this.input = '';
         },
-        sendImage(file, fileList) {
-            file = file.raw;
-            fileList.splice(0, 1);
-            if (file.size > 100 * 1024) return alert('图片大小不能超过 100KB');
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => {
-                const image = reader.result;
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                const img = new Image();
-                img.src = image;
-                img.onload = () => {
-                    const width = img.width;
-                    const height = img.height;
-                    const scale = width / height;
-                    const maxWidth = 400;
-                    const maxHeight = 400;
-                    const newWidth = scale > 1 ? maxWidth : maxHeight * scale;
-                    const newHeight = scale > 1 ? maxHeight / scale : maxHeight;
-                    canvas.width = newWidth;
-                    canvas.height = newHeight;
-                    ctx.drawImage(img, 0, 0, newWidth, newHeight);
-                    const newImage = canvas.toDataURL('image/webp');
-                    this.send(newImage, 'image');
+        sendImage() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = () => {
+                const file = input.files[0];
+                if (!file) return;
+                if (file.size > 100 * 1024) return alert('图片大小不能超过 100KB');
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => {
+                    const image = reader.result;
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const img = new Image();
+                    img.src = image;
+                    img.onload = () => {
+                        const width = img.width;
+                        const height = img.height;
+                        const scale = width / height;
+                        const maxWidth = 200;
+                        const maxHeight = 200;
+                        const newWidth = scale > 1 ? maxWidth : maxHeight * scale;
+                        const newHeight = scale > 1 ? maxHeight / scale : maxHeight;
+                        canvas.width = newWidth;
+                        canvas.height = newHeight;
+                        ctx.drawImage(img, 0, 0, newWidth, newHeight);
+                        const newImage = canvas.toDataURL('image/webp');
+                        this.send(newImage, 'image');
+                    }
                 }
             }
+            input.click();
         },
         handleVoice() {
             this.isCancel = false;
@@ -338,10 +343,10 @@ export default {
             const height = (window.innerWidth - 2.5 * rem) / 2 + rem;
             setTimeout(() => {
                 if (val) {
-                    if(this.visualHeight - height < 0) return;
+                    if (this.visualHeight - height < 0) return;
                     this.visualHeight -= height;
                 } else {
-                    if(this.visualHeight + height > window.innerHeight) return;
+                    if (this.visualHeight + height > window.innerHeight) return;
                     this.visualHeight += height;
                 }
             }, 100);
@@ -534,6 +539,7 @@ export default {
                 cursor: pointer;
                 background-color: #f1f1f1;
                 border-radius: 8px;
+                border: none;
 
                 /deep/ .el-upload {
                     height: 100%;

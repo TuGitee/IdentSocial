@@ -61,7 +61,7 @@
               </p>
               <div class="sign-up-box-check">
                 <input type="number" class="sign-up-box-check-input" v-model="Captcha" autocomplete="true"
-                  placeholder="输入您的验证码" />
+                  placeholder="输入您的验证码" inputmode="numeric"/>
                 <div class="captcha">
                   <div class="captcha-item" v-for="i, index in computedCaptcha"
                     :class="{ 'active-index': index === Captcha.length }" :key="index">{{ i }}</div>
