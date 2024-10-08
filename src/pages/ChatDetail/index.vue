@@ -338,8 +338,10 @@ export default {
             const height = (window.innerWidth - 2.5 * rem) / 2 + rem;
             setTimeout(() => {
                 if (val) {
+                    if(this.visualHeight - height < 0) return;
                     this.visualHeight -= height;
                 } else {
+                    if(this.visualHeight + height > window.innerHeight) return;
                     this.visualHeight += height;
                 }
             }, 100);
@@ -520,6 +522,7 @@ export default {
             gap: .5rem;
             grid-template-columns: repeat(4, 1fr);
             grid-template-rows: repeat(2, 1fr);
+            background-color: @white;
 
             .drawer-item {
                 display: flex;

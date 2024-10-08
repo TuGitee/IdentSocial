@@ -63,14 +63,15 @@
                 <input type="number" class="sign-up-box-check-input" v-model="Captcha" autocomplete="true"
                   placeholder="输入您的验证码" />
                 <div class="captcha">
-                  <div class="captcha-item" v-for="i, index in computedCaptcha" :key="index">{{ i }}</div>
+                  <div class="captcha-item" v-for="i, index in computedCaptcha"
+                    :class="{ 'active-index': index === Captcha.length }" :key="index">{{ i }}</div>
                 </div>
               </div>
               <p class="sign-up-box-subtitle">
                 <el-button class="sign-up-box-resend" :disabled="time > 0" @click="sendCaptcha" type="text">重新发送{{
                   time > 0 ?
                     `(${time})`
-                  : '' }}</el-button>
+                    : '' }}</el-button>
               </p>
               <button type="submit" :class="{ active: isActive }" :disabled="!isActive" class="sign-up-box-submit"
                 @click="nextStep" @keydown.enter="nextStep">
@@ -146,7 +147,6 @@ export default {
         this.Captcha = res.data;
         return res;
       })
-      // return this.$api.post(`/verification/sendcode?email=${this.mail}`);
     },
     jumpToStep(index) {
       if (this.finished >= index) {
@@ -181,14 +181,6 @@ export default {
           return false;
         }
       })
-      // let res = await this.$api.post('/verification/checkout', {
-      //   email: this.mail,
-      //   code: String(this.Captcha),
-      //   type: "REGISTER",
-      // })
-      // if (res.status == 200) {
-      //   return true;
-      // }
     },
     toNext() {
       this.current = String(Number(this.current) + 1);
@@ -211,45 +203,10 @@ export default {
               });
             }
           }).catch(() => { });
-          // const res = await this.$userAxios.get(`/user/sign?email=${this.mail}`)
-          // if (!res.data.code) {
-          //   this.$notify.error({
-          //     title: "注册失败",
-          //     message: "您的邮箱已被注册!",
-          //     
-          //     duration: 2000,
-          //   });
-          //   return;
-          // }
           break;
         case "1":
           const flag = await this.checkCaptcha();
           if (!flag) break;
-          // if (flag) {
-          // let res = await this.$userAxios.post("/user/sign", { email: this.mail, password: this.password })
-          //   if (!res.data.data) {
-          //     this.$notify.error({
-          //       title: "注册失败",
-          //       message: "您的邮箱已被注册!",
-          //       
-          //       duration: 2000,
-          //     });
-          //     this.finished = "0";
-          //     this.current = "0";
-          //     this.mail = "";
-          //     this.password = "";
-          //     this.makesure = "";
-          //     this.Captcha = "";
-          //     this.isActive = false;
-          //     this.time = 60;
-          //     clearInterval(this.timer);
-          //     this.timer = null;
-          //     return;
-          //   }
-          //   this.toNext();
-          //   this.isActive = true;
-          //   this.finished = -1;
-          // }
           await reqMockUserRegister(this.mail, this.password);
           this.toNext();
           this.isActive = true;
@@ -386,6 +343,31 @@ export default {
         font-size: 1.5rem;
         color: grey;
         cursor: pointer;
+
+        &.active-index {
+          &::after {
+            content: "|";
+            animation: opacity 1s ease infinite;
+          }
+
+          @keyframes opacity {
+            0% {
+              opacity: 0.2;
+              transform: scaleY(0);
+            }
+
+            50% {
+              opacity: 1;
+              transform: scaleY(1);
+            }
+
+            100% {
+              opacity: 0.2;
+              transform: scaleY(0);
+            }
+          }
+
+        }
       }
     }
 
