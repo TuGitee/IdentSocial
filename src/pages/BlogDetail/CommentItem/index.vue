@@ -18,7 +18,7 @@
                 <p class="comment-item-right-bottom-time">
                     <b @click="emitTarget(comment, $refs.text)">回复</b>
                     <time>{{ formatTime(comment.time) }}</time>
-                    <i class="el-icon-delete" @click="deleteComment(comment.id)"></i>
+                    <i class="el-icon-delete" v-if="comment.uid === token" @click="deleteComment(comment.id)"></i>
                 </p>
                 <ul class="comment-item-right-bottom-list">
                     <li class="comment-item-right-bottom-list-item" v-for="c in comment.children?.slice(0, sliceNum)"
@@ -56,7 +56,7 @@
                                 <p class="comment-item-right-bottom-list-item-right-bottom-time">
                                     <b>回复</b>
                                     <time @click.stop>{{ c.time }}</time>
-                                    <i class="el-icon-delete" @click.stop="deleteComment(c.id)"></i>
+                                    <i class="el-icon-delete" v-if="c.uid === token" @click.stop="deleteComment(c.id)"></i>
                                 </p>
                             </div>
                         </div>
@@ -77,9 +77,15 @@
 <script>
 import pubsub from '@/utils/pubsub';
 import formatTime from '@/utils/time';
+import { mapState } from 'vuex';
 
 export default {
     name: "CommentItem",
+    computed: {
+        ...mapState({
+            token: state => state.user.token
+        })
+    },
     props: {
         comment: {
             type: Object,
