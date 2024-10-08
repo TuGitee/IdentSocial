@@ -8,24 +8,27 @@
                     username: item.username,
                     avatarUrl: item.avatarUrl
                 }
-            }">
+            }" v-if="!nextItem || nextItem.from_id !== item.from_id || nextItem.time - item.time > 5 * 60 * 1000">
                 <MyImage :src="item.avatarUrl" alt="">
                     {{ item.username?.slice(0, 1) || '未' }}
                 </MyImage>
             </router-link>
         </div>
         <div class="chat-item-info">
-            <p class="chat-item-username">
+            <p class="chat-item-username"
+                v-if="!prevItem || prevItem.from_id !== item.from_id || item.time - prevItem.time > 5 * 60 * 1000">
                 <span>
                     {{ item.username || '未知用户' }}
                 </span>
                 <time>{{ formatTime(item.time) }}</time>
             </p>
-            <div class="chat-item-box">
+            <div class="chat-item-box"
+                :class="{ prev: nextItem && nextItem.from_id === item.from_id && nextItem.time - item.time < 5 * 60 * 1000 }">
                 <i class="el-icon-loading" v-if="!item.isSend"></i>
                 <img class="chat-item-content image" v-if="item.type === 'image'" :src="item.message"
                     :preview="item.to_id ?? 'world'">
-                <audio class="chat-item-content voice" type="audio/mpeg" :src="item.message" v-else-if="item.type === 'voice'" controls="controls"></audio>
+                <audio class="chat-item-content voice" type="audio/mpeg" :src="item.message"
+                    v-else-if="item.type === 'voice'" controls="controls"></audio>
                 <p class="chat-item-content" v-else>
                     {{ item.message }}
                 </p>
@@ -46,6 +49,14 @@ export default {
     },
     props: {
         item: {
+            type: Object,
+            default: () => ({})
+        },
+        prevItem: {
+            type: Object,
+            default: () => ({})
+        },
+        nextItem: {
             type: Object,
             default: () => ({})
         }
@@ -83,32 +94,33 @@ export default {
             margin-left: auto;
         }
 
-        .chat-item-content {
-            background-color: @purple ;
-            color: @white;
-            margin-right: 0.5rem;
-
-            &::before {
-                display: none;
-            }
-
-            &::after {
-                position: absolute;
-                right: 0;
-                bottom: 0;
-                content: '';
-                width: 1rem;
-                height: 1rem;
-                background-color: @purple;
-            }
-        }
-
         .chat-item-box {
             justify-content: flex-end;
             flex-direction: row;
 
             i {
                 order: 0;
+            }
+
+            .chat-item-content {
+                background-color: @purple;
+                color: @white;
+                margin-right: 0.5rem;
+
+                &::before {
+                    display: none;
+                }
+
+                &::after {
+                    position: absolute;
+                    right: 0;
+                    bottom: 0;
+                    content: '';
+                    width: 1rem;
+                    z-index: -1;
+                    height: 1rem;
+                    background-color: @purple;
+                }
             }
         }
     }
@@ -140,6 +152,61 @@ export default {
         i {
             order: 1;
         }
+
+        &.prev {
+            .chat-item-content {
+
+                &::before,
+                &::after {
+                    display: none;
+                }
+            }
+        }
+
+        .chat-item-content {
+            margin-left: 0.5rem;
+            margin-right: .5rem;
+            user-select: text;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            min-width: 0;
+            padding: 0.5rem .8rem;
+            line-height: 1.5;
+            background-color: @lightPurple;
+            border-radius: 1rem;
+            position: relative;
+            width: fit-content;
+            word-wrap: normal;
+            word-break: break-all;
+            max-width: 70%;
+
+            &.image {
+                background-color: transparent;
+                padding: 0;
+                border-radius: 8px;
+                margin-top: 4px;
+            }
+
+            &.voice {
+                background-color: transparent;
+                padding: 0;
+                margin-top: 4px;
+                width: 100%;
+            }
+
+            &::before {
+                position: absolute;
+                left: 0;
+                bottom: 0;
+                content: '';
+                width: 1rem;
+                height: 1rem;
+                z-index: -1;
+                background-color: @lightPurple;
+            }
+        }
     }
 
     .chat-item-username {
@@ -157,50 +224,6 @@ export default {
             font-size: .6rem;
             color: @gray-3;
             font-weight: normal;
-        }
-    }
-
-    .chat-item-content {
-        margin-left: 0.5rem;
-        margin-right: .5rem;
-        user-select: text;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: flex-start;
-        min-width: 0;
-        padding: 0.5rem 1rem;
-        line-height: 1.5;
-        background-color: @lightPurple;
-        border-radius: 1rem;
-        position: relative;
-        width: fit-content;
-        word-wrap: normal;
-        word-break: break-all;
-        max-width: 70%;
-
-        &.image {
-            background-color: transparent;
-            padding: 0;
-            border-radius: 8px;
-            margin-top: 4px;
-        }
-
-        &.voice {
-            background-color: transparent;
-            padding: 0;
-            margin-top: 4px;
-            width: 100%;
-        }
-
-        &::before {
-            position: absolute;
-            left: 0;
-            bottom: 0;
-            content: '';
-            width: 1rem;
-            height: 1rem;
-            background-color: @lightPurple;
         }
     }
 }

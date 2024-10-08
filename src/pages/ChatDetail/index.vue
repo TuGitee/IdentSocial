@@ -24,7 +24,7 @@
             :style="{ '--height': visualHeight + 'px' }" ref="chatDetail" @touchmove.passive="handleBody"
             @touchend="toTop" @touchstart="isDrawer && showDrawer()">
             <div class="chat-detail-body-content" ref="chatDetailBody">
-                <ChatItem v-for="chat in chatList" :key="chat.from_id + chat.time" :item="chat"></ChatItem>
+                <ChatItem v-for="(chat, index) in chatList" :key="chat.from_id + chat.time" :item="chat" :prev-item="chatList[index - 1] ?? null" :next-item="chatList[index + 1] ?? null"></ChatItem>
             </div>
         </div>
         <form class="chat-footer" @submit.prevent="sendText" :style="{
@@ -168,9 +168,11 @@ export default {
             const input = document.createElement('input');
             input.type = 'file';
             input.accept = 'image/*';
-            input.onchange = () => {
+            input.addEventListener('change', () => {
                 const file = input.files[0];
-                if (!file) return;
+                if (!file) {
+                    return alert('请选择图片');
+                }
                 if (file.size > 100 * 1024) return alert('图片大小不能超过 100KB');
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
@@ -195,8 +197,13 @@ export default {
                         this.send(newImage, 'image');
                     }
                 }
-            }
-            input.click();
+            })
+            const clickEvent = new MouseEvent('click', {
+                view: window,
+                bubbles: true,
+                cancelable: true
+            });
+            input.dispatchEvent(clickEvent);
         },
         handleVoice() {
             this.isCancel = false;
