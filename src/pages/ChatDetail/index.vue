@@ -22,16 +22,25 @@
         </div>
         <div class="chat-detail-body" :class="{ focus: isFocus, disabled: !chatList.length }"
             :style="{ '--height': visualHeight + 'px' }" ref="chatDetail" @touchmove.passive="handleBody"
-            @touchend="toTop" @click="isDrawer && showDrawer()">
+            @touchend="toTop" @touchstart="isDrawer && showDrawer()">
             <div class="chat-detail-body-content" ref="chatDetailBody">
                 <ChatItem v-for="chat in chatList" :key="chat.from_id + chat.time" :item="chat"></ChatItem>
             </div>
         </div>
-        <form class="chat-footer" @submit.prevent="send" :style="{
+        <form class="chat-footer" @submit.prevent="sendText" :style="{
             '--top': visualHeight + 'px'
         }" :class="{ drawer: isDrawer }">
             <div class="input">
-                <input type="text" @focus="handleFocus" @blur="handleBlur" class="chat-footer-input"
+                <button class="chat-footer-button" type="button" @click="isVoice = !isVoice">
+                    <VoiceIcon v-if="!isVoice"></VoiceIcon>
+                    <KeyboardIcon v-else></KeyboardIcon>
+                </button>
+                <el-button v-if="isVoice" @touchstart.native.prevent="handleVoice"
+                    @touchend.native.prevent="handleVoiceEnd" class="chat-footer-input voice"
+                    :class="{ active: isRecording }">
+                    {{ isRecording ? "录音中..." : "按住说话" }}
+                </el-button>
+                <input v-else type="text" @focus="handleFocus" @blur="handleBlur" class="chat-footer-input"
                     place-holder="说点什么..." enterkeyhint="send" v-model="input" />
                 <button class="chat-footer-button" @click="showDrawer" type="button">
                     <PlusIcon></PlusIcon>
@@ -39,9 +48,10 @@
             </div>
             <Transition name="el-fade-in-linear" :duration="100">
                 <div class="drawer" v-show="isDrawer">
-                    <div class="drawer-item" @click="sendImage">
+                    <el-upload class="drawer-item" action="#" :show-file-list="false" :limit="1" :on-change="sendImage"
+                        :auto-upload="false" accept="image/*">
                         <i class="el-icon-picture"></i>
-                    </div>
+                    </el-upload>
                 </div>
             </Transition>
         </form>
@@ -56,12 +66,16 @@ import defaultAvatar from "@/assets/images/0.png";
 import MyImage from "@/components/MyImage.vue";
 import pubsub from "@/utils/pubsub";
 import PlusIcon from "@/icons/PlusIcon.vue";
+import VoiceIcon from "@/icons/VoiceIcon.vue";
+import KeyboardIcon from "@/icons/KeyboardIcon.vue";
 export default {
     name: "ChatDetail",
     components: {
         ChatItem,
         MyImage,
-        PlusIcon
+        PlusIcon,
+        VoiceIcon,
+        KeyboardIcon
     },
     data() {
         return {
@@ -69,7 +83,9 @@ export default {
             isFocus: false,
             visualHeight: window.innerHeight,
             defaultAvatar,
-            isDrawer: false
+            isDrawer: false,
+            isVoice: false,
+            isRecording: false
         }
     },
     methods: {
@@ -109,13 +125,13 @@ export default {
                 setTimeout(() => {
                     if (this.$refs.chatDetailBody)
                         this.$refs.chatDetailBody.scrollTop = this.$refs.chatDetailBody.scrollHeight;
-                }, 0);
+                }, 50);
             })
         },
-        send() {
-            if (!this.input.trim()) return
+        send(message, type = 'text') {
             const info = {
-                message: this.input,
+                type,
+                message,
                 to_id: this.id,
                 from_id: this.token,
                 avatarUrl: this.userInfo.avatarUrl,
@@ -128,59 +144,80 @@ export default {
             } else {
                 this.addUserChat(info)
             }
-            emit(this.id ? WebSocketType.PrivateChat : WebSocketType.GroupChat, this.createMessage(this.token, this.id, this.input))
-            this.input = ''
+            emit(this.id ? WebSocketType.PrivateChat : WebSocketType.GroupChat, this.createMessage(this.token, this.id, message, type));
             this.toContentEnd()
         },
-        sendImage() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'image/*';
-            input.onchange = () => {
-                const file = input.files[0];
-                if (file.size > 100 * 1024) return alert('图片大小不能超过 100KB');
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => {
-                    const image = reader.result;
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    const img = new Image();
-                    img.src = image;
-                    img.onload = () => {
-                        const width = img.width;
-                        const height = img.height;
-                        const scale = width / height;
-                        const maxWidth = 400;
-                        const maxHeight = 400;
-                        const newWidth = scale > 1 ? maxWidth : maxHeight * scale;
-                        const newHeight = scale > 1 ? maxHeight / scale : maxHeight;
-                        canvas.width = newWidth;
-                        canvas.height = newHeight;
-
-                        ctx.drawImage(img, 0, 0, newWidth, newHeight);
-                        const newImage = canvas.toDataURL('image/webp');
-                        const info = {
-                            type: 'image',
-                            message: newImage,
-                            to_id: this.id,
-                            from_id: this.token,
-                            avatarUrl: this.userInfo.avatarUrl,
-                            time: new Date().getTime(),
-                            username: this.userInfo.username,
-                            isSend: false
-                        };
-                        emit(this.id ? WebSocketType.PrivateChat : WebSocketType.GroupChat, this.createMessage(this.token, this.id, newImage, 'image'));
-                        this.toContentEnd();
-                        if (!this.id) {
-                            this.addGroupChat(info);
-                        } else {
-                            this.addUserChat(info)
-                        }
-                    }
+        sendText() {
+            if (!this.input.trim()) return;
+            this.send(this.input);
+            this.input = '';
+        },
+        sendImage(file, fileList) {
+            file = file.raw;
+            fileList.splice(0, 1);
+            if (file.size > 100 * 1024) return alert('图片大小不能超过 100KB');
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => {
+                const image = reader.result;
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                img.src = image;
+                img.onload = () => {
+                    const width = img.width;
+                    const height = img.height;
+                    const scale = width / height;
+                    const maxWidth = 400;
+                    const maxHeight = 400;
+                    const newWidth = scale > 1 ? maxWidth : maxHeight * scale;
+                    const newHeight = scale > 1 ? maxHeight / scale : maxHeight;
+                    canvas.width = newWidth;
+                    canvas.height = newHeight;
+                    ctx.drawImage(img, 0, 0, newWidth, newHeight);
+                    const newImage = canvas.toDataURL('image/webp');
+                    this.send(newImage, 'image');
                 }
             }
-            input.click();
+        },
+        handleVoice() {
+            this.isRecording = true;
+            navigator.mediaDevices.getUserMedia({
+                audio: true
+            }).then(stream => {
+                this.recorder = new MediaRecorder(stream);
+                this.start = Date.now();
+                this.recorder.start();
+                const chunks = [];
+                this.recorder.ondataavailable = e => {
+                    chunks.push(e.data);
+                }
+                this.recorder.onstop = () => {
+                    this.isRecording = false;
+                    if (Date.now() - this.start < 1000) {
+                        alert('录音时间太短了');
+                        return;
+                    }
+                    const blob = new Blob(chunks, {
+                        type: 'audio/ogg; codecs=opus'
+                    });
+                    const reader = new FileReader();
+                    reader.readAsDataURL(blob);
+                    reader.onload = () => {
+                        const data = reader.result;
+                        this.send(data, 'voice');
+                        stream.getTracks().forEach(track => track.stop());
+                        this.recorder.stop();
+                        this.recorder = null;
+                    }
+                }
+            }).catch(() => {
+                alert('录音失败')
+            })
+        },
+        handleVoiceEnd() {
+            this.recorder?.stop();
+            this.isRecording = false;
         },
         addGroupChat(data) {
             this.$store.commit("ADDCHAT", data)
@@ -247,7 +284,7 @@ export default {
         },
         unbindEvent() {
             this.id ? channel.unbind(WebSocketType.GroupChat) : privateChannel?.unbind(WebSocketType.PrivateChat);
-        },
+        }
     },
     mounted() {
         window.addEventListener("touchmove", this.prevent, { passive: false });
@@ -380,6 +417,7 @@ export default {
         top: calc(env(safe-area-inset-top) + 4rem);
         height: calc(var(--height, 100%) - constant(safe-area-inset-top) - constant(safe-area-inset-bottom) - 3.5rem - 4rem);
         height: calc(var(--height, 100%) - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 3.5rem - 4rem);
+        transition: height .2s;
 
         &.focus {
             height: calc(var(--height, 100%) - 7.5rem - constant(safe-area-inset-top));
@@ -413,7 +451,7 @@ export default {
         padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem);
         z-index: 99;
         -webkit-overflow-scrolling: touch;
-        transition: top .2s linear;
+        transition: top .2s;
 
         &:focus-within {
             top: calc(var(--top, 100%) - 3.5rem);
@@ -440,6 +478,16 @@ export default {
                 color: @gray-6;
                 background-color: @gray-1;
                 border-radius: .5rem;
+
+                &.voice {
+                    font-weight: bold;
+                    transition: background-color .2s, color .2s;
+
+                    &.active {
+                        background-color: @lightPurple;
+                        color: @white;
+                    }
+                }
             }
 
             .chat-footer-button {
@@ -451,8 +499,9 @@ export default {
         }
 
         .drawer {
-            --width: calc((100vw - 2.5rem) / 4);
+            --width: calc((100vw - 4.5rem) / 4);
             margin-top: .5rem;
+            padding: .5rem 1rem;
             display: grid;
             gap: .5rem;
             grid-template-columns: repeat(4, 1fr);
@@ -466,8 +515,16 @@ export default {
                 justify-content: center;
                 color: @gray-6;
                 cursor: pointer;
-                background-color: @gray-0;
-                border-radius: 4px;
+                background-color: #f1f1f1;
+                border-radius: 8px;
+
+                /deep/ .el-upload {
+                    height: 100%;
+                    width: 100%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
 
                 i {
                     font-size: 1.2rem;

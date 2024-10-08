@@ -25,6 +25,7 @@
                 <i class="el-icon-loading" v-if="!item.isSend"></i>
                 <img class="chat-item-content image" v-if="item.type === 'image'" :src="item.message"
                     :preview="item.to_id ?? 'world'">
+                <audio class="chat-item-content voice" :src="item.message" v-else-if="item.type === 'voice'" controls="controls"></audio>
                 <p class="chat-item-content" v-else>
                     {{ item.message }}
                 </p>
@@ -167,7 +168,7 @@ export default {
         flex-direction: column;
         justify-content: center;
         align-items: flex-start;
-        flex: 0.01 fit-content;
+        min-width: 0;
         padding: 0.5rem 1rem;
         line-height: 1.5;
         background-color: @lightPurple;
@@ -183,6 +184,13 @@ export default {
             padding: 0;
             border-radius: 8px;
             margin-top: 4px;
+        }
+
+        &.voice {
+            background-color: transparent;
+            padding: 0;
+            margin-top: 4px;
+            width: 100%;
         }
 
         &::before {
