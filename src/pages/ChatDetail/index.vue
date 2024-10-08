@@ -1,7 +1,7 @@
 <template>
     <div class="chat-detail" :style="{
         height: visualHeight + 'px'
-    }">
+    }" @touchmove.prevent="cancleVoice">
         <div class="chat-detail-header">
             <div class="chat-detail-header-icon" @click="goBack">
                 <i class="el-icon-arrow-left"></i>
@@ -36,9 +36,9 @@
                     <KeyboardIcon v-else></KeyboardIcon>
                 </button>
                 <el-button v-if="isVoice" @touchstart.native.prevent="handleVoice"
-                    @touchend.native.prevent="handleVoiceEnd" class="chat-footer-input voice"
-                    :class="{ active: isRecording }">
-                    {{ isRecording ? "录音中..." : "按住说话" }}
+                    @touchend.native.prevent="handleVoiceEnd" @touchmove.native.prevent="activeVoice" class="chat-footer-input voice"
+                    :class="{ active: isRecording, disabled: isRecording && isCancel }">
+                    {{ isRecording ? isCancel ? "松开取消" : "录音中..." : "按住说话" }}
                 </el-button>
                 <input v-else type="text" @focus="handleFocus" @blur="handleBlur" class="chat-footer-input"
                     place-holder="说点什么..." enterkeyhint="send" v-model="input" />
@@ -85,7 +85,8 @@ export default {
             defaultAvatar,
             isDrawer: false,
             isVoice: false,
-            isRecording: false
+            isRecording: false,
+            isCancel: false
         }
     },
     methods: {
@@ -181,6 +182,7 @@ export default {
             }
         },
         handleVoice() {
+            this.isCancel = false;
             this.isRecording = true;
             navigator.mediaDevices.getUserMedia({
                 audio: true,
@@ -193,23 +195,25 @@ export default {
                     chunks.push(e.data);
                 }
                 this.recorder.onstop = () => {
+                    if (!this.isCancel) {
+                        if (Date.now() - this.start < 1000) {
+                            alert('录音时间太短了');
+                        } else {
+                            const blob = new Blob(chunks, {
+                                type: 'audio/aac'
+                            });
+                            const reader = new FileReader();
+                            reader.readAsDataURL(blob);
+                            reader.onload = () => {
+                                const data = reader.result;
+                                this.send(data, 'voice');
+                            }
+                        }
+                    }
+                    stream.getTracks().forEach(track => track.stop());
+                    this.recorder.stop();
+                    this.recorder = null;
                     this.isRecording = false;
-                    if (Date.now() - this.start < 1000) {
-                        alert('录音时间太短了');
-                        return;
-                    }
-                    const blob = new Blob(chunks, {
-                        type: 'audio/aac'
-                    });
-                    const reader = new FileReader();
-                    reader.readAsDataURL(blob);
-                    reader.onload = () => {
-                        const data = reader.result;
-                        this.send(data, 'voice');
-                        stream.getTracks().forEach(track => track.stop());
-                        this.recorder.stop();
-                        this.recorder = null;
-                    }
                 }
             }).catch(() => {
                 alert('录音失败')
@@ -218,6 +222,12 @@ export default {
         handleVoiceEnd() {
             this.recorder?.stop();
             this.isRecording = false;
+        },
+        cancleVoice() {
+            this.isCancel = true;
+        },
+        activeVoice() {
+            this.isCancel = false;
         },
         addGroupChat(data) {
             this.$store.commit("ADDCHAT", data)
@@ -486,6 +496,10 @@ export default {
                     &.active {
                         background-color: @lightPurple;
                         color: @white;
+                    }
+
+                    &.disabled {
+                        background-color: @red;
                     }
                 }
             }
