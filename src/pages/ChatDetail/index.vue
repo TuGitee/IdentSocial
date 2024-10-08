@@ -1,7 +1,7 @@
 <template>
     <div class="chat-detail" :style="{
         height: visualHeight + 'px'
-    }" @touchmove.prevent="cancleVoice">
+    }">
         <div class="chat-detail-header">
             <div class="chat-detail-header-icon" @click="goBack">
                 <i class="el-icon-arrow-left"></i>
@@ -35,8 +35,8 @@
                     <VoiceIcon v-if="!isVoice"></VoiceIcon>
                     <KeyboardIcon v-else></KeyboardIcon>
                 </button>
-                <el-button v-if="isVoice" @touchstart.native.prevent="handleVoice"
-                    @touchend.native.prevent="handleVoiceEnd" @touchmove.native.prevent="activeVoice"
+                <el-button ref="voice" v-if="isVoice" @touchstart.native.prevent="handleVoice"
+                    @touchend.native.prevent="handleVoiceEnd" @touchmove.native.prevent="handleVoiceMove"
                     class="chat-footer-input voice" :class="{ active: isRecording, disabled: isRecording && isCancel }">
                     {{ isRecording ? isCancel ? "松开取消" : "录音中..." : "按住说话" }}
                 </el-button>
@@ -102,6 +102,18 @@ export default {
                 e.stopPropagation();
             }
             this.toTop();
+        },
+        handleVoiceMove(e) {
+            const el = this.$refs.voice.$el;
+            const { clientY, clientX } = e.touches[0];
+            const { left, top, width, height } = el.getBoundingClientRect();
+            const x = clientX - left;
+            const y = clientY - top;
+            if (x < 0 || x > width || y < 0 || y > height) {
+                this.cancleVoice();
+            } else {
+                this.activeVoice();
+            }
         },
         getVisualHeight() {
             setTimeout(() => {
@@ -179,7 +191,7 @@ export default {
                         canvas.width = newWidth;
                         canvas.height = newHeight;
                         ctx.drawImage(img, 0, 0, newWidth, newHeight);
-                        const newImage = canvas.toDataURL('image/webp');
+                        const newImage = canvas.toDataURL('image/jpeg');
                         this.send(newImage, 'image');
                     }
                 }

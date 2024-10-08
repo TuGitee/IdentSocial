@@ -26,7 +26,7 @@ export default {
   mounted() {
     if (this.token) {
       this.$store.dispatch('getUserInfo');
-      if (this.$route.matched.some(item => item.meta.requireAuth))
+      if (this.$route.matched.some(item => !item.meta.requireAuth))
         this.$router.replace({ name: 'Home' });
     }
     window.addEventListener('scroll', this.handleScroll);
