@@ -125,7 +125,7 @@ export default {
                 setTimeout(() => {
                     if (this.$refs.chatDetailBody)
                         this.$refs.chatDetailBody.scrollTop = this.$refs.chatDetailBody.scrollHeight;
-                }, 50);
+                }, 100);
             })
         },
         send(message, type = 'text') {
@@ -183,7 +183,7 @@ export default {
         handleVoice() {
             this.isRecording = true;
             navigator.mediaDevices.getUserMedia({
-                audio: true
+                audio: true,
             }).then(stream => {
                 this.recorder = new MediaRecorder(stream);
                 this.start = Date.now();
@@ -199,7 +199,7 @@ export default {
                         return;
                     }
                     const blob = new Blob(chunks, {
-                        type: 'audio/ogg; codecs=opus'
+                        type: 'audio/aac'
                     });
                     const reader = new FileReader();
                     reader.readAsDataURL(blob);

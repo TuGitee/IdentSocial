@@ -25,7 +25,7 @@
                 <i class="el-icon-loading" v-if="!item.isSend"></i>
                 <img class="chat-item-content image" v-if="item.type === 'image'" :src="item.message"
                     :preview="item.to_id ?? 'world'">
-                <audio class="chat-item-content voice" :src="item.message" v-else-if="item.type === 'voice'" controls="controls"></audio>
+                <audio class="chat-item-content voice" type="audio/mpeg" :src="item.message" v-else-if="item.type === 'voice'" controls="controls"></audio>
                 <p class="chat-item-content" v-else>
                     {{ item.message }}
                 </p>
