@@ -1,4 +1,4 @@
-<template>
+<template v-if="item">
     <div class="blog-item">
         <div class="blog-item-header">
             <div class="blog-item-header-avatar" @click="toUserDetail">

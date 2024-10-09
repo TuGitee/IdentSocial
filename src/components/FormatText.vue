@@ -5,6 +5,7 @@
                 @click.stop>
                 {{ determineText(item) }}
             </router-link>
+            <br v-else-if="determineComponent(item) === 'br'" :key="index" />
             <template v-else>{{ item }}</template>
         </template>
     </p>
@@ -17,12 +18,12 @@ export default {
     },
     computed: {
         textList() {
-            return this.text.split(/(@\[.+?\]\(.+?\))/);
+            return this.text.split(/(@\[.+?\]\(.+?\)|\n)/);
         },
     },
     methods: {
         determineComponent(item) {
-            return item.startsWith('@') ? 'router-link' : 'span';
+            return item.startsWith('@') ? 'router-link' : item === '\n' ? 'br' : 'span';
         },
         determineLink(item) {
             const match = item.match(/@\[.+?\]\((.+?)\)/);
@@ -41,6 +42,8 @@ export default {
         determineText(item) {
             if (this.determineComponent(item) === 'router-link') {
                 return item.replace(/(@)\[(.+?)\]\(.+?\)/, '$1$2');
+            } else if (item === '\n') {
+                return '<br>';
             } else {
                 return item;
             }
