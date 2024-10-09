@@ -24,7 +24,11 @@
             :style="{ '--height': visualHeight + 'px' }" ref="chatDetail" @touchmove.passive="handleBody"
             @touchend="toTop" @touchstart="isDrawer && showDrawer()">
             <div class="chat-detail-body-content" ref="chatDetailBody">
-                <ChatItem v-for="(chat, index) in chatList" :key="chat.from_id + chat.time" :item="chat" :prev-item="chatList[index - 1] ?? null" :next-item="chatList[index + 1] ?? null"></ChatItem>
+                <TransitionGroup name="chat-item" tag="div" appear>
+                    <ChatItem v-for="(chat, index) in chatList" :key="chat.from_id + chat.time" :item="chat"
+                        :prev-item="chatList[index - 1] ?? null" :next-item="chatList[index + 1] ?? null"
+                        :style="{ '--delay': (index - chatList.length) * 0.02 + 's' }"></ChatItem>
+                </TransitionGroup>
             </div>
         </div>
         <form class="chat-footer" @submit.prevent="sendText" :style="{
@@ -202,7 +206,7 @@ export default {
                     }
                 }
                 input.remove();
-            })            
+            })
             input.click();
         },
         handleVoice() {
@@ -471,6 +475,25 @@ export default {
             flex-direction: column;
             overflow: scroll;
             padding-bottom: 1rem;
+
+            .chat-item {
+                transition: transform 1s;
+                transition-delay: var(--delay, 0s);
+            }
+
+            .chat-item-enter,
+            .chat-item-leave-to {
+                opacity: 0;
+                transform: translateX(-100px);
+
+                &.reverse {
+                    transform: translateX(100px);
+                }
+            }
+
+            .chat-item-leave-active {
+                position: absolute;
+            }
         }
     }
 

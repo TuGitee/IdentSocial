@@ -106,21 +106,8 @@ export default {
                 background-color: @purple;
                 color: @white;
                 margin-right: 0.5rem;
-
-                &::before {
-                    display: none;
-                }
-
-                &::after {
-                    position: absolute;
-                    right: 0;
-                    bottom: 0;
-                    content: '';
-                    width: 1rem;
-                    z-index: -1;
-                    height: 1rem;
-                    background-color: @purple;
-                }
+                border-bottom-right-radius: 0;
+                border-bottom-left-radius: 1rem;
             }
         }
     }
@@ -155,11 +142,7 @@ export default {
 
         &.prev {
             .chat-item-content {
-
-                &::before,
-                &::after {
-                    display: none;
-                }
+                border-radius: 1rem;
             }
         }
 
@@ -181,6 +164,8 @@ export default {
             word-wrap: normal;
             word-break: break-all;
             max-width: 70%;
+            border-bottom-left-radius: 0;
+            transition: all .2s;
 
             &.image {
                 background-color: transparent;
@@ -194,17 +179,6 @@ export default {
                 padding: 0;
                 margin-top: 4px;
                 width: 100%;
-            }
-
-            &::before {
-                position: absolute;
-                left: 0;
-                bottom: 0;
-                content: '';
-                width: 1rem;
-                height: 1rem;
-                z-index: -1;
-                background-color: @lightPurple;
             }
         }
     }
