@@ -31,7 +31,7 @@ export default {
             return this.$route.path.includes('follower')
         },
         title() {
-            return `# ${this.userInfo.username}的${this.isFollower ? '粉丝' : '关注'}列表`
+            return `# ${this.userInfo.username || '未知'}的${this.isFollower ? '粉丝' : '关注'}列表`
         }
     },
     methods: {

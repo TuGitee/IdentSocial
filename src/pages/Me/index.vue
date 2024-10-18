@@ -244,7 +244,6 @@ export default {
         display: -webkit-box;
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 3;
-        font-weight: lighter;
         overflow: hidden;
       }
     }

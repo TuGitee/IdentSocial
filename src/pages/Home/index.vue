@@ -211,7 +211,8 @@ export default {
 
     .line-enter,
     .line-leave-to {
-      top: -32px;
+      top: -100px;
+      opacity: 0;
     }
 
     .line-enter-active,
