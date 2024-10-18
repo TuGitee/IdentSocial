@@ -23,11 +23,11 @@ const actions = {
     async getPostList({ state, commit }) {
         if (!state.isMorePost) return
         const res = await reqMockPostList(state.postListNo, state.pageSize);
+        state.postListNo++;
         commit("GETPOSTLIST", res.data);
         if (res.data.length < state.pageSize) {
             state.isMorePost = false
         }
-        state.postListNo++;
     },
     async getUserPostList({ commit, state }, id) {
         if (!state.userList[id]) {
@@ -91,7 +91,6 @@ const actions = {
 }
 const mutations = {
     RESET(state) {
-        state.postList = []
         state.postListNo = 1
         state.followListNo = 1
         state.pageSize = 10

@@ -20,8 +20,10 @@
                     <time>{{ formatTime(comment.time) }}</time>
                     <i class="el-icon-delete" v-if="comment.uid === token" @click="deleteComment(comment.id)"></i>
                 </p>
-                <ul class="comment-item-right-bottom-list">
-                    <li class="comment-item-right-bottom-list-item" v-for="c in comment.children?.slice(0, sliceNum)"
+                <transition-group tag="ul" name="list" class="comment-item-right-bottom-list" :style="{
+                    '--height': height + 'px'
+                }" ref="list">
+                    <li class="comment-item-right-bottom-list-item" v-for="c in comment.children.slice(0, sliceNum)"
                         :key="c.id">
                         <div class="comment-item-right-bottom-list-item-left">
                             <router-link :to="`/user-detail/${c.uid}`">
@@ -56,19 +58,22 @@
                                 <p class="comment-item-right-bottom-list-item-right-bottom-time">
                                     <b>回复</b>
                                     <time @click.stop>{{ c.time }}</time>
-                                    <i class="el-icon-delete" v-if="c.uid === token" @click.stop="deleteComment(c.id)"></i>
+                                    <i class="el-icon-delete" v-if="c.uid === token"
+                                        @click.stop="deleteComment(c.id)"></i>
                                 </p>
                             </div>
                         </div>
                     </li>
-                </ul>
-                <div class="comment-item-right-more" @click="moreComment"
-                    v-if="comment.children && comment.children?.length > sliceNum"><i
-                        class="el-icon-caret-right"></i>点击查看更多评论</div>
-                <div class="comment-item-right-more" @click="lessComment"
-                    v-else-if="comment.children && comment.children.length !== 1"><i
-                        class="el-icon-caret-top"></i>点击折叠评论
-                </div>
+                </transition-group>
+                <transition name="el-fade-in-linear" :duration="100">
+                    <div class="comment-item-right-more" @click="moreComment"
+                        v-if="comment.children && comment.children.length > sliceNum"><i
+                            class="el-icon-caret-right"></i>点击查看更多评论</div>
+                    <div class="comment-item-right-more" @click="lessComment"
+                        v-else-if="comment.children && comment.children.length > 1"><i
+                            class="el-icon-caret-top"></i>点击折叠评论
+                    </div>
+                </transition>
             </div>
         </div>
     </div>
@@ -102,7 +107,8 @@ export default {
     },
     data() {
         return {
-            sliceNum: 1
+            sliceNum: 0,
+            height: 0
         }
     },
     methods: {
@@ -119,7 +125,7 @@ export default {
         deleteComment(id) {
             this.$confirm('确定删除该评论?', '提示').then(() => {
                 return this.$store.dispatch("deleteComment", id);
-            }).then(()=>{
+            }).then(() => {
                 this.$emit("refreshComment");
             }).catch(() => { })
         }
@@ -127,10 +133,31 @@ export default {
     mounted() {
         pubsub.on(`comment:${this.comment.id}`, () => {
             this.sliceNum += 1;
+            console.log(this.sliceNum, this.comment);
         })
     },
     beforeDestroy() {
         pubsub.off(`comment:${this.comment.id}`)
+    },
+    watch: {
+        sliceNum: {
+            immediate: true,
+            handler(val) {
+                this.$nextTick(() => {
+                    const doms = Array.from(this.$refs.list.$el.children) ?? []
+                    this.height = doms.slice(0, val).reduce((p, c) => p + c.offsetHeight, 0);
+                })
+            }
+        },
+        'comment.children': {
+            handler() {
+                this.sliceNum = Math.min(this.sliceNum, this.comment.children?.length ?? 0)
+                this.$nextTick(() => {
+                    const doms = Array.from(this.$refs.list.$el.children) ?? []
+                    this.height = doms.slice(0, this.sliceNum).reduce((p, c) => p + c.offsetHeight, 0);
+                })
+            }
+        }
     }
 }
 </script>
@@ -219,6 +246,9 @@ export default {
 
             .comment-item-right-bottom-list {
                 margin-top: 5px;
+                height: var(--height);
+                transition: height .3s;
+                overflow: hidden;
 
                 .comment-item-right-bottom-list-item {
                     display: flex;

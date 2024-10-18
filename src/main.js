@@ -28,7 +28,38 @@ const options = {
 }
 Vue.use(preview, options)
 
-import './utils/messageOffset';
+import { Message } from 'element-ui';
+const $message = (optionsOrMessage) => {
+  let mergedOptions = {};
+  let offset = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top"));
+  if (typeof optionsOrMessage === 'string') {
+    mergedOptions.message = optionsOrMessage;
+    mergedOptions.offset = offset;
+  } else {
+    mergedOptions = { ...optionsOrMessage, offset: offset };
+  }
+  return Message(mergedOptions);
+};
+
+const createTypedMessage = (type) => {
+  return (optionsOrMessage) => {
+    let typedOptions = {};
+    if (typeof optionsOrMessage === 'string') {
+      typedOptions = { type, message: optionsOrMessage };
+    } else {
+      typedOptions = { type, ...optionsOrMessage };
+    }
+    return $message(typedOptions);
+  };
+};
+
+$message.info = createTypedMessage('info');
+$message.success = createTypedMessage('success');
+$message.warning = createTypedMessage('warning');
+$message.error = createTypedMessage('error');
+
+Vue.prototype.$message = $message;
+Vue.prototype.$message.closeAll = Message.closeAll;
 
 new Vue({
   render: h => h(App),

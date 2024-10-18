@@ -1,12 +1,6 @@
 <template>
     <div id="root" class="setting">
-        <header>
-            <button class="back" @click="goBack">
-                <i class="el-icon-arrow-left"></i>
-                <b>返回</b>
-            </button>
-            <h1 class="title"># 设置</h1>
-        </header>
+        <PageHeader title="# 设置"></PageHeader>
         <main>
             <el-form v-if="currentInfo" action="#" @submit.native.prevent="submit" label-position="top">
                 <el-form-item label="用户名">
@@ -56,11 +50,13 @@
 </template>
 
 <script>
+import PageHeader from '@/components/PageHeader.vue';
 import { set } from '@/utils/storage';
 import { mapState } from 'vuex';
 
 export default {
     name: 'Setting',
+    components: { PageHeader },
     methods: {
         goBack() {
             this.$router.back();

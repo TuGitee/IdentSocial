@@ -67,7 +67,7 @@ export default [
     {
         path: '/follower/:uid',
         name: 'Follower',
-        component: () => import('@/pages/Follower'),
+        component: () => import('@/pages/Follow'),
         meta: {
             requireAuth: true
         }

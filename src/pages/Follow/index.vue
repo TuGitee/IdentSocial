@@ -1,25 +1,21 @@
 <template>
     <div class="container" id="root">
-        <header>
-            <button class="back" @click="goBack">
-                <i class="el-icon-arrow-left"></i>
-                <b>返回</b>
-            </button>
-            <h1 class="title"># {{ userInfo.username }}关注列表</h1>
-        </header>
+        <PageHeader :title="title"></PageHeader>
         <el-empty v-if="!followList.length"></el-empty>
-        <UserItem v-for="item in followList" :key="item.id" :id="item.fid" />
+        <UserItem v-for="item in followList" :key="item.id" :id="isFollower ? item.uid : item.fid" />
     </div>
 </template>
 
 <script>
-import { reqMockFollowList, reqMockUser } from '@/api';
+import { reqMockFollowerList, reqMockFollowList, reqMockUser } from '@/api';
+import PageHeader from '@/components/PageHeader.vue';
 import UserItem from '@/components/UserItem.vue';
 
 export default {
     name: 'Follow',
     components: {
-        UserItem
+        UserItem,
+        PageHeader
     },
     data() {
         return {
@@ -30,13 +26,19 @@ export default {
     computed: {
         uid() {
             return this.$route.params.uid
+        },
+        isFollower() {
+            return this.$route.path.includes('follower')
+        },
+        title() {
+            return `# ${this.userInfo.username}的${this.isFollower ? '粉丝' : '关注'}列表`
         }
     },
     methods: {
         async init() {
             const res = await reqMockUser(this.uid);
             this.userInfo = res.data
-            const followingList = await reqMockFollowList(this.uid);
+            const followingList = this.isFollower ? await reqMockFollowerList(this.uid) : await reqMockFollowList(this.uid);
             this.followList = followingList.data.filter(follow => follow.isFollow);
         },
         goBack() {

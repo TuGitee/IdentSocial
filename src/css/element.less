@@ -1,8 +1,14 @@
 .el-message {
-    max-width: 80%;
+    max-width: 66%;
+    width: max-content;
     min-width: 0 !important;
     padding: 14px 24px 14px 20px !important;
     border-radius: 10px !important;
+
+    .el-message__content {
+        line-height: 1.5;
+        text-align: center;
+    }
 
     &--info {
         i {
@@ -50,6 +56,7 @@
 
         .el-message-box__btns {
             display: flex;
+            padding-top: 10px;
 
             .el-button {
                 flex: 1;

@@ -33,7 +33,7 @@
       </div>
       <ul class="me-drawers-list">
         <component :is="item.to ? 'router-link' : 'li'" :to="item.to ? item.to : ''" class="me-drawers-list-item"
-          v-for="(item, index) in list" :key="index" @click="item.onClick && item.onClick.call(this)">
+          v-for="(item, index) in list" :key="index" @click="item.onClick ? item.onClick.call(this) : alert(item.text)">
           <div class="me-drawers-list-item-left">
             <div class="me-drawers-list-item-left-icon">
               <i :class="item.icon"></i>
@@ -94,10 +94,6 @@ export default {
           text: "关于我们"
         },
         {
-          icon: "el-icon-s-ticket",
-          text: "优惠券"
-        },
-        {
           icon: "el-icon-s-home",
           text: "退出登录",
           onClick: () => {
@@ -135,6 +131,9 @@ export default {
     },
     toFollower() {
       this.$router.push({ name: 'Follower', params: { uid: this.userInfo.id } });
+    },
+    alert(text) {
+      this.$message.error(`功能暂未开放：${text}`);
     }
   }
 }
@@ -245,6 +244,7 @@ export default {
         display: -webkit-box;
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 3;
+        font-weight: lighter;
         overflow: hidden;
       }
     }

@@ -1,14 +1,10 @@
 <template>
     <div id="root" class="container">
-        <header ref="header">
-            <button class="back" @click="goBack">
-                <i class="el-icon-arrow-left"></i>
-                <b>返回</b>
-            </button>
-            <img :src="userInfo.backgroundUrl ?? defaultBg" :style="{
-                transform: `scale(${scale})`
-            }" class="bg" v-if="userInfo?.id" preview="bg">
+        <PageHeader ref="header" :light="true">
             <div class="userInfo" v-if="uid">
+                <img :src="userInfo.backgroundUrl ?? defaultBg" :style="{
+                    transform: `scale(${scale})`
+                }" class="bg" v-if="userInfo?.id" preview="bg">
                 <MyImage preview="avatar" :src="userInfo?.avatarUrl">{{ userInfo?.username || '加载中' }}</MyImage>
                 <h1 class="username">{{ userInfo?.username || '加载中' }}</h1>
                 <p class="other" v-if="userInfo?.id">
@@ -44,8 +40,9 @@
                         <b>粉丝</b>
                     </router-link>
                 </p>
+
             </div>
-        </header>
+        </PageHeader>
         <main>
             <LoadingIcon v-if="isRequest" class="loading"></LoadingIcon>
             <el-empty v-else-if="userPostList.length === 0" :image-size="180" description="暂无内容"></el-empty>
@@ -64,10 +61,11 @@ import { mapGetters } from 'vuex';
 import BlogItem from '@/components/BlogItem.vue';
 import defaultBg from '@/assets/bg/index.jpg';
 import MyImage from '@/components/MyImage.vue';
+import PageHeader from '@/components/PageHeader.vue';
 
 export default {
     name: 'UserDetail',
-    components: { LoadingIcon, GenderIcon, BlogItem, MyImage },
+    components: { LoadingIcon, GenderIcon, BlogItem, MyImage, PageHeader },
     computed: {
         uid() {
             return this.$route.params.uid
@@ -89,7 +87,7 @@ export default {
     },
     mounted() {
         this.init();
-        this.height = this.$refs.header.getBoundingClientRect().height;
+        this.height = this.$refs.header.$el.getBoundingClientRect().height;
         window.addEventListener('scroll', this.handleScroll, { passive: false })
     },
     beforeDestroy() {
@@ -151,32 +149,27 @@ export default {
         min-width: 0;
         min-height: 256px;
 
-        .back {
-            color: @white;
-            text-shadow: 0 0 4px @black;
-        }
-
         .bg {
             position: absolute;
-            height: 125%;
-            width: 100%;
-            bottom: 0;
-            left: 0;
+            height: calc(3.6rem + 125%);
+            width: calc(2.4rem + 100%);
+            bottom: -1.2rem;
+            left: -1.2rem;
+            z-index: -9;
             will-change: transform;
             object-fit: cover;
-            z-index: -2;
             transform-origin: 50% 100%;
         }
 
-        &:after {
+        .userInfo:before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
+            bottom: -1.2rem;
+            left: -1.2rem;
+            width: calc(2.4rem + 100%);
+            z-index: -1;
             height: 100%;
             background: linear-gradient(transparent 0%, #000000 100%);
-            z-index: -1;
             pointer-events: none;
         }
 
@@ -186,9 +179,15 @@ export default {
             flex-direction: column;
             justify-content: center;
             margin-right: auto;
-            flex: 1;
             min-width: 0;
             padding-top: 1.8rem;
+            position: relative;
+            z-index: 0;
+
+            .info {
+                position: relative;
+                z-index: 1;
+            }
 
             .my-image {
                 height: 4rem;
@@ -286,6 +285,7 @@ export default {
             .follow {
                 display: flex;
                 margin-top: 1rem;
+                width: fit-content;
 
                 .follow-item {
                     width: fit-content;
@@ -306,14 +306,6 @@ export default {
                     }
                 }
             }
-
-            .info {
-                font-size: 16px;
-                line-height: 1.8;
-                color: @gray-0;
-                cursor: pointer;
-            }
-
         }
 
         .tool {

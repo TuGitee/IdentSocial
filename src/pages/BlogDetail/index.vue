@@ -16,8 +16,10 @@
         <div class="blog-content" ref="content">
             <template v-if="currentPost">
                 <BlogItem :item="currentPost" @click="comment"></BlogItem>
-                <CommentItem v-for="cmt in commentList" :key="cmt.id" :comment="cmt" @click="changeTarget"
-                    ref="comments" @refreshComment="init" />
+                <TransitionGroup name="comment">
+                    <CommentItem v-for="cmt in commentList" :key="cmt.id" :comment="cmt" @click="changeTarget"
+                        ref="comments" @refreshComment="init" />
+                </TransitionGroup>
             </template>
             <el-empty v-else description="该动态不存在或被删除"></el-empty>
         </div>
@@ -60,8 +62,6 @@ export default {
             });
         },
         async init() {
-            console.log('init');
-
             this.text = '';
             this.target = null;
             this.setComment(false);
@@ -105,10 +105,10 @@ export default {
             for (let i = res.data.length - 1; i >= 0; i--) {
                 const item = res.data[i];
                 tree.forEach(treeItem => {
+                    if (!treeItem.children) {
+                        this.$set(treeItem, 'children', []);
+                    }
                     if (item.cid === treeItem.id) {
-                        if (!treeItem.children) {
-                            treeItem.children = [];
-                        }
                         treeItem.children.push(item);
                     } else if (treeItem.children && treeItem.children.find(child => child.id === item.cid)) {
                         const parent = treeItem.children.find(child => child.id === item.cid);
@@ -231,6 +231,20 @@ export default {
             margin: 0;
             background-color: transparent;
         }
+
+        .comment-enter, .comment-leave-to {
+            opacity: 0;
+        }
+
+        .comment-item {
+            transition: all 0.5s;
+        }
+
+        .comment-leave-active {
+            position: absolute;
+        }
+
+
 
         .blog-content-comment {
             width: 100%;

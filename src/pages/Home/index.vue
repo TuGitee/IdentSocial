@@ -6,7 +6,11 @@
       <router-link to="/upload">
         <i class="el-icon-plus home-header-plus"></i>
       </router-link>
-
+      <transition name="line">
+        <div class="home-header-line" v-if="isScrolling">
+          <i class="el-icon-s-opportunity icon"></i>
+        </div>
+      </transition>
     </header>
     <div class="home-middle">
       <div class="home-middle-scroll">
@@ -21,12 +25,10 @@
     </div>
 
     <div class="home-titlemask" ref="mask"></div>
-    <el-tabs v-model="activeName" @tab-click="handleClick">
+    <el-tabs v-model="activeName">
       <el-tab-pane v-for="(item, index) in homeRoutes" :key="index" :label="item.meta.name" :name="item.name">
-        <footer class="home-footer">
-          <router-view :key="activeName"></router-view>
-          <p class="loading"><i class="el-icon el-icon-loading"></i></p>
-        </footer>
+        <router-view></router-view>
+        <p class="loading"><i class="el-icon el-icon-loading"></i></p>
       </el-tab-pane>
     </el-tabs>
 
@@ -48,9 +50,6 @@ export default {
     MyImage,
   },
   activated() {
-    if (this.postList.length <= this.pageSize) {
-      this.getData();
-    }
     this.$bus.$on("forward", (id, isPostFrom, user, text, el) => {
       this.to = {
         id,
@@ -62,10 +61,16 @@ export default {
       this.isComment = true;
       window.scrollTo({ top: el.offsetTop + parseInt(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top")), behavior: "smooth" });
     });
+    this.el.addEventListener("scroll", this.handleScroll);
+  },
+  deactivated() {
+    this.el.removeEventListener("scroll", this.handleScroll);
+    this.$bus.$off("forward");
+  },
+  mounted() {
     this.activeName = this.$route.name;
     this.el = window;
     this.handleScroll();
-    this.el.addEventListener("scroll", this.handleScroll);
   },
   data() {
     return {
@@ -77,6 +82,12 @@ export default {
       timer: null,
       isScrolling: false,
     };
+  },
+  watch: {
+    activeName(val) {
+      if (!val) return;
+      this.$router.replace({ name: val });
+    }
   },
   computed: {
     ...mapState({
@@ -96,10 +107,6 @@ export default {
       return arr;
     }
   },
-  deactivated() {
-    this.el.removeEventListener("scroll", this.handleScroll);
-    this.$bus.$off("forward");
-  },
   methods: {
     closeComment() {
       this.isComment = false;
@@ -108,24 +115,18 @@ export default {
     getData() {
       switch (this.activeName.toLowerCase()) {
         case 'following':
-          this.$store.dispatch('getFollowingPostList');
-          break;
+          return this.$store.dispatch('getFollowingPostList');
         default:
-          this.$store.dispatch('getPostList');
-          break;
+          return this.$store.dispatch('getPostList');
       }
-    },
-    handleClick(tab, event) {
-      event.preventDefault();
-      this.$router.push({ path: tab.name });
     },
     handleFetchData() {
       if (this.timer) return;
       if (this.el.scrollY + this.el.innerHeight >= this.$refs?.root?.offsetHeight) {
         this.timer = setTimeout(() => {
-          this.getData();
           this.timer = null;
-        }, 300);
+          this.getData();
+        }, 100);
       } else if (this.el.scrollY <= 0 && !this.isScrolling) {
         this.isScrolling = true;
         this.timer = setTimeout(() => {
@@ -133,7 +134,7 @@ export default {
           this.getData();
           this.timer = null;
         }, 1000);
-      } else if (this.el.scrollY > 0) {
+      } else if (this.el.scrollY >= 0) {
         this.isScrolling = false;
       }
     },
@@ -206,6 +207,39 @@ export default {
         0px -1px 0px @purple, 1px -1px 0px @purple;
       font-size: 1.5rem;
       color: @purple;
+    }
+
+    .line-enter,
+    .line-leave-to {
+      top: -32px;
+    }
+
+    .line-enter-active,
+    .line-leave-active {
+      transition: all 0.5s;
+    }
+
+    &-line {
+      position: absolute;
+      right: 1rem;
+      top: 0;
+
+      i {
+        transform: rotate(180deg);
+        color: @darkPurple;
+
+        &::after {
+          content: "";
+          position: absolute;
+          width: 2px;
+          height: 999px;
+          background-color: @black;
+          top: 2px;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: -1;
+        }
+      }
     }
   }
 
