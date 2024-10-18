@@ -27,13 +27,8 @@ const options = {
   hideAnimationDuration: 500, //隐藏动画时间
 }
 Vue.use(preview, options)
-const originalNotify = Vue.prototype.$notify;
-Vue.prototype.$notify = (options) => {
-  originalNotify({
-    ...options,
-    offset: parseInt(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top"))
-  })
-}
+
+import './utils/messageOffset';
 
 new Vue({
   render: h => h(App),

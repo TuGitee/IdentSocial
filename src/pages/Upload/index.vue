@@ -81,12 +81,7 @@ export default {
         },
         handleExceed(file, fileList) {
             if (fileList.length >= 9) {
-                this.$notify({
-                    title: '失败',
-                    message: '最多上传9张图片',
-                    type: 'error',
-                    duration: 2000
-                });
+                this.$message.error("最多上传9张图片");
                 return
             }
             const newFileList = Array.from(file).slice(0, 9 - fileList.length).map(item => ({ raw: item, url: URL.createObjectURL(item), uid: uuid()}));
@@ -106,12 +101,7 @@ export default {
                     this.$router.back();
                 });
             }).catch(() => {
-                this.$notify({
-                    title: '失败',
-                    message: '发布失败',
-                    type: 'error',
-                    duration: 2000
-                })
+                this.$message.error("发布失败")
             }).finally(() => {
                 this.isLoading = false;
             })

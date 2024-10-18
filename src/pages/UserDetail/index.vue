@@ -105,14 +105,14 @@ export default {
         },
         async getUserInfo() {
             this.isRequest = true;
-            try {
-                const res = await reqMockUser(this.uid);
-                this.userInfo = res.data;
+            const res = await reqMockUser(this.uid);
+            if (res.code !== 200) {
+                this.$message.error(res.msg);
                 this.isRequest = false;
-            } catch (error) {
-                this.$message.error('获取用户信息失败');
-                this.isRequest = false;
+                return;
             }
+            this.userInfo = res.data;
+            this.isRequest = false;
         },
         handleScroll() {
             const scrollY = window.scrollY;

@@ -69,12 +69,7 @@ export default {
       if (this.isActive && this.isExit) {
         const res = await reqMockUserLogin(this.mail, this.password);
         if (res.code == 400) {
-          this.$notify({
-            title: "登录失败",
-            message: "请检查您的邮箱和密码是否正确!",
-            type: "error",
-            duration: 2000,
-          });
+          this.$message.error("邮箱或密码有误");
         } else {
           this.$store.commit("SETTOKEN", res.data.id);
           this.$store.dispatch("getUserInfo");

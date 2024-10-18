@@ -98,11 +98,7 @@ export default {
         faceAnalysis(this.imgSrc).then(async (res) => {
           if (!this.isLoading) return;
           if (!res) {
-            this.$notify({
-              title: '未检测到人脸',
-              message: '请重新上传',
-              type: 'error'
-            })
+            this.$message.error('未检测到人脸')
             return;
           }
           const image = new Image();

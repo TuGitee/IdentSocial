@@ -93,10 +93,7 @@ export default {
             }
             this.$store.dispatch("updateUserInfo", this.currentInfo).then(() => {
                 this.goBack();
-                this.$notify({
-                    title: '修改成功',
-                    type: 'success'
-                });
+                this.$message.success("修改成功");
             });
         }
     },

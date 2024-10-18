@@ -61,7 +61,7 @@
               </p>
               <div class="sign-up-box-check">
                 <input type="number" class="sign-up-box-check-input" v-model="Captcha" autocomplete="true"
-                  placeholder="输入您的验证码" inputmode="numeric"/>
+                  placeholder="输入您的验证码" inputmode="numeric" />
                 <div class="captcha">
                   <div class="captcha-item" v-for="i, index in computedCaptcha"
                     :class="{ 'active-index': index === Captcha.length }" :key="index">{{ i }}</div>
@@ -138,10 +138,8 @@ export default {
         }
       }, 1000)
       return reqMockVerifyCode(this.mail).then(res => {
-        this.$notify({
-          title: "验证码",
-          message: `您的验证码为${res.data}`,
-          type: "info",
+        this.$message.info({
+          message: `验证码为${res.data}`,
           duration: 10000,
         })
         this.Captcha = res.data;
@@ -172,12 +170,7 @@ export default {
         if (res.code == 200) {
           return true;
         } else {
-          this.$notify({
-            title: "验证码错误",
-            message: "请检查验证码是否正确",
-            duration: 2000,
-            type: "error",
-          })
+          this.$message.error("验证码错误");
           return false;
         }
       })
@@ -195,12 +188,7 @@ export default {
               this.toNext();
               this.sendCaptcha();
             } else {
-              this.$notify({
-                title: "注册失败",
-                message: "您的邮箱已被注册!",
-                duration: 2000,
-                type: "error",
-              });
+              this.$message.error("邮箱已被注册！");
             }
           }).catch(() => { });
           break;
