@@ -2,9 +2,7 @@
     <div id="root" class="container">
         <PageHeader ref="header" :light="true">
             <div class="userInfo" v-if="uid">
-                <img :src="userInfo.backgroundUrl ?? defaultBg" :style="{
-                    transform: `scale(${scale})`
-                }" class="bg" v-if="userInfo?.id" preview="bg">
+                <img :src="userInfo.backgroundUrl ?? defaultBg" class="bg" ref="bg" v-if="userInfo?.id" preview="bg">
                 <MyImage preview="avatar" :src="userInfo?.avatarUrl">{{ userInfo?.username || '加载中' }}</MyImage>
                 <h1 class="username">{{ userInfo?.username || '加载中' }}</h1>
                 <p class="other" v-if="userInfo?.id">
@@ -81,14 +79,13 @@ export default {
         return {
             userInfo: null,
             isRequest: true,
-            defaultBg,
-            scale: 1
+            defaultBg
         }
     },
     mounted() {
         this.init();
         this.height = this.$refs.header.$el.getBoundingClientRect().height;
-        window.addEventListener('scroll', this.handleScroll, { passive: false })
+        window.addEventListener('scroll', this.handleScroll)
     },
     beforeDestroy() {
         window.removeEventListener('scroll', this.handleScroll)
@@ -115,9 +112,9 @@ export default {
         handleScroll() {
             const scrollY = window.scrollY;
             if (scrollY > 0) {
-                this.scale = 1;
+                this.$refs.bg.style.transform = `scale(1)`;
             } else {
-                this.scale = 1 + Math.abs(scrollY) / this.height;
+                this.$refs.bg.style.transform = `scale(${1 + Math.abs(scrollY) / this.height})`;
             }
             if (scrollY + window.innerHeight >= document.body.scrollHeight) {
                 this.getData();
@@ -140,6 +137,7 @@ export default {
     min-width: 0;
     width: 100%;
     padding: 0;
+    overflow-x: hidden;
 
     header {
         align-items: center;
