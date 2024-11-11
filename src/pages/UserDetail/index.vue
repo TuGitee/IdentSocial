@@ -180,7 +180,6 @@ export default {
             padding-top: 1.8rem;
             position: relative;
             z-index: 0;
-            overflow-x: hidden;
 
             .info {
                 position: relative;
