@@ -137,7 +137,6 @@ export default {
     min-width: 0;
     width: 100%;
     padding: 0;
-    overflow-x: hidden;
 
     header {
         align-items: center;
@@ -181,6 +180,7 @@ export default {
             padding-top: 1.8rem;
             position: relative;
             z-index: 0;
+            overflow-x: hidden;
 
             .info {
                 position: relative;
